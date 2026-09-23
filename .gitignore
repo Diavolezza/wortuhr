@@ -1,0 +1,6 @@
+build/
+build.log
+diag.log
+crash-latest.ips
+publish.sh
+.DS_Store
