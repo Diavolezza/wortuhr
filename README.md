@@ -34,9 +34,10 @@ schreibt Systemprotokoll (letzte 20 Minuten) und Absturzberichte nach `diag.log`
 - Der Bildschirmschoner läuft hinter dem Anmeldefenster weiter → bei Eingabe ausblenden.
 - Das Anmeldefenster verschwindet nach 30 s ohne Eingabe wieder → dann Uhr wieder einblenden.
 - Die Vorschau in den Systemeinstellungen meldet `isPreview = false` → Eingabeerkennung nur beim echten
-  Bildschirmschoner: nach `didstart` oder wenn die Ansicht den ganzen Bildschirm füllt.
+  Bildschirmschoner: nach `didstart` oder wenn der Bildschirm gesperrt ist (`CGSSessionScreenIsLocked`).
+  Die Größe taugt nicht als Merkmal – die Vorschau ist intern ebenfalls bildschirmgroß.
 - `didstart` ist unzuverlässig: kommt manchmal gar nicht, manchmal bevor macOS eine zweite Ansicht anlegt
-  → Zustand gilt prozessweit, zusätzlich Erkennung über die Größe.
+  → Zustand gilt prozessweit, zusätzlich Prüfung auf gesperrten Bildschirm.
 - Hinter dem Anmeldefenster bleiben `animateOneFrame` bzw. die Animation aus → eigener Takt (`DispatchSourceTimer`), `stopAnimation` hält die Uhr nicht an.
 - `legacyScreenSaver` beendet sich nicht → `exit(0)` nach `willstop`.
 - NSColorPanel ist im Bildschirmschoner-Prozess unzuverlässig → Farben als Auswahllisten.

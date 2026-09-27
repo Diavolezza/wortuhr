@@ -30,14 +30,18 @@ final class WortuhrView: ScreenSaverView {
     }
     /// true nach „willstop“: Der Prozess wird gleich verlassen.
     private static var stopping = false
-    /// Echter Bildschirmschoner (nicht die Vorschau): „didstart“ kam, oder die Ansicht füllt
-    /// den ganzen Bildschirm. Auf „didstart“ allein ist kein Verlass – es kommt manchmal
-    /// vor dem Anlegen der Ansicht und manchmal gar nicht.
+    /// Echter Bildschirmschoner (nicht die Vorschau): „didstart“ kam, oder der Bildschirm ist
+    /// gesperrt. Auf „didstart“ allein ist kein Verlass – es kommt manchmal vor dem Anlegen
+    /// der Ansicht und manchmal gar nicht. (Die Größe taugt nicht: Die Vorschau in den
+    /// Systemeinstellungen ist intern ebenfalls bildschirmgroß.)
     private var isRealSaver: Bool {
         guard !isPreview, !Self.stopping else { return false }
-        if saverRunning { return true }
-        guard let screen = window?.screen else { return false }
-        return bounds.width >= screen.frame.width - 1 && bounds.height >= screen.frame.height - 1
+        return saverRunning || Self.screenIsLocked
+    }
+
+    private static var screenIsLocked: Bool {
+        let d = CGSessionCopyCurrentDictionary() as? [String: Any]
+        return (d?["CGSSessionScreenIsLocked"] as? Bool) ?? false
     }
     /// Feste Uhrzeit (Stunde, Minute) – nur für das Vorschaubild.
     var fixedTime: (Int, Int)?
