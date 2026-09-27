@@ -3,6 +3,7 @@
 # Aufruf:  ./build.sh            bauen und installieren
 #          ./build.sh --no-install   nur bauen
 #          ./build.sh --system       für alle Benutzer nach /Library/Screen Savers (Administrator-Passwort)
+#          --arm-only                nur für Apple Silicon (schneller; kombinierbar, z. B. ./build.sh --system --arm-only)
 set -euo pipefail
 cd "$(dirname "$0")"
 # Ausgabe zusätzlich in build.log (damit Claude Fehler mitlesen kann)
@@ -11,6 +12,14 @@ exec > >(tee build.log) 2>&1
 NAME=Wortuhr
 MIN_OS=13.0
 ARCHS=(arm64 x86_64)
+MODE=""
+for arg in "$@"; do
+  case "$arg" in
+    --arm-only) ARCHS=(arm64) ;;
+    --no-install|--system) MODE="$arg" ;;
+    *) echo "Unbekannte Option: $arg" >&2; exit 1 ;;
+  esac
+done
 BUILD=build
 BUNDLE="$BUILD/$NAME.saver"
 SDK=$(xcrun --sdk macosx --show-sdk-path)
@@ -51,7 +60,6 @@ chmod -R u+rwX,go+rX-w "$BUNDLE"
 codesign --force --sign - "$BUNDLE"
 echo "✓ Gebaut: $BUNDLE"
 
-MODE="${1:-}"
 if [ "$MODE" != "--no-install" ]; then
   if [ "$MODE" = "--system" ]; then
     # Für alle Benutzer nach /Library (fragt nach dem Administrator-Passwort)

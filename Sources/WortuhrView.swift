@@ -21,11 +21,31 @@ final class WortuhrView: ScreenSaverView {
     private var hiddenForActivity = false
     /// true erst nach „didstart“: Nur der echte Bildschirmschoner reagiert auf Eingaben.
     /// (Die Vorschau in den Systemeinstellungen meldet sich unter macOS 26+ fälschlich mit isPreview=false.)
-    private var saverRunning = false
+    /// Gilt für den ganzen Prozess: macOS legt nach „didstart“ oft noch eine weitere Ansicht an,
+    /// die das Signal sonst nie sähe und dann nicht auf Eingaben reagierte.
+    private static var saverRunning = false
+    private var saverRunning: Bool {
+        get { Self.saverRunning }
+        set { Self.saverRunning = newValue }
+    }
+    /// true nach „willstop“: Der Prozess wird gleich verlassen.
+    private static var stopping = false
+    /// Echter Bildschirmschoner (nicht die Vorschau): „didstart“ kam, oder die Ansicht füllt
+    /// den ganzen Bildschirm. Auf „didstart“ allein ist kein Verlass – es kommt manchmal
+    /// vor dem Anlegen der Ansicht und manchmal gar nicht.
+    private var isRealSaver: Bool {
+        guard !isPreview, !Self.stopping else { return false }
+        if saverRunning { return true }
+        guard let screen = window?.screen else { return false }
+        return bounds.width >= screen.frame.width - 1 && bounds.height >= screen.frame.height - 1
+    }
     /// Feste Uhrzeit (Stunde, Minute) – nur für das Vorschaubild.
     var fixedTime: (Int, Int)?
     private var snapshotScale: CGFloat?
     private var builtSize = CGSize.zero
+    /// Eigener Takt statt animateOneFrame: Hinter dem Anmeldefenster ruft macOS
+    /// animateOneFrame nicht mehr auf (bzw. stopAnimation), die Uhr bliebe stehen.
+    private var ticker: DispatchSourceTimer?
 
     // MARK: - Lebenszyklus
 
@@ -40,6 +60,7 @@ final class WortuhrView: ScreenSaverView {
     }
 
     deinit {
+        ticker?.cancel()
         DistributedNotificationCenter.default().removeObserver(self)
     }
 
@@ -67,6 +88,7 @@ final class WortuhrView: ScreenSaverView {
         Log.n("Bildschirmschoner gestartet")
         saverRunning = true
         startDate = Date()
+        startTicker()
         if hiddenForActivity {
             hiddenForActivity = false
             setClockVisible(true)
@@ -77,12 +99,14 @@ final class WortuhrView: ScreenSaverView {
     /// Ohne diesen Ausstieg laufen alte Instanzen im Hintergrund weiter.
     @objc private func screenSaverWillStop(_ note: Notification) {
         saverRunning = false
+        if !isPreview { Self.stopping = true }
         guard !isPreview else { return }
         Log.n("Bildschirmschoner beendet → Prozess wird verlassen")
         CATransaction.begin()
         CATransaction.setAnimationDuration(0.25)
         plate.opacity = 0
         CATransaction.commit()
+        stopTicker()
         stopAnimation()
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { exit(0) }
     }
@@ -108,9 +132,39 @@ final class WortuhrView: ScreenSaverView {
         hiddenForActivity = false
         startDate = Date()
         updateTime(animated: false)
+        startTicker()
+    }
+
+    override func stopAnimation() {
+        super.stopAnimation()
+        // Der echte Bildschirmschoner bekommt stopAnimation auch, wenn nur das
+        // Anmeldefenster erscheint – dann weiterlaufen. Beendet wird über willstop.
+        if !isRealSaver {
+            stopTicker()
+        } else {
+            Log.n("stopAnimation während der Bildschirmschoner läuft → Uhr läuft weiter")
+        }
     }
 
     override func animateOneFrame() {
+        // Leer: Die Arbeit macht tick().
+    }
+
+    private func startTicker() {
+        guard ticker == nil else { return }
+        let t = DispatchSource.makeTimerSource(queue: .main)
+        t.schedule(deadline: .now(), repeating: animationTimeInterval, leeway: .milliseconds(50))
+        t.setEventHandler { [weak self] in self?.tick() }
+        t.resume()
+        ticker = t
+    }
+
+    private func stopTicker() {
+        ticker?.cancel()
+        ticker = nil
+    }
+
+    private func tick() {
         // Manche macOS-Versionen ändern die Größe, ohne setFrameSize aufzurufen.
         if bounds.size != builtSize { rebuild() }
         checkActivity()
@@ -286,18 +340,21 @@ final class WortuhrView: ScreenSaverView {
 
     /// Seit Sonoma läuft der Bildschirmschoner hinter dem Anmeldefenster weiter, bis man
     /// sich angemeldet hat. Sobald Maus oder Tastatur benutzt werden, blendet die Uhr aus,
-    /// damit das Anmeldefenster auf ruhigem Schwarz steht. Bleibt der Rechner danach
-    /// eine Minute unberührt, kommt die Uhr zurück.
+    /// damit das Anmeldefenster auf ruhigem Schwarz steht. Nach 30 s ohne Eingabe blendet
+    /// macOS das Anmeldefenster wieder aus („standard timeout of: 30“) – dann kommt die Uhr zurück.
+    /// So lange zeigt macOS das Anmeldefenster ohne Eingabe, dann wieder den Bildschirmschoner.
+    private static let loginTimeout: Double = 30
+
     private func checkActivity() {
-        guard !isPreview, saverRunning else { return }
+        guard isRealSaver else { return }
         let idle = secondsSinceInput()
         let running = Date().timeIntervalSince(startDate)
         if !hiddenForActivity && running > 2 && idle < 1.0 {
             Log.n("Eingabe erkannt → Uhr ausblenden")
             hiddenForActivity = true
             setClockVisible(false)
-        } else if hiddenForActivity && idle > 60 {
-            Log.n("Eine Minute keine Eingabe → Uhr wieder einblenden")
+        } else if hiddenForActivity && idle > Self.loginTimeout {
+            Log.n("\(Int(Self.loginTimeout)) s keine Eingabe → Uhr wieder einblenden")
             hiddenForActivity = false
             setClockVisible(true)
         }

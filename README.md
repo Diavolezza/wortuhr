@@ -20,6 +20,9 @@ erzeugt das Vorschaubild, signiert ad hoc und installiert nach `/Library/Screen 
 Nur aus `/Library/Screen Savers` zeigen die Systemeinstellungen das eigene Vorschaubild;
 `./build.sh` ohne Option installiert nach `~/Library/Screen Savers` (dann mit Standard-Strudel).
 
+Mit `--arm-only` wird nur für Apple Silicon gebaut – schneller, reicht für den eigenen Mac
+(z. B. `./build.sh --system --arm-only`). Zum Weitergeben ohne die Option bauen.
+
 ## Wenn etwas nicht geht
 
     ./diag.sh
@@ -29,7 +32,12 @@ schreibt Systemprotokoll (letzte 20 Minuten) und Absturzberichte nach `diag.log`
 ## Eigenheiten von macOS 26+, die der Code abfängt
 
 - Der Bildschirmschoner läuft hinter dem Anmeldefenster weiter → bei Eingabe ausblenden.
-- Die Vorschau in den Systemeinstellungen meldet `isPreview = false` → Eingabeerkennung erst nach `didstart`.
+- Das Anmeldefenster verschwindet nach 30 s ohne Eingabe wieder → dann Uhr wieder einblenden.
+- Die Vorschau in den Systemeinstellungen meldet `isPreview = false` → Eingabeerkennung nur beim echten
+  Bildschirmschoner: nach `didstart` oder wenn die Ansicht den ganzen Bildschirm füllt.
+- `didstart` ist unzuverlässig: kommt manchmal gar nicht, manchmal bevor macOS eine zweite Ansicht anlegt
+  → Zustand gilt prozessweit, zusätzlich Erkennung über die Größe.
+- Hinter dem Anmeldefenster bleiben `animateOneFrame` bzw. die Animation aus → eigener Takt (`DispatchSourceTimer`), `stopAnimation` hält die Uhr nicht an.
 - `legacyScreenSaver` beendet sich nicht → `exit(0)` nach `willstop`.
 - NSColorPanel ist im Bildschirmschoner-Prozess unzuverlässig → Farben als Auswahllisten.
 
