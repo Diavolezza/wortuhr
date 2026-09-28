@@ -7,8 +7,8 @@ struct Settings {
     var intro = true              // always show "ES IST" / "IT IS"
     var front = NSColor(hex: "#0e0f11")
     var lit = NSColor(hex: "#fff1d6")
-    var dim: Double = 14          // brightness of unlit letters in %
-    var glow: Double = 35         // glow in %
+    var dim: Double = 10          // brightness of unlit letters in %
+    var glow: Double = 40         // glow in %
     var edge: Double = 40         // emphasis of the plate edge in %
     var font = "Avenir Next"
     var weight = 400

@@ -213,7 +213,7 @@ const LITS=[["Warm white","#fff1d6"],["Cool white","#f3f7ff"],["Amber","#ffb24a"
 /* Default language: the browser's, British English otherwise */
 const browserLanguage=(()=>{const l=(navigator.language||"en").toLowerCase();
   return l.startsWith("de-ch")?"deCH":l.startsWith("de")?"de":l.startsWith("en-us")?"us":["es","fr","it"].find(x=>l.startsWith(x))||"en"})();
-const DEF={language:browserLanguage,intro:true,front:"#0e0f11",lit:"#fff1d6",dim:14,glow:35,edge:40,
+const DEF={language:browserLanguage,intro:true,front:"#0e0f11",lit:"#fff1d6",dim:10,glow:40,edge:40,
   font:'"Avenir Next",Avenir,sans-serif',weight:"400",lscale:100,look:"plate",size:92,fade:0.8,dots:true,drift:false,tmode:"live",man:945};
 let S={...DEF};
 try{const s=JSON.parse(localStorage.getItem("wortuhr-prototype")||"null");if(s)S={...DEF,...s}}catch(e){}

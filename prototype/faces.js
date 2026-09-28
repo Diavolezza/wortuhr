@@ -11,7 +11,7 @@ const OCLOCK_MARK = { glyph:"’", row:9, afterCol:5, word:"OCLOCK" };
 const FACES = {
   de: {
     grid: ["ESRISTLZEHN","FÜNFZWANZIG","DREIVIERTEL","NACHQTVORMJ","HALBXSIEBEN",
-           "ZWÖLFKEINSA","ZWEIDREIELF","VIERYFÜNFOT","SECHSRACHTN","ZEHNEUNXUHR"],
+           "ZWÖLFKEINSA","ZWEIDREIELF","VIERYFÜNFOT","SECHSRACHTN","ZEHNEUNJUHR"],
     words: { ES:[0,0,2], IST:[0,3,3], M5:[1,0,4], M10:[0,7,4], M20:[1,4,7],
       DV:[2,0,11], V:[2,4,7], NACH:[3,0,4], VOR:[3,6,3], HALB:[4,0,4],
       H7:[4,5,6], H0:[5,0,5], EIN:[5,6,3], H1:[5,6,4], H2:[6,0,4], H3:[6,4,4],

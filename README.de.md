@@ -22,7 +22,7 @@ Wortuhr im 11×10-Raster mit vier Minutenpunkten. Zeitansage in acht Varianten:
 Farben, Schrift, Größe, Einbrennschutz und „Nur auf dem Hauptbildschirm“ im Optionen-Dialog einstellbar; der Dialog
 spricht die gewählte Sprache. Beim ersten Start richtet sich die Uhr nach der Sprache des Macs.
 
-![Wortuhr um 11:55 – „ES IST FÜNF VOR ZWÖLF“](docs/wortuhr.png)
+![Wortuhr im Zeitraffer von 3:00 bis 3:55](docs/wortuhr.gif)
 
 Getestet unter macOS 27 auf Apple Silicon; gebaut wird für Apple Silicon und Intel (ab macOS 13).
 

@@ -22,7 +22,7 @@ A word clock on an 11×10 letter grid with four minute dots. The time is spelled
 Colours, typeface, size, burn-in protection and “main display only” can be set in the options dialog; the
 dialog speaks the selected language. On first start the clock uses the Mac's language.
 
-![Wortuhr at 11:55 – “ES IST FÜNF VOR ZWÖLF”](docs/wortuhr.png)
+![Wortuhr running from 3:00 to 3:55 in German](docs/wortuhr.gif)
 
 Tested on macOS 27 on Apple Silicon; built for Apple Silicon and Intel (macOS 13 or later).
 

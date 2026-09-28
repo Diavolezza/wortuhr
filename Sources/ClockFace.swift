@@ -116,7 +116,7 @@ struct ClockFace {
             "ZWEIDREIELF",
             "VIERYFÜNFOT",
             "SECHSRACHTN",
-            "ZEHNEUNXUHR",   // ZEHN and NEUN share the N, gap before UHR
+            "ZEHNEUNJUHR",   // ZEHN and NEUN share the N, gap before UHR
         ],
         words: [
             "ES": (0, 0, 2), "IST": (0, 3, 3),
