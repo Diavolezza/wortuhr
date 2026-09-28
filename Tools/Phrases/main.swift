@@ -3,9 +3,11 @@ import Foundation
 // Gibt Raster, Wörter und alle Zeitansagen aus – zum Vergleich mit dem Prototyp
 // (prototype/check.mjs). Aufruf über: node prototype/check.mjs
 
-for (name, face) in [("de", ClockFace.german), ("en", ClockFace.english)] {
+let faces: [(String, ClockFace)] = [("de", .german), ("en", .english), ("us", .american),
+                                    ("fr", .french), ("it", .italian), ("es", .spanish)]
+for (name, face) in faces {
     for row in face.grid { print("grid \(name) \(row.precomposedStringWithCanonicalMapping)") }
-    for key in face.words.keys.sorted() {
+    for key in face.words.keys.sorted(by: { Array($0.unicodeScalars.map(\.value)).lexicographicallyPrecedes($1.unicodeScalars.map(\.value)) }) {
         let (r, c, l) = face.words[key]!
         print("word \(name) \(key) \(r) \(c) \(l)")
     }

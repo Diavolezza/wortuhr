@@ -130,9 +130,11 @@ kbd{font:11px ui-monospace,Menlo,monospace;border:1px solid var(--line);border-b
 
     <section>
       <h2>Zeitansage</h2>
-      <div class="row"><div class="seg" data-key="lang">
-        <button data-v="hoch">🇩🇪 Hoch</button><button data-v="sued">🇩🇪 Süd</button><button data-v="en">🇬🇧 English</button>
-      </div>
+      <div class="row"><select id="lang" aria-label="Sprache">
+        <option value="hoch">🇩🇪 Deutsch – Hochdeutsch</option><option value="sued">🇩🇪 Deutsch – Süddeutsch</option>
+        <option value="en">🇬🇧 English – UK</option><option value="us">🇺🇸 English – US</option>
+        <option value="es">🇪🇸 Español</option><option value="fr">🇫🇷 Français</option><option value="it">🇮🇹 Italiano</option>
+      </select>
       <p class="hint" id="langHint"></p></div>
       <label class="check"><input type="checkbox" id="intro"> <span id="introLabel"></span> immer anzeigen</label>
     </section>
@@ -243,6 +245,7 @@ document.querySelectorAll(".seg").forEach(seg=>seg.querySelectorAll("button").fo
 ["dim","glow","edge","lscale","size","fade","man"].forEach(k=>$(k).oninput=e=>{S[k]=+e.target.value;apply()});
 ["intro","dots","drift"].forEach(k=>$(k).onchange=e=>{S[k]=e.target.checked;apply()});
 $("font").onchange=e=>{S.font=e.target.value;apply()};
+$("lang").onchange=e=>{S.lang=e.target.value;apply()};
 
 const fmt=min=>String(Math.floor(min/60)).padStart(2,"0")+":"+String(min%60).padStart(2,"0");
 function apply(){
@@ -261,7 +264,8 @@ function apply(){
   $("c_front").value=S.front;$("c_lit").value=S.lit;
   ["dim","glow","edge","lscale","size","fade","man"].forEach(k=>$(k).value=S[k]);
   ["intro","dots","drift"].forEach(k=>$(k).checked=S[k]);
-  $("introLabel").textContent=S.lang==="en"?"„IT IS“":"„ES IST“";
+  $("lang").value=S.lang;
+  $("introLabel").textContent={hoch:"„ES IST“",sued:"„ES IST“",en:"„IT IS“",us:"„IT IS“",fr:"„IL EST“",it:"„SONO“/„È“",es:"„SON“/„ES“"}[S.lang];
   $("font").value=S.font;
   $("oDim").textContent=S.dim+" %";$("oGlow").textContent=S.glow+" %";$("oEdge").textContent=S.edge+" %";$("oLscale").textContent=S.lscale+" %";
   $("oSize").textContent=S.size+" %";$("oFade").textContent=S.fade.toFixed(1).replace(".",",")+" s";$("oMan").textContent=fmt(S.man);
@@ -269,7 +273,11 @@ function apply(){
   $("langHint").textContent={
     hoch:"3:15 viertel nach drei · 3:20 zwanzig nach drei · 3:45 viertel vor vier",
     sued:"3:15 viertel vier · 3:20 zehn vor halb vier · 3:45 dreiviertel vier",
-    en:"3:15 a quarter past three · 3:35 twenty five to four · 3:00 three o’clock"}[S.lang];
+    en:"3:15 a quarter past three · 3:35 twenty five to four · 3:00 three o’clock",
+    us:"3:15 a quarter after three · 3:30 half past three · 3:35 twenty five to four",
+    fr:"3:15 trois heures et quart · 3:45 quatre heures moins le quart · 12:00 midi",
+    it:"3:15 le tre e un quarto · 3:45 le quattro meno un quarto · 1:00 è l’una",
+    es:"3:15 las tres y cuarto · 3:45 las cuatro menos cuarto · 1:00 es la una"}[S.lang];
   buildGrid();
   const {tmode,man,...out}=S;
   $("json").value=JSON.stringify(out,null,1);
@@ -292,7 +300,7 @@ function render(force){
   cells.forEach((row,r)=>row.forEach((el,c)=>el.classList.toggle("on",on.has(r*11+c))));
   marks.forEach(mk=>mk.el.classList.toggle("on",p.words.includes(mk.word)));
   dotEls.forEach((d,i)=>d.classList.toggle("on",i<p.dots));
-  const words=p.words.map(w=>{const[r,c,l]=W[w];const t=[...face.grid[r].normalize("NFC")].slice(c,c+l).join("");return w==="OCLOCK"?"O’CLOCK":t}).join(" ");
+  const words=spell(S.lang,p.words);
   $("rTime").textContent=fmt(t);
   $("rPhrase").textContent=words+(p.dots?"  + "+p.dots+(p.dots===1?" Punkt":" Punkte"):"");
   $("clock").setAttribute("aria-label",fmt(t)+" – "+words.toLowerCase());

@@ -1,10 +1,19 @@
 # Wortuhr – Bildschirmschoner für macOS
 
-Wortuhr im 11×10-Raster mit vier Minutenpunkten. Zeitansage Hochdeutsch
-(„viertel nach drei“), Süddeutsch („viertel vier“, „dreiviertel vier“) oder
-britisches Englisch („a quarter past three“, „three o’clock“). Farben, Schrift,
-Größe und Einbrennschutz im Optionen-Dialog einstellbar; der Dialog spricht die
-gewählte Sprache.
+Wortuhr im 11×10-Raster mit vier Minutenpunkten. Zeitansage in sieben Varianten:
+
+| Sprache | Beispiel (3:15 · 3:45) |
+|---|---|
+| Hochdeutsch | viertel nach drei · viertel vor vier |
+| Süddeutsch | viertel vier · dreiviertel vier |
+| Englisch (britisch) | a quarter past three · a quarter to four |
+| Englisch (amerikanisch) | a quarter after three · a quarter to four |
+| Französisch | trois heures et quart · quatre heures moins le quart (12 Uhr: midi, 0 Uhr: minuit) |
+| Italienisch | le tre e un quarto · le quattro meno un quarto (1 Uhr: è l’una) |
+| Spanisch | las tres y cuarto · las cuatro menos cuarto (1 Uhr: es la una) |
+
+Farben, Schrift, Größe und Einbrennschutz im Optionen-Dialog einstellbar; der Dialog
+spricht die gewählte Sprache.
 
 ![Wortuhr um 11:55 – „ES IST FÜNF VOR ZWÖLF“](docs/wortuhr.png)
 
@@ -44,6 +53,17 @@ schreibt Systemprotokoll (letzte 20 Minuten) und Absturzberichte nach `diag.log`
 - `legacyScreenSaver` beendet sich nicht → `exit(0)` nach `willstop`.
 - NSColorPanel ist im Bildschirmschoner-Prozess unzuverlässig → Farben als Auswahllisten.
 
+## Bekanntes Problem: „Optionen …“ öffnet nur einmal
+
+In den Systemeinstellungen öffnet „Optionen …“ den Dialog pro Sitzung nur einmal. Wird die
+Kachel erneut angeklickt, fragt macOS den Dialog zwar bei der Wortuhr ab, blendet ihn aber
+nicht ein. Abhilfe: Systemeinstellungen ganz beenden und neu öffnen.
+
+Der Fehler liegt bei macOS 26 und betrifft auch andere Bildschirmschoner von Drittanbietern
+(siehe [cowsaver#1](https://github.com/matthewsundling/cowsaver/issues/1)); Apples eigene
+Bildschirmschoner laufen anders und sind nicht betroffen. Versuche, das Blatt von der Wortuhr
+aus zu erzwingen, haben nicht funktioniert oder es verschlimmert.
+
 ## Prototyp
 
 `prototype/index.html` im Browser öffnen: dieselbe Uhr zum Ausprobieren von Zeitansage,
@@ -54,7 +74,8 @@ Nach jeder Änderung daran:
 
     node prototype/check.mjs
 
-prüft alle Zeitansagen (jedes Wort im Raster, Lesereihenfolge, keine Überlappung) und
+prüft alle Zeitansagen (jedes Wort im Raster, Lesereihenfolge, keine Überlappung,
+gleichzeitig leuchtende Wörter nicht aneinandergeklebt) und
 vergleicht Prototyp und Swift Zeile für Zeile.
 
 ## Aufbau
@@ -62,7 +83,7 @@ vergleicht Prototyp und Swift Zeile für Zeile.
 - `Sources/ClockFace.swift` – Buchstabenraster und Zeitlogik je Sprache
 - `Sources/Settings.swift` – Einstellungen, Voreinstellungen, Speichern (ScreenSaverDefaults)
 - `Sources/WortuhrView.swift` – Darstellung mit Core Animation (ein Glyphen-Layer pro Buchstabe)
-- `Sources/ConfigController.swift` – Optionen-Dialog (deutsch/englisch)
+- `Sources/ConfigController.swift` – Optionen-Dialog in allen Sprachen
 - `Sources/Log.swift` – Diagnose-Ausgaben (`./diag.sh` sammelt sie)
 - `Tools/main.swift` – erzeugt das Vorschaubild für die Systemeinstellungen (11:55)
 - `Tools/Phrases/main.swift` – gibt alle Zeitansagen aus Swift aus (für `prototype/check.mjs`)

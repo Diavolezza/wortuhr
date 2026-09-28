@@ -162,14 +162,14 @@ final class ConfigController: NSObject {
 
         let fontIndex = max(font.indexOfSelectedItem, 0)
         font.removeAllItems()
-        font.addItems(withTitles: Settings.fonts.map { ui == .en ? $0.1 : $0.0 })
+        font.addItems(withTitles: Settings.fonts.map { $0 == "System" ? t.systemFont : $0 })
         font.selectItem(at: fontIndex)
         let lookIndex = max(look.indexOfSelectedItem, 0)
         look.removeAllItems()
         look.addItems(withTitles: [t.plate, t.flat])
         look.selectItem(at: lookIndex)
-        fillColors(front, Settings.frontPresets, current: s.front)
-        fillColors(lit, Settings.litPresets, current: s.lit)
+        fillColors(front, Settings.frontPresets, t.frontNames, current: s.front)
+        fillColors(lit, Settings.litPresets, t.litNames, current: s.lit)
 
         if let content = window.contentView {
             content.layoutSubtreeIfNeeded()
@@ -190,15 +190,15 @@ final class ConfigController: NSObject {
         }
     }
 
-    private func fillColors(_ popup: NSPopUpButton, _ presets: [(String, String, String)], current: NSColor) {
+    private func fillColors(_ popup: NSPopUpButton, _ presets: [String], _ names: [String], current: NSColor) {
         popup.removeAllItems()
         let cur = current.hexString
-        for (de, en, hex) in presets {
-            popup.addItem(withTitle: ui == .en ? en : de)
+        for (hex, name) in zip(presets, names) {
+            popup.addItem(withTitle: name)
             popup.lastItem?.image = swatch(hex)
             popup.lastItem?.representedObject = hex
         }
-        if let i = presets.firstIndex(where: { $0.2 == cur }) {
+        if let i = presets.firstIndex(of: cur) {
             popup.selectItem(at: i)
         } else {
             popup.addItem(withTitle: "\(t.custom) (\(cur))")
@@ -211,12 +211,12 @@ final class ConfigController: NSObject {
     private func fill() {
         language.selectItem(at: Language.allCases.firstIndex(of: s.language) ?? 0)
         intro.state = s.intro ? .on : .off
-        fillColors(front, Settings.frontPresets, current: s.front)
-        fillColors(lit, Settings.litPresets, current: s.lit)
+        fillColors(front, Settings.frontPresets, t.frontNames, current: s.front)
+        fillColors(lit, Settings.litPresets, t.litNames, current: s.lit)
         dim.doubleValue = s.dim
         glow.doubleValue = s.glow
         edge.doubleValue = s.edge
-        font.selectItem(at: Settings.fonts.firstIndex { $0.2 == s.font } ?? 0)
+        font.selectItem(at: Settings.fonts.firstIndex(of: s.font) ?? 0)
         weight.selectItem(at: Settings.weights.firstIndex { $0.1 == s.weight } ?? 1)
         letterScale.doubleValue = s.letterScale
         look.selectItem(at: s.flat ? 1 : 0)
@@ -235,7 +235,7 @@ final class ConfigController: NSObject {
         s.dim = dim.doubleValue.rounded()
         s.glow = (glow.doubleValue / 5).rounded() * 5
         s.edge = (edge.doubleValue / 5).rounded() * 5
-        s.font = Settings.fonts[max(font.indexOfSelectedItem, 0)].2
+        s.font = Settings.fonts[max(font.indexOfSelectedItem, 0)]
         s.weight = Settings.weights[max(weight.indexOfSelectedItem, 0)].1
         s.letterScale = (letterScale.doubleValue / 5).rounded() * 5
         s.flat = look.indexOfSelectedItem == 1
@@ -252,7 +252,7 @@ final class ConfigController: NSObject {
         letterScaleValue.stringValue = "\(Int(s.letterScale)) %"
         sizeValue.stringValue = "\(Int(s.size)) %"
         let f = String(format: "%.1f s", s.fade)
-        fadeValue.stringValue = ui == .de ? f.replacingOccurrences(of: ".", with: ",") : f
+        fadeValue.stringValue = t.decimalComma ? f.replacingOccurrences(of: ".", with: ",") : f
     }
 
     // MARK: - Aktionen
@@ -301,9 +301,13 @@ extension Language {
     /// Eintrag in der Sprachliste: Flagge und Name in der eigenen Sprache.
     var menuTitle: String {
         switch self {
-        case .hoch: return "🇩🇪 Hochdeutsch (viertel nach drei)"
-        case .sued: return "🇩🇪 Süddeutsch (viertel vier)"
-        case .en:   return "🇬🇧 English (a quarter past three)"
+        case .hoch: return "🇩🇪 Deutsch – Hochdeutsch (viertel nach drei)"
+        case .sued: return "🇩🇪 Deutsch – Süddeutsch (viertel vier)"
+        case .en:   return "🇬🇧 English – UK (a quarter past three)"
+        case .us:   return "🇺🇸 English – US (a quarter after three)"
+        case .es:   return "🇪🇸 Español (las tres y cuarto)"
+        case .fr:   return "🇫🇷 Français (trois heures et quart)"
+        case .it:   return "🇮🇹 Italiano (le tre e un quarto)"
         }
     }
 }
@@ -312,29 +316,106 @@ extension Language {
 struct Texts {
     let sectionTime, language, intro: String
     let sectionColors, front, lit, dim, glow, edge, custom: String
-    let sectionFont, font, weight, letterScale: String
+    let sectionFont, font, weight, letterScale, systemFont: String
     let sectionLook, look, plate, flat, size, fade, dots, drift: String
     let reset, cancel, ok: String
+    /// Farbnamen in der Reihenfolge von Settings.frontPresets / Settings.litPresets
+    let frontNames, litNames: [String]
+    let decimalComma: Bool
 
-    static func `for`(_ ui: UILanguage) -> Texts { ui == .en ? en : de }
+    static func `for`(_ ui: UILanguage) -> Texts {
+        switch ui {
+        case .de:   return de
+        case .enGB: return enGB
+        case .enUS: return enUS
+        case .fr:   return fr
+        case .it:   return it
+        case .es:   return es
+        }
+    }
 
     static let de = Texts(
         sectionTime: "Zeitansage", language: "Sprache:", intro: "„ES IST“ immer anzeigen",
         sectionColors: "Farben", front: "Front:", lit: "Leuchtfarbe:", dim: "Unbeleuchtet:",
         glow: "Leuchten:", edge: "Rand:", custom: "Eigene",
         sectionFont: "Schrift", font: "Schrift:", weight: "Schnitt:", letterScale: "Buchstabengröße:",
+        systemFont: "SF Pro (Systemschrift)",
         sectionLook: "Darstellung", look: "Darstellung:", plate: "Frontplatte", flat: "Vollflächig",
         size: "Größe:", fade: "Überblendung:", dots: "Minutenpunkte",
         drift: "Langsam wandern (Einbrennschutz)",
-        reset: "Standard", cancel: "Abbrechen", ok: "OK")
+        reset: "Standard", cancel: "Abbrechen", ok: "OK",
+        frontNames: ["Tiefschwarz", "Graphit", "Nachtblau", "Tannengrün", "Ziegelrot", "Kalkweiß"],
+        litNames: ["Warmweiß", "Kaltweiß", "Bernstein", "Eisblau", "Mint", "Anthrazit"],
+        decimalComma: true)
 
-    static let en = Texts(
+    static let enGB = Texts(
         sectionTime: "Time", language: "Language:", intro: "Always show “IT IS”",
         sectionColors: "Colours", front: "Front:", lit: "Light colour:", dim: "Unlit letters:",
         glow: "Glow:", edge: "Edge:", custom: "Custom",
         sectionFont: "Typeface", font: "Typeface:", weight: "Weight:", letterScale: "Letter size:",
+        systemFont: "SF Pro (system font)",
         sectionLook: "Appearance", look: "Style:", plate: "Front plate", flat: "Full screen",
         size: "Size:", fade: "Cross-fade:", dots: "Minute dots",
         drift: "Drift slowly (burn-in protection)",
-        reset: "Defaults", cancel: "Cancel", ok: "OK")
+        reset: "Defaults", cancel: "Cancel", ok: "OK",
+        frontNames: ["Deep black", "Graphite", "Midnight blue", "Forest green", "Brick red", "Chalk white"],
+        litNames: ["Warm white", "Cool white", "Amber", "Ice blue", "Mint", "Anthracite"],
+        decimalComma: false)
+
+    static let enUS = Texts(
+        sectionTime: "Time", language: "Language:", intro: "Always show “IT IS”",
+        sectionColors: "Colors", front: "Front:", lit: "Light color:", dim: "Unlit letters:",
+        glow: "Glow:", edge: "Edge:", custom: "Custom",
+        sectionFont: "Typeface", font: "Typeface:", weight: "Weight:", letterScale: "Letter size:",
+        systemFont: "SF Pro (system font)",
+        sectionLook: "Appearance", look: "Style:", plate: "Front plate", flat: "Full screen",
+        size: "Size:", fade: "Cross-fade:", dots: "Minute dots",
+        drift: "Drift slowly (burn-in protection)",
+        reset: "Defaults", cancel: "Cancel", ok: "OK",
+        frontNames: ["Deep black", "Graphite", "Midnight blue", "Forest green", "Brick red", "Chalk white"],
+        litNames: ["Warm white", "Cool white", "Amber", "Ice blue", "Mint", "Anthracite"],
+        decimalComma: false)
+
+    // Französisch: schmales geschütztes Leerzeichen vor dem Doppelpunkt
+    static let fr = Texts(
+        sectionTime: "Heure", language: "Langue\u{202F}:", intro: "Toujours afficher «\u{202F}IL EST\u{202F}»",
+        sectionColors: "Couleurs", front: "Façade\u{202F}:", lit: "Couleur lumineuse\u{202F}:",
+        dim: "Lettres éteintes\u{202F}:", glow: "Halo\u{202F}:", edge: "Bord\u{202F}:", custom: "Personnalisée",
+        sectionFont: "Police", font: "Police\u{202F}:", weight: "Graisse\u{202F}:",
+        letterScale: "Taille des lettres\u{202F}:", systemFont: "SF Pro (police système)",
+        sectionLook: "Affichage", look: "Style\u{202F}:", plate: "Façade", flat: "Plein écran",
+        size: "Taille\u{202F}:", fade: "Fondu\u{202F}:", dots: "Points des minutes",
+        drift: "Déplacement lent (anti-marquage)",
+        reset: "Par défaut", cancel: "Annuler", ok: "OK",
+        frontNames: ["Noir profond", "Graphite", "Bleu nuit", "Vert sapin", "Rouge brique", "Blanc craie"],
+        litNames: ["Blanc chaud", "Blanc froid", "Ambre", "Bleu glacier", "Menthe", "Anthracite"],
+        decimalComma: true)
+
+    static let it = Texts(
+        sectionTime: "Ora", language: "Lingua:", intro: "Mostra sempre «SONO» / «È»",
+        sectionColors: "Colori", front: "Frontale:", lit: "Colore luce:", dim: "Lettere spente:",
+        glow: "Bagliore:", edge: "Bordo:", custom: "Personalizzato",
+        sectionFont: "Carattere", font: "Carattere:", weight: "Peso:", letterScale: "Dimensione lettere:",
+        systemFont: "SF Pro (font di sistema)",
+        sectionLook: "Aspetto", look: "Stile:", plate: "Pannello frontale", flat: "Schermo intero",
+        size: "Dimensione:", fade: "Dissolvenza:", dots: "Punti dei minuti",
+        drift: "Spostamento lento (anti burn-in)",
+        reset: "Predefiniti", cancel: "Annulla", ok: "OK",
+        frontNames: ["Nero profondo", "Grafite", "Blu notte", "Verde abete", "Rosso mattone", "Bianco gesso"],
+        litNames: ["Bianco caldo", "Bianco freddo", "Ambra", "Blu ghiaccio", "Menta", "Antracite"],
+        decimalComma: true)
+
+    static let es = Texts(
+        sectionTime: "Hora", language: "Idioma:", intro: "Mostrar siempre «SON» / «ES»",
+        sectionColors: "Colores", front: "Frontal:", lit: "Color de luz:", dim: "Letras apagadas:",
+        glow: "Brillo:", edge: "Borde:", custom: "Personalizado",
+        sectionFont: "Tipografía", font: "Tipografía:", weight: "Grosor:", letterScale: "Tamaño de letra:",
+        systemFont: "SF Pro (fuente del sistema)",
+        sectionLook: "Aspecto", look: "Estilo:", plate: "Placa frontal", flat: "Pantalla completa",
+        size: "Tamaño:", fade: "Fundido:", dots: "Puntos de minutos",
+        drift: "Desplazamiento lento (antiquemado)",
+        reset: "Predeterminado", cancel: "Cancelar", ok: "Aceptar",
+        frontNames: ["Negro profundo", "Grafito", "Azul noche", "Verde abeto", "Rojo ladrillo", "Blanco tiza"],
+        litNames: ["Blanco cálido", "Blanco frío", "Ámbar", "Azul hielo", "Menta", "Antracita"],
+        decimalComma: true)
 }

@@ -21,27 +21,11 @@ struct Settings {
 
     static let moduleName = "de.wanner-it.wortuhr"
 
-    /// Schriften: (Anzeigename deutsch, englisch, Schlüssel)
-    static let fonts: [(String, String, String)] = [
-        ("Helvetica Neue", "Helvetica Neue", "Helvetica Neue"),
-        ("SF Pro (Systemschrift)", "SF Pro (system font)", "System"),
-        ("Avenir Next", "Avenir Next", "Avenir Next"),
-        ("Futura", "Futura", "Futura"),
-        ("DIN Alternate", "DIN Alternate", "DIN Alternate"),
-        ("Gill Sans", "Gill Sans", "Gill Sans"),
-        ("SF Mono", "SF Mono", "SF Mono"),
-    ]
-    /// Farben: (Name deutsch, englisch, Hex)
-    static let frontPresets: [(String, String, String)] = [
-        ("Tiefschwarz", "Deep black", "#0e0f11"), ("Graphit", "Graphite", "#2a2c30"),
-        ("Nachtblau", "Midnight blue", "#101b2c"), ("Tannengrün", "Forest green", "#14261e"),
-        ("Ziegelrot", "Brick red", "#5e231d"), ("Kalkweiß", "Chalk white", "#e9e7e1"),
-    ]
-    static let litPresets: [(String, String, String)] = [
-        ("Warmweiß", "Warm white", "#fff1d6"), ("Kaltweiß", "Cool white", "#f3f7ff"),
-        ("Bernstein", "Amber", "#ffb24a"), ("Eisblau", "Ice blue", "#9ad7ff"),
-        ("Mint", "Mint", "#9ff0c8"), ("Anthrazit", "Anthracite", "#1d1f22"),
-    ]
+    /// Schriften (Schlüssel; „System“ = SF Pro, Anzeigename in Texts.systemFont)
+    static let fonts = ["Helvetica Neue", "System", "Avenir Next", "Futura", "DIN Alternate", "Gill Sans", "SF Mono"]
+    /// Farben (Hex; Namen je Sprache in Texts.frontNames / Texts.litNames)
+    static let frontPresets = ["#0e0f11", "#2a2c30", "#101b2c", "#14261e", "#5e231d", "#e9e7e1"]
+    static let litPresets = ["#fff1d6", "#f3f7ff", "#ffb24a", "#9ad7ff", "#9ff0c8", "#1d1f22"]
     static let weights: [(String, Int)] = [("Light", 300), ("Regular", 400), ("Medium", 500), ("Bold", 700)]
 
     private static var store: ScreenSaverDefaults? {
