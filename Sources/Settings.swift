@@ -18,6 +18,7 @@ struct Settings {
     var fade: Double = 0.8        // seconds
     var dots = true
     var drift = false
+    var mainScreenOnly = false    // other displays stay black
 
     static let moduleName = "de.wanner-it.wortuhr"
 
@@ -53,6 +54,7 @@ struct Settings {
         s.fade = dbl("fade", s.fade)
         s.dots = bool("dots", s.dots)
         s.drift = bool("drift", s.drift)
+        s.mainScreenOnly = bool("mainScreenOnly", s.mainScreenOnly)
         return s
     }
 
@@ -73,6 +75,7 @@ struct Settings {
         d.set(fade, forKey: "fade")
         d.set(dots, forKey: "dots")
         d.set(drift, forKey: "drift")
+        d.set(mainScreenOnly, forKey: "mainScreenOnly")
         d.synchronize()
     }
 

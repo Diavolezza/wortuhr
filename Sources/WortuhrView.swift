@@ -21,6 +21,8 @@ final class WortuhrView: ScreenSaverView {
     private var plateCenter = CGPoint.zero
     private var config: ConfigController?
     private var hiddenForActivity = false
+    /// Secondary display with "main display only" switched on: stays black.
+    private var blankedDisplay = false
     /// True only after "didstart": only the real screen saver reacts to input.
     /// (On macOS 26+ the preview in System Settings wrongly reports isPreview = false.)
     /// Process-wide: after "didstart" macOS often creates another view, which would
@@ -134,8 +136,9 @@ final class WortuhrView: ScreenSaverView {
 
     override func startAnimation() {
         super.startAnimation()
-        plate.opacity = 1
         hiddenForActivity = false
+        blankedDisplay = shouldBlankDisplay
+        plate.opacity = blankedDisplay ? 0 : 1
         startDate = Date()
         updateTime(animated: false)
         startTicker()
@@ -171,6 +174,11 @@ final class WortuhrView: ScreenSaverView {
     }
 
     private func tick() {
+        let blank = shouldBlankDisplay
+        if blank != blankedDisplay {
+            blankedDisplay = blank
+            setClockVisible(!hiddenForActivity)
+        }
         // Some macOS versions change the size without calling setFrameSize.
         if bounds.size != builtSize { rebuild() }
         checkActivity()
@@ -196,7 +204,7 @@ final class WortuhrView: ScreenSaverView {
 
         root.frame = b
         root.contentsScale = scale
-        root.backgroundColor = (s.flat ? s.front : NSColor.black).cgColor
+        root.backgroundColor = (s.flat && !blankedDisplay && !hiddenForActivity ? s.front : NSColor.black).cgColor
 
         // Plate
         let side = floor(min(b.width, b.height) * CGFloat(s.size / 100))
@@ -382,7 +390,16 @@ final class WortuhrView: ScreenSaverView {
         }
     }
 
-    private func setClockVisible(_ visible: Bool) {
+    /// "Main display only": the real screen saver on any display other than the one with the
+    /// menu bar stays black. The preview in System Settings always shows the clock.
+    private var shouldBlankDisplay: Bool {
+        guard settings.mainScreenOnly, isRealSaver, NSScreen.screens.count > 1,
+              let screen = window?.screen else { return false }
+        return screen != NSScreen.screens.first
+    }
+
+    private func setClockVisible(_ requested: Bool) {
+        let visible = requested && !blankedDisplay
         CATransaction.begin()
         CATransaction.setAnimationDuration(visible ? 1.0 : 0.3)
         plate.opacity = visible ? 1 : 0

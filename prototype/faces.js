@@ -19,6 +19,15 @@ const FACES = {
       H9:[9,3,4], UHR:[9,8,3] },
     marks: [],
   },
+  ch: {
+    grid: ["ESKISCHAFÜF","VIERTELSZÄH","ZWÄNZGDABLN","VORKHALBIJE","EISRZWÖIDRÜ",
+           "VIERIKFÜFIS","SÄCHSISIBNI","ACHTIENÜNIX","ZÄNIKELFIRS","ZWÖLFIKSTOQ"],
+    words: { ES:[0,0,2], ISCH:[0,3,4], M5:[0,8,3], V:[1,0,7], M10:[1,8,3],
+      M20:[2,0,6], AB:[2,7,2], VOR:[3,0,3], HALBI:[3,4,5],
+      H1:[4,0,3], H2:[4,4,4], H3:[4,8,3], H4:[5,0,5], H5:[5,6,4],
+      H6:[6,0,6], H7:[6,6,5], H8:[7,0,5], H9:[7,6,4], H10:[8,0,4], H11:[8,5,4], H0:[9,0,6] },
+    marks: [],
+  },
   en: {
     grid: ["ITLISQHALFP","AZQUARTERCK","TWENTYXFIVE","TENRPASTBTO", ...EN_HOUR_ROWS],
     words: { IT:[0,0,2], IS:[0,3,2], HALF:[0,6,4], A:[1,0,1], QUARTER:[1,2,7],
@@ -66,13 +75,22 @@ const FACES = {
 };
 
 /* language -> grid */
-const LANGS = { de:"de", deSouth:"de", en:"en", us:"us", es:"es", fr:"fr", it:"it" };
+const LANGS = { de:"de", deCH:"ch", deSouth:"de", en:"en", us:"us", es:"es", fr:"fr", it:"it" };
 
 /* Time phrase: intro (optional) and words */
 function phrase(h24, m, lang, intro){
   const m5 = Math.floor(m/5)*5, h = h24%12, n = (h+1)%12, H = x=>"H"+x;
   let p;
   switch (lang) {
+    case "deCH": {
+      // Swiss German: viertel ab drü, halbi vieri
+      p = { intro:["ES","ISCH"], words:{
+        0:[H(h)], 5:["M5","AB",H(h)], 10:["M10","AB",H(h)], 15:["V","AB",H(h)],
+        20:["M20","AB",H(h)], 25:["M5","VOR","HALBI",H(n)], 30:["HALBI",H(n)],
+        35:["M5","AB","HALBI",H(n)], 40:["M20","VOR",H(n)], 45:["V","VOR",H(n)],
+        50:["M10","VOR",H(n)], 55:["M5","VOR",H(n)] }[m5] };
+      break;
+    }
     case "en": case "us": {
       const past = lang === "us" ? "AFTER" : "PAST";
       p = { intro:["IT","IS"], words:{

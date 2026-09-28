@@ -27,6 +27,7 @@ final class ConfigController: NSObject {
     private let fade = NSSlider(value: 0.8, minValue: 0, maxValue: 3, target: nil, action: nil)
     private let dots = NSButton(checkboxWithTitle: "", target: nil, action: nil)
     private let drift = NSButton(checkboxWithTitle: "", target: nil, action: nil)
+    private let mainScreenOnly = NSButton(checkboxWithTitle: "", target: nil, action: nil)
     private let reset = NSButton(title: "", target: nil, action: nil)
     private let cancel = NSButton(title: "", target: nil, action: nil)
     private let ok = NSButton(title: "", target: nil, action: nil)
@@ -63,7 +64,7 @@ final class ConfigController: NSObject {
         weight.addItems(withTitles: Settings.weights.map { $0.0 })
 
         let controls: [NSControl] = [language, intro, front, lit, dim, glow, edge, font, weight,
-                                     letterScale, look, size, fade, dots, drift]
+                                     letterScale, look, size, fade, dots, drift, mainScreenOnly]
         for c in controls {
             c.target = self
             c.action = #selector(changed(_:))
@@ -113,6 +114,7 @@ final class ConfigController: NSObject {
             [label(\.fade), fade, fadeValue],
             [e(), dots, e()],
             [e(), drift, e()],
+            [e(), mainScreenOnly, e()],
         ])
         grid.translatesAutoresizingMaskIntoConstraints = false
         grid.column(at: 0).xPlacement = .trailing
@@ -156,6 +158,7 @@ final class ConfigController: NSObject {
         intro.title = t.intro
         dots.title = t.dots
         drift.title = t.drift
+        mainScreenOnly.title = t.mainScreenOnly
         reset.title = t.reset
         cancel.title = t.cancel
         ok.title = t.ok
@@ -224,6 +227,7 @@ final class ConfigController: NSObject {
         fade.doubleValue = s.fade
         dots.state = s.dots ? .on : .off
         drift.state = s.drift ? .on : .off
+        mainScreenOnly.state = s.mainScreenOnly ? .on : .off
         updateLabels()
     }
 
@@ -243,6 +247,7 @@ final class ConfigController: NSObject {
         s.fade = (fade.doubleValue * 10).rounded() / 10
         s.dots = dots.state == .on
         s.drift = drift.state == .on
+        s.mainScreenOnly = mainScreenOnly.state == .on
     }
 
     private func updateLabels() {
@@ -302,6 +307,7 @@ extension Language {
     var menuTitle: String {
         switch self {
         case .de:      return "🇩🇪 Deutsch – Hochdeutsch (viertel nach drei)"
+        case .deCH:    return "🇨🇭 Deutsch – Schwiizerdütsch (viertel ab drü)"
         case .deSouth: return "🇩🇪 Deutsch – Süddeutsch (viertel vier)"
         case .en:      return "🇬🇧 English – UK (a quarter past three)"
         case .us:      return "🇺🇸 English – US (a quarter after three)"
@@ -317,7 +323,7 @@ struct Texts {
     let sectionTime, language, intro: String
     let sectionColors, front, lit, dim, glow, edge, custom: String
     let sectionFont, font, weight, letterScale, systemFont: String
-    let sectionLook, look, plate, flat, size, fade, dots, drift: String
+    let sectionLook, look, plate, flat, size, fade, dots, drift, mainScreenOnly: String
     let reset, cancel, ok: String
     /// Colour names in the order of Settings.frontPresets / Settings.litPresets
     let frontNames, litNames: [String]
@@ -326,6 +332,7 @@ struct Texts {
     static func `for`(_ ui: UILanguage) -> Texts {
         switch ui {
         case .de:   return de
+        case .deCH: return deCH
         case .enGB: return enGB
         case .enUS: return enUS
         case .fr:   return fr
@@ -342,11 +349,26 @@ struct Texts {
         systemFont: "SF Pro (Systemschrift)",
         sectionLook: "Darstellung", look: "Darstellung:", plate: "Frontplatte", flat: "Vollflächig",
         size: "Größe:", fade: "Überblendung:", dots: "Minutenpunkte",
-        drift: "Langsam wandern (Einbrennschutz)",
+        drift: "Langsam wandern (Einbrennschutz)", mainScreenOnly: "Nur auf dem Hauptbildschirm",
         reset: "Standard", cancel: "Abbrechen", ok: "OK",
         frontNames: ["Tiefschwarz", "Graphit", "Nachtblau", "Tannengrün", "Ziegelrot", "Kalkweiß"],
         litNames: ["Warmweiß", "Kaltweiß", "Bernstein", "Eisblau", "Mint", "Anthrazit"],
         decimalComma: true)
+
+    // Swiss Standard German: ss instead of ß, «» quotes, decimal point
+    static let deCH = Texts(
+        sectionTime: "Zeitansage", language: "Sprache:", intro: "«ES ISCH» immer anzeigen",
+        sectionColors: "Farben", front: "Front:", lit: "Leuchtfarbe:", dim: "Unbeleuchtet:",
+        glow: "Leuchten:", edge: "Rand:", custom: "Eigene",
+        sectionFont: "Schrift", font: "Schrift:", weight: "Schnitt:", letterScale: "Buchstabengrösse:",
+        systemFont: "SF Pro (Systemschrift)",
+        sectionLook: "Darstellung", look: "Darstellung:", plate: "Frontplatte", flat: "Vollflächig",
+        size: "Grösse:", fade: "Überblendung:", dots: "Minutenpunkte",
+        drift: "Langsam wandern (Einbrennschutz)", mainScreenOnly: "Nur auf dem Hauptbildschirm",
+        reset: "Standard", cancel: "Abbrechen", ok: "OK",
+        frontNames: ["Tiefschwarz", "Graphit", "Nachtblau", "Tannengrün", "Ziegelrot", "Kalkweiss"],
+        litNames: ["Warmweiss", "Kaltweiss", "Bernstein", "Eisblau", "Mint", "Anthrazit"],
+        decimalComma: false)
 
     static let enGB = Texts(
         sectionTime: "Time", language: "Language:", intro: "Always show “IT IS”",
@@ -356,7 +378,7 @@ struct Texts {
         systemFont: "SF Pro (system font)",
         sectionLook: "Appearance", look: "Style:", plate: "Front plate", flat: "Full screen",
         size: "Size:", fade: "Cross-fade:", dots: "Minute dots",
-        drift: "Drift slowly (burn-in protection)",
+        drift: "Drift slowly (burn-in protection)", mainScreenOnly: "Main display only",
         reset: "Defaults", cancel: "Cancel", ok: "OK",
         frontNames: ["Deep black", "Graphite", "Midnight blue", "Forest green", "Brick red", "Chalk white"],
         litNames: ["Warm white", "Cool white", "Amber", "Ice blue", "Mint", "Anthracite"],
@@ -370,7 +392,7 @@ struct Texts {
         systemFont: "SF Pro (system font)",
         sectionLook: "Appearance", look: "Style:", plate: "Front plate", flat: "Full screen",
         size: "Size:", fade: "Cross-fade:", dots: "Minute dots",
-        drift: "Drift slowly (burn-in protection)",
+        drift: "Drift slowly (burn-in protection)", mainScreenOnly: "Main display only",
         reset: "Defaults", cancel: "Cancel", ok: "OK",
         frontNames: ["Deep black", "Graphite", "Midnight blue", "Forest green", "Brick red", "Chalk white"],
         litNames: ["Warm white", "Cool white", "Amber", "Ice blue", "Mint", "Anthracite"],
@@ -385,7 +407,7 @@ struct Texts {
         letterScale: "Taille des lettres\u{202F}:", systemFont: "SF Pro (police système)",
         sectionLook: "Affichage", look: "Style\u{202F}:", plate: "Façade", flat: "Plein écran",
         size: "Taille\u{202F}:", fade: "Fondu\u{202F}:", dots: "Points des minutes",
-        drift: "Déplacement lent (anti-marquage)",
+        drift: "Déplacement lent (anti-marquage)", mainScreenOnly: "Écran principal uniquement",
         reset: "Par défaut", cancel: "Annuler", ok: "OK",
         frontNames: ["Noir profond", "Graphite", "Bleu nuit", "Vert sapin", "Rouge brique", "Blanc craie"],
         litNames: ["Blanc chaud", "Blanc froid", "Ambre", "Bleu glacier", "Menthe", "Anthracite"],
@@ -399,7 +421,7 @@ struct Texts {
         systemFont: "SF Pro (font di sistema)",
         sectionLook: "Aspetto", look: "Stile:", plate: "Pannello frontale", flat: "Schermo intero",
         size: "Dimensione:", fade: "Dissolvenza:", dots: "Punti dei minuti",
-        drift: "Spostamento lento (anti burn-in)",
+        drift: "Spostamento lento (anti burn-in)", mainScreenOnly: "Solo sullo schermo principale",
         reset: "Predefiniti", cancel: "Annulla", ok: "OK",
         frontNames: ["Nero profondo", "Grafite", "Blu notte", "Verde abete", "Rosso mattone", "Bianco gesso"],
         litNames: ["Bianco caldo", "Bianco freddo", "Ambra", "Blu ghiaccio", "Menta", "Antracite"],
@@ -413,7 +435,7 @@ struct Texts {
         systemFont: "SF Pro (fuente del sistema)",
         sectionLook: "Aspecto", look: "Estilo:", plate: "Placa frontal", flat: "Pantalla completa",
         size: "Tamaño:", fade: "Fundido:", dots: "Puntos de minutos",
-        drift: "Desplazamiento lento (antiquemado)",
+        drift: "Desplazamiento lento (antiquemado)", mainScreenOnly: "Solo en la pantalla principal",
         reset: "Predeterminado", cancel: "Cancelar", ok: "Aceptar",
         frontNames: ["Negro profundo", "Grafito", "Azul noche", "Verde abeto", "Rojo ladrillo", "Blanco tiza"],
         litNames: ["Blanco cálido", "Blanco frío", "Ámbar", "Azul hielo", "Menta", "Antracita"],

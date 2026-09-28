@@ -4,6 +4,7 @@ import Foundation
 /// The raw values are stored in the settings – changing them resets the saved language.
 enum Language: String, CaseIterable {
     case de       // VIERTEL NACH DREI, ZWANZIG NACH DREI, VIERTEL VOR VIER
+    case deCH     // VIERTEL AB DRÜ, FÜF VOR HALBI VIERI (Swiss German)
     case deSouth  // VIERTEL VIER, ZEHN VOR HALB VIER, DREIVIERTEL VIER (southern German)
     case en       // A QUARTER PAST THREE, TWENTY FIVE TO FOUR (British)
     case us       // A QUARTER AFTER THREE, HALF PAST THREE (American)
@@ -14,6 +15,7 @@ enum Language: String, CaseIterable {
     var face: ClockFace {
         switch self {
         case .de, .deSouth: return .german
+        case .deCH:        return .swiss
         case .en:          return .english
         case .us:          return .american
         case .fr:          return .french
@@ -26,6 +28,7 @@ enum Language: String, CaseIterable {
     static var systemDefault: Language {
         let id = (Locale.preferredLanguages.first ?? "en").lowercased()
         switch true {
+        case id.hasPrefix("de-ch"): return .deCH
         case id.hasPrefix("de"):    return .de
         case id.hasPrefix("en-us"): return .us
         case id.hasPrefix("es"):    return .es
@@ -39,6 +42,7 @@ enum Language: String, CaseIterable {
     var ui: UILanguage {
         switch self {
         case .de, .deSouth: return .de
+        case .deCH:        return .deCH
         case .en:          return .enGB
         case .us:          return .enUS
         case .fr:          return .fr
@@ -48,7 +52,7 @@ enum Language: String, CaseIterable {
     }
 }
 
-enum UILanguage { case de, enGB, enUS, fr, it, es }
+enum UILanguage { case de, deCH, enGB, enUS, fr, it, es }
 
 /// Letter grid and time logic of the word clock, per language.
 /// Identical to the HTML prototype (prototype/faces.js); `node prototype/check.mjs` checks both.
@@ -88,6 +92,7 @@ struct ClockFace {
         let p: (intro: [String], words: [String])
         switch language {
         case .de, .deSouth: p = germanWords(m5: m5, h: h, n: n, south: language == .deSouth)
+        case .deCH:        p = swissWords(m5: m5, h: h, n: n)
         case .en, .us:     p = englishWords(m5: m5, h: h, n: n, american: language == .us)
         case .fr:          p = frenchWords(m5: m5, h24: hour24)
         case .it:          p = italianWords(m5: m5, h: h, n: n)
@@ -144,6 +149,55 @@ struct ClockFace {
         default: w = ["M5", "VOR", H(n)]
         }
         return (["ES", "IST"], w)
+    }
+
+    // MARK: - Swiss German
+
+    static let swiss = ClockFace(
+        grid: [
+            "ESKISCHAFÜF",
+            "VIERTELSZÄH",
+            "ZWÄNZGDABLN",
+            "VORKHALBIJE",
+            "EISRZWÖIDRÜ",
+            "VIERIKFÜFIS",
+            "SÄCHSISIBNI",
+            "ACHTIENÜNIX",
+            "ZÄNIKELFIRS",
+            "ZWÖLFIKSTOQ",
+        ],
+        words: [
+            "ES": (0, 0, 2), "ISCH": (0, 3, 4), "M5": (0, 8, 3),
+            "V": (1, 0, 7), "M10": (1, 8, 3),
+            "M20": (2, 0, 6), "AB": (2, 7, 2),
+            "VOR": (3, 0, 3), "HALBI": (3, 4, 5),
+            "H1": (4, 0, 3), "H2": (4, 4, 4), "H3": (4, 8, 3),
+            "H4": (5, 0, 5), "H5": (5, 6, 4),
+            "H6": (6, 0, 6), "H7": (6, 6, 5),
+            "H8": (7, 0, 5), "H9": (7, 6, 4),
+            "H10": (8, 0, 4), "H11": (8, 5, 4),
+            "H0": (9, 0, 6),
+        ],
+        marks: []
+    )
+
+    private static func swissWords(m5: Int, h: Int, n: Int) -> ([String], [String]) {
+        let w: [String]
+        switch m5 {
+        case 0:  w = [H(h)]
+        case 5:  w = ["M5", "AB", H(h)]
+        case 10: w = ["M10", "AB", H(h)]
+        case 15: w = ["V", "AB", H(h)]
+        case 20: w = ["M20", "AB", H(h)]
+        case 25: w = ["M5", "VOR", "HALBI", H(n)]
+        case 30: w = ["HALBI", H(n)]
+        case 35: w = ["M5", "AB", "HALBI", H(n)]
+        case 40: w = ["M20", "VOR", H(n)]
+        case 45: w = ["V", "VOR", H(n)]
+        case 50: w = ["M10", "VOR", H(n)]
+        default: w = ["M5", "VOR", H(n)]
+        }
+        return (["ES", "ISCH"], w)
     }
 
     // MARK: - English (British and American)

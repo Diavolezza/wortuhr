@@ -131,7 +131,7 @@ kbd{font:11px ui-monospace,Menlo,monospace;border:1px solid var(--line);border-b
     <section>
       <h2>Time</h2>
       <div class="row"><select id="language" aria-label="Language">
-        <option value="de">🇩🇪 Deutsch – Hochdeutsch</option><option value="deSouth">🇩🇪 Deutsch – Süddeutsch</option>
+        <option value="de">🇩🇪 Deutsch – Hochdeutsch</option><option value="deCH">🇨🇭 Deutsch – Schwiizerdütsch</option><option value="deSouth">🇩🇪 Deutsch – Süddeutsch</option>
         <option value="en">🇬🇧 English – UK</option><option value="us">🇺🇸 English – US</option>
         <option value="es">🇪🇸 Español</option><option value="fr">🇫🇷 Français</option><option value="it">🇮🇹 Italiano</option>
       </select>
@@ -212,7 +212,7 @@ const FRONTS=[["Deep black","#0e0f11"],["Graphite","#2a2c30"],["Midnight blue","
 const LITS=[["Warm white","#fff1d6"],["Cool white","#f3f7ff"],["Amber","#ffb24a"],["Ice blue","#9ad7ff"],["Mint","#9ff0c8"],["Anthracite","#1d1f22"]];
 /* Default language: the browser's, British English otherwise */
 const browserLanguage=(()=>{const l=(navigator.language||"en").toLowerCase();
-  return l.startsWith("de")?"de":l.startsWith("en-us")?"us":["es","fr","it"].find(x=>l.startsWith(x))||"en"})();
+  return l.startsWith("de-ch")?"deCH":l.startsWith("de")?"de":l.startsWith("en-us")?"us":["es","fr","it"].find(x=>l.startsWith(x))||"en"})();
 const DEF={language:browserLanguage,intro:true,front:"#0e0f11",lit:"#fff1d6",dim:14,glow:35,edge:40,
   font:'"Avenir Next",Avenir,sans-serif',weight:"400",lscale:100,look:"plate",size:92,fade:0.8,dots:true,drift:false,tmode:"live",man:945};
 let S={...DEF};
@@ -266,13 +266,14 @@ function apply(){
   ["dim","glow","edge","lscale","size","fade","man"].forEach(k=>$(k).value=S[k]);
   ["intro","dots","drift"].forEach(k=>$(k).checked=S[k]);
   $("language").value=S.language;
-  $("introLabel").textContent={de:"“ES IST”",deSouth:"“ES IST”",en:"“IT IS”",us:"“IT IS”",fr:"“IL EST”",it:"“SONO”/“È”",es:"“SON”/“ES”"}[S.language];
+  $("introLabel").textContent={de:"“ES IST”",deCH:"“ES ISCH”",deSouth:"“ES IST”",en:"“IT IS”",us:"“IT IS”",fr:"“IL EST”",it:"“SONO”/“È”",es:"“SON”/“ES”"}[S.language];
   $("font").value=S.font;
   $("oDim").textContent=S.dim+" %";$("oGlow").textContent=S.glow+" %";$("oEdge").textContent=S.edge+" %";$("oLscale").textContent=S.lscale+" %";
   $("oSize").textContent=S.size+" %";$("oFade").textContent=S.fade.toFixed(1)+" s";$("oMan").textContent=fmt(S.man);
   $("manualRow").hidden=S.tmode!=="manual";
   $("languageHint").textContent={
     de:"3:15 viertel nach drei · 3:20 zwanzig nach drei · 3:45 viertel vor vier",
+    deCH:"3:15 viertel ab drü · 3:25 füf vor halbi vieri · 3:45 viertel vor vieri",
     deSouth:"3:15 viertel vier · 3:20 zehn vor halb vier · 3:45 dreiviertel vier",
     en:"3:15 a quarter past three · 3:35 twenty five to four · 3:00 three o’clock",
     us:"3:15 a quarter after three · 3:30 half past three · 3:35 twenty five to four",

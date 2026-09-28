@@ -3,7 +3,7 @@ import Foundation
 // Prints grids, words and all time phrases – for comparison with the prototype
 // (prototype/check.mjs). Run via: node prototype/check.mjs
 
-let faces: [(String, ClockFace)] = [("de", .german), ("en", .english), ("us", .american),
+let faces: [(String, ClockFace)] = [("de", .german), ("ch", .swiss), ("en", .english), ("us", .american),
                                     ("fr", .french), ("it", .italian), ("es", .spanish)]
 for (name, face) in faces {
     for row in face.grid { print("grid \(name) \(row.precomposedStringWithCanonicalMapping)") }

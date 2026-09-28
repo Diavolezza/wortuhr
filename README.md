@@ -6,11 +6,12 @@
 · **[Try it in the browser](https://diavolezza.github.io/wortuhr/)**
 · **[Download](https://github.com/Diavolezza/wortuhr/releases/latest)**
 
-A word clock on an 11×10 letter grid with four minute dots. The time is spelled out in seven variants:
+A word clock on an 11×10 letter grid with four minute dots. The time is spelled out in eight variants:
 
 | Language | Example (3:15 · 3:45) |
 |---|---|
 | German (standard) | viertel nach drei · viertel vor vier |
+| Swiss German | viertel ab drü · viertel vor vieri (3:25 füf vor halbi vieri) |
 | German (southern) | viertel vier · dreiviertel vier |
 | English (British) | a quarter past three · a quarter to four |
 | English (American) | a quarter after three · a quarter to four |
@@ -18,7 +19,7 @@ A word clock on an 11×10 letter grid with four minute dots. The time is spelled
 | Italian | le tre e un quarto · le quattro meno un quarto (1:00 è l’una) |
 | Spanish | las tres y cuarto · las cuatro menos cuarto (1:00 es la una) |
 
-Colours, typeface, size and burn-in protection can be set in the options dialog; the
+Colours, typeface, size, burn-in protection and “main display only” can be set in the options dialog; the
 dialog speaks the selected language. On first start the clock uses the Mac's language.
 
 ![Wortuhr at 11:55 – “ES IST FÜNF VOR ZWÖLF”](docs/wortuhr.png)

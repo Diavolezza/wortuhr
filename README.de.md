@@ -6,11 +6,12 @@
 · **[Im Browser ausprobieren](https://diavolezza.github.io/wortuhr/)**
 · **[Download](https://github.com/Diavolezza/wortuhr/releases/latest)**
 
-Wortuhr im 11×10-Raster mit vier Minutenpunkten. Zeitansage in sieben Varianten:
+Wortuhr im 11×10-Raster mit vier Minutenpunkten. Zeitansage in acht Varianten:
 
 | Sprache | Beispiel (3:15 · 3:45) |
 |---|---|
 | Hochdeutsch | viertel nach drei · viertel vor vier |
+| Schweizerdeutsch | viertel ab drü · viertel vor vieri (3:25 füf vor halbi vieri) |
 | Süddeutsch | viertel vier · dreiviertel vier |
 | Englisch (britisch) | a quarter past three · a quarter to four |
 | Englisch (amerikanisch) | a quarter after three · a quarter to four |
@@ -18,7 +19,7 @@ Wortuhr im 11×10-Raster mit vier Minutenpunkten. Zeitansage in sieben Varianten
 | Italienisch | le tre e un quarto · le quattro meno un quarto (1 Uhr: è l’una) |
 | Spanisch | las tres y cuarto · las cuatro menos cuarto (1 Uhr: es la una) |
 
-Farben, Schrift, Größe und Einbrennschutz im Optionen-Dialog einstellbar; der Dialog
+Farben, Schrift, Größe, Einbrennschutz und „Nur auf dem Hauptbildschirm“ im Optionen-Dialog einstellbar; der Dialog
 spricht die gewählte Sprache. Beim ersten Start richtet sich die Uhr nach der Sprache des Macs.
 
 ![Wortuhr um 11:55 – „ES IST FÜNF VOR ZWÖLF“](docs/wortuhr.png)
