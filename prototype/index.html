@@ -194,7 +194,7 @@ kbd{font:11px ui-monospace,Menlo,monospace;border:1px solid var(--line);border-b
 
     <section>
       <h2>Export settings</h2>
-      <p class="hint" style="margin-bottom:8px">Send these values to Claude; they become the defaults of the screen saver.</p>
+      <p class="hint" style="margin-bottom:8px">The current settings as JSON – e.g. to use them as the screen saver's defaults.</p>
       <textarea id="json" readonly aria-label="Settings as JSON"></textarea>
       <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
         <button class="btn" id="bCopy">Copy</button><button class="btn" id="bReset">Reset</button>
@@ -210,7 +210,10 @@ kbd{font:11px ui-monospace,Menlo,monospace;border:1px solid var(--line);border-b
 /* ---------- Settings ---------- */
 const FRONTS=[["Deep black","#0e0f11"],["Graphite","#2a2c30"],["Midnight blue","#101b2c"],["Forest green","#14261e"],["Brick red","#5e231d"],["Chalk white","#e9e7e1"]];
 const LITS=[["Warm white","#fff1d6"],["Cool white","#f3f7ff"],["Amber","#ffb24a"],["Ice blue","#9ad7ff"],["Mint","#9ff0c8"],["Anthracite","#1d1f22"]];
-const DEF={language:"de",intro:true,front:"#0e0f11",lit:"#fff1d6",dim:14,glow:35,edge:40,
+/* Default language: the browser's, British English otherwise */
+const browserLanguage=(()=>{const l=(navigator.language||"en").toLowerCase();
+  return l.startsWith("de")?"de":l.startsWith("en-us")?"us":["es","fr","it"].find(x=>l.startsWith(x))||"en"})();
+const DEF={language:browserLanguage,intro:true,front:"#0e0f11",lit:"#fff1d6",dim:14,glow:35,edge:40,
   font:'"Avenir Next",Avenir,sans-serif',weight:"400",lscale:100,look:"plate",size:92,fade:0.8,dots:true,drift:false,tmode:"live",man:945};
 let S={...DEF};
 try{const s=JSON.parse(localStorage.getItem("wortuhr-prototype")||"null");if(s)S={...DEF,...s}}catch(e){}

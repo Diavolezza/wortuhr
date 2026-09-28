@@ -1,0 +1,46 @@
+# Builds a universal Wortuhr.saver for a version tag (e.g. v1.1) and attaches it to a GitHub release.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check grids and time phrases
+        run: node prototype/check.mjs
+      - name: Build (Apple Silicon + Intel)
+        run: ./build.sh --no-install
+      - name: Set version from tag and re-sign
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" build/Wortuhr.saver/Contents/Info.plist
+          codesign --force --sign - build/Wortuhr.saver
+          ditto -c -k --keepParent build/Wortuhr.saver "Wortuhr-$VERSION.zip"
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          cat > notes.md <<'EOF'
+          ## Install
+
+          1. Unzip and move `Wortuhr.saver` to `~/Library/Screen Savers` (or `/Library/Screen Savers` for all users).
+          2. The bundle is signed ad hoc, not notarised. Remove the download quarantine once in Terminal:
+
+                 xattr -dr com.apple.quarantine ~/Library/Screen\ Savers/Wortuhr.saver
+
+          3. System Settings → Screen Saver → select “Wortuhr”.
+
+          Runs on Apple Silicon and Intel, macOS 13 or later.
+          EOF
+          gh release create "$GITHUB_REF_NAME" "Wortuhr-$VERSION.zip" --title "Wortuhr $VERSION" --notes-file notes.md

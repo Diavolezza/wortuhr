@@ -3,7 +3,7 @@ import ScreenSaver
 
 /// All Wortuhr settings. Defaults = values tuned in the prototype.
 struct Settings {
-    var language: Language = .de
+    var language: Language = .systemDefault
     var intro = true              // always show "ES IST" / "IT IS"
     var front = NSColor(hex: "#0e0f11")
     var lit = NSColor(hex: "#fff1d6")

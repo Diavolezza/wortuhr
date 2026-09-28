@@ -1,0 +1,20 @@
+# Builds the screen saver and checks all time phrases (prototype vs. Swift) on every push.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-check:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build (Apple Silicon + Intel)
+        run: ./build.sh --no-install
+      - name: Check grids and time phrases
+        run: node prototype/check.mjs

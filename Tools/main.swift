@@ -15,6 +15,10 @@ for (scale, name) in [(1, "thumbnail.png"), (2, "thumbnail@2x.png")] {
         FileHandle.standardError.write("Could not create the view\n".data(using: .utf8)!)
         exit(1)
     }
+    // Fixed defaults in German – independent of the builder's saved settings and system language
+    var settings = Settings()
+    settings.language = .de
+    view.settings = settings
     view.fixedTime = (11, 55)
     view.prepareSnapshot(scale: CGFloat(scale))
 

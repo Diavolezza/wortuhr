@@ -2,6 +2,10 @@
 
 **English** · [Deutsch](README.de.md)
 
+[![CI](https://github.com/Diavolezza/wortuhr/actions/workflows/ci.yml/badge.svg)](https://github.com/Diavolezza/wortuhr/actions/workflows/ci.yml)
+· **[Try it in the browser](https://diavolezza.github.io/wortuhr/)**
+· **[Download](https://github.com/Diavolezza/wortuhr/releases/latest)**
+
 A word clock on an 11×10 letter grid with four minute dots. The time is spelled out in seven variants:
 
 | Language | Example (3:15 · 3:45) |
@@ -15,13 +19,23 @@ A word clock on an 11×10 letter grid with four minute dots. The time is spelled
 | Spanish | las tres y cuarto · las cuatro menos cuarto (1:00 es la una) |
 
 Colours, typeface, size and burn-in protection can be set in the options dialog; the
-dialog speaks the selected language.
+dialog speaks the selected language. On first start the clock uses the Mac's language.
 
 ![Wortuhr at 11:55 – “ES IST FÜNF VOR ZWÖLF”](docs/wortuhr.png)
 
 Tested on macOS 27 on Apple Silicon; built for Apple Silicon and Intel (macOS 13 or later).
 
-## Build and install
+## Download and install
+
+Download `Wortuhr-….zip` from the [latest release](https://github.com/Diavolezza/wortuhr/releases/latest),
+unzip it and move `Wortuhr.saver` to `~/Library/Screen Savers`. The bundle is signed ad hoc,
+not notarised, so remove the download quarantine once in Terminal:
+
+    xattr -dr com.apple.quarantine ~/Library/Screen\ Savers/Wortuhr.saver
+
+Then select “Wortuhr” in System Settings → Screen Saver.
+
+## Build and install from source
 
     ./build.sh --system
 
@@ -68,8 +82,9 @@ within Wortuhr did not work or made things worse.
 
 ## Prototype
 
-Open `prototype/index.html` in a browser: the same clock for trying out languages, colours,
-typeface and size, with a fast-forward mode. The settings can be copied as JSON.
+Open `prototype/index.html` in a browser – or the [live demo](https://diavolezza.github.io/wortuhr/):
+the same clock for trying out languages, colours, typeface and size, with a fast-forward mode.
+The settings can be copied as JSON.
 
 Grids and time logic live in `prototype/faces.js` and, identically, in `Sources/ClockFace.swift`.
 After every change to them run
@@ -88,6 +103,7 @@ at the same time don’t touch) and compares prototype and Swift line by line.
 - `Sources/Log.swift` – diagnostic messages (collected by `./diag.sh`)
 - `Tools/main.swift` – creates the thumbnail for System Settings (11:55)
 - `Tools/Phrases/main.swift` – prints all time phrases from Swift (for `prototype/check.mjs`)
+- `.github/workflows/` – CI (build + check), live demo on GitHub Pages, release on version tags (`v1.2` …)
 
 ## Licence
 

@@ -2,6 +2,10 @@
 
 [English](README.md) · **Deutsch**
 
+[![CI](https://github.com/Diavolezza/wortuhr/actions/workflows/ci.yml/badge.svg)](https://github.com/Diavolezza/wortuhr/actions/workflows/ci.yml)
+· **[Im Browser ausprobieren](https://diavolezza.github.io/wortuhr/)**
+· **[Download](https://github.com/Diavolezza/wortuhr/releases/latest)**
+
 Wortuhr im 11×10-Raster mit vier Minutenpunkten. Zeitansage in sieben Varianten:
 
 | Sprache | Beispiel (3:15 · 3:45) |
@@ -15,13 +19,23 @@ Wortuhr im 11×10-Raster mit vier Minutenpunkten. Zeitansage in sieben Varianten
 | Spanisch | las tres y cuarto · las cuatro menos cuarto (1 Uhr: es la una) |
 
 Farben, Schrift, Größe und Einbrennschutz im Optionen-Dialog einstellbar; der Dialog
-spricht die gewählte Sprache.
+spricht die gewählte Sprache. Beim ersten Start richtet sich die Uhr nach der Sprache des Macs.
 
 ![Wortuhr um 11:55 – „ES IST FÜNF VOR ZWÖLF“](docs/wortuhr.png)
 
 Getestet unter macOS 27 auf Apple Silicon; gebaut wird für Apple Silicon und Intel (ab macOS 13).
 
-## Bauen und installieren
+## Herunterladen und installieren
+
+`Wortuhr-….zip` aus dem [neuesten Release](https://github.com/Diavolezza/wortuhr/releases/latest)
+laden, entpacken und `Wortuhr.saver` nach `~/Library/Screen Savers` legen. Das Paket ist nur
+ad hoc signiert, nicht notarisiert – deshalb einmal im Terminal die Download-Sperre entfernen:
+
+    xattr -dr com.apple.quarantine ~/Library/Screen\ Savers/Wortuhr.saver
+
+Dann in Systemeinstellungen → Bildschirmschoner „Wortuhr“ wählen.
+
+## Aus dem Quelltext bauen und installieren
 
     ./build.sh --system
 
@@ -68,8 +82,9 @@ aus zu erzwingen, haben nicht funktioniert oder es verschlimmert.
 
 ## Prototyp
 
-`prototype/index.html` im Browser öffnen: dieselbe Uhr zum Ausprobieren von Zeitansage,
-Farben, Schrift und Größe, mit Zeitraffer. Die Einstellungen lassen sich als JSON kopieren.
+`prototype/index.html` im Browser öffnen – oder die [Live-Demo](https://diavolezza.github.io/wortuhr/):
+dieselbe Uhr zum Ausprobieren von Zeitansage, Farben, Schrift und Größe, mit Zeitraffer.
+Die Einstellungen lassen sich als JSON kopieren.
 
 Raster und Zeitlogik stehen in `prototype/faces.js` und identisch in `Sources/ClockFace.swift`.
 Nach jeder Änderung daran:
@@ -89,6 +104,7 @@ vergleicht Prototyp und Swift Zeile für Zeile.
 - `Sources/Log.swift` – Diagnose-Ausgaben (`./diag.sh` sammelt sie)
 - `Tools/main.swift` – erzeugt das Vorschaubild für die Systemeinstellungen (11:55)
 - `Tools/Phrases/main.swift` – gibt alle Zeitansagen aus Swift aus (für `prototype/check.mjs`)
+- `.github/workflows/` – CI (Bauen + Prüfen), Live-Demo auf GitHub Pages, Release bei Versions-Tags (`v1.2` …)
 
 ## Lizenz
 

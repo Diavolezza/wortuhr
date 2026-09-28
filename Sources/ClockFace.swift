@@ -22,6 +22,19 @@ enum Language: String, CaseIterable {
         }
     }
 
+    /// Default on first start: the Mac's preferred language, British English otherwise.
+    static var systemDefault: Language {
+        let id = (Locale.preferredLanguages.first ?? "en").lowercased()
+        switch true {
+        case id.hasPrefix("de"):    return .de
+        case id.hasPrefix("en-us"): return .us
+        case id.hasPrefix("es"):    return .es
+        case id.hasPrefix("fr"):    return .fr
+        case id.hasPrefix("it"):    return .it
+        default:                    return .en
+        }
+    }
+
     /// Language of the options dialog.
     var ui: UILanguage {
         switch self {
