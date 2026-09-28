@@ -1,7 +1,7 @@
-/* Raster & Zeitlogik je Sprache – identisch in Sources/ClockFace.swift.
-   Wird vom Prototyp (index.html) und vom Prüfskript (check.mjs) geladen. */
+/* Letter grids & time logic per language – identical in Sources/ClockFace.swift.
+   Loaded by the prototype (index.html) and by the check script (check.mjs). */
 
-// Stundenwörter im englischen Raster (britisch und amerikanisch gleich)
+// Hour words in the English grid (same for British and American)
 const EN_HOURS = { H1:[4,0,3], H2:[4,4,3], H6:[4,8,3], H3:[5,0,5], H7:[5,6,5],
   H4:[6,0,4], H11:[6,5,6], H5:[7,0,4], H0:[7,5,6], H8:[8,0,5], H10:[8,6,3],
   H9:[9,0,4], OCLOCK:[9,5,6] };
@@ -39,7 +39,7 @@ const FACES = {
       MIDI:[4,0,4], H10:[4,2,3], MINUIT:[4,5,6], H11:[5,0,4], HEURE:[5,5,5], HEURES:[5,5,6],
       MOINS:[6,0,5], LE:[6,6,2], M10:[6,8,3], ET:[7,0,2], QUART:[7,3,5],
       M20:[8,0,5], M5:[8,5,4], M25:[8,0,9], DEMI:[9,1,4], DEMIE:[9,1,5] },
-    // Bindestrich in VINGT-CINQ
+    // hyphen in VINGT-CINQ
     marks: [{ glyph:"-", row:8, afterCol:4, word:"M25" }],
   },
   it: {
@@ -50,7 +50,7 @@ const FACES = {
       H0:[5,0,6], H2:[5,6,3], H3:[6,0,3], E:[6,4,1], MENO:[6,5,4],
       UN:[7,0,2], QUARTO:[7,3,6], M20:[8,0,5], M5:[8,5,6], M25:[8,0,11],
       MEZZA:[9,0,5], M10:[9,6,5] },
-    // Apostroph in L'UNA
+    // apostrophe in L'UNA
     marks: [{ glyph:"’", row:1, afterCol:2, word:"H1" }],
   },
   es: {
@@ -65,10 +65,10 @@ const FACES = {
   },
 };
 
-/* Sprache -> Raster */
-const LANGS = { hoch:"de", sued:"de", en:"en", us:"us", es:"es", fr:"fr", it:"it" };
+/* language -> grid */
+const LANGS = { de:"de", deSouth:"de", en:"en", us:"us", es:"es", fr:"fr", it:"it" };
 
-/* Zeitansage: Einleitung (abschaltbar) und Wörter */
+/* Time phrase: intro (optional) and words */
 function phrase(h24, m, lang, intro){
   const m5 = Math.floor(m/5)*5, h = h24%12, n = (h+1)%12, H = x=>"H"+x;
   let p;
@@ -83,7 +83,7 @@ function phrase(h24, m, lang, intro){
       break;
     }
     case "fr": {
-      // Stunde (24 h) -> Stundenwort und „heure(s)“; 12 Uhr = midi, 0 Uhr = minuit
+      // hour (24 h) -> hour word and "heure(s)"; 12:00 = midi, 0:00 = minuit
       const hw = x => x === 0 ? ["MINUIT"] : x === 12 ? ["MIDI"] : [H(x%12), x%12 === 1 ? "HEURE" : "HEURES"];
       const cur = hw(h24), nxt = hw((h24+1)%24);
       const demi = cur.length === 1 ? "DEMI" : "DEMIE";   // midi et demi, trois heures et demie
@@ -117,21 +117,21 @@ function phrase(h24, m, lang, intro){
       break;
     }
     default: {
-      const sued = lang === "sued";
+      const south = lang === "deSouth";
       p = { intro:["ES","IST"], words:{
         0:[h===1?"EIN":H(h),"UHR"], 5:["M5","NACH",H(h)], 10:["M10","NACH",H(h)],
-        15: sued?["V",H(n)]:["V","NACH",H(h)],
-        20: sued?["M10","VOR","HALB",H(n)]:["M20","NACH",H(h)],
+        15: south?["V",H(n)]:["V","NACH",H(h)],
+        20: south?["M10","VOR","HALB",H(n)]:["M20","NACH",H(h)],
         25:["M5","VOR","HALB",H(n)], 30:["HALB",H(n)], 35:["M5","NACH","HALB",H(n)],
-        40: sued?["M10","NACH","HALB",H(n)]:["M20","VOR",H(n)],
-        45: sued?["DV",H(n)]:["V","VOR",H(n)],
+        40: south?["M10","NACH","HALB",H(n)]:["M20","VOR",H(n)],
+        45: south?["DV",H(n)]:["V","VOR",H(n)],
         50:["M10","VOR",H(n)], 55:["M5","VOR",H(n)] }[m5] };
     }
   }
   return { words:(intro?p.intro:[]).concat(p.words), dots:m%5 };
 }
 
-/* Wörter als lesbarer Text (für Anzeige und Prüfung) */
+/* Words as readable text (for display and checks) */
 function spell(lang, words){
   const f = FACES[LANGS[lang]];
   return words.map(w => {

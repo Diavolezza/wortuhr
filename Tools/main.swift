@@ -1,18 +1,18 @@
 import AppKit
 
-// Erzeugt thumbnail.png und thumbnail@2x.png für die Systemeinstellungen:
-// die Wortuhr mit den Voreinstellungen, Uhrzeit 11:55 („ES IST FÜNF VOR ZWÖLF“).
-// Aufruf: makethumb <Zielordner>
+// Creates thumbnail.png and thumbnail@2x.png for System Settings:
+// the word clock with default settings at 11:55 ("ES IST FÜNF VOR ZWÖLF").
+// Usage: makethumb <output folder>
 
 _ = NSApplication.shared
 let outDir = CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : "."
-// Größe wie bei den Apple-Bildschirmschonern: 90×58 bzw. 180×116 Pixel
+// Same size as Apple's screen savers: 90×58 and 180×116 pixels
 let size = NSSize(width: 90, height: 58)
 
 for (scale, name) in [(1, "thumbnail.png"), (2, "thumbnail@2x.png")] {
     guard let view = WortuhrView(frame: NSRect(origin: .zero, size: size), isPreview: true),
           let layer = view.layer else {
-        FileHandle.standardError.write("Ansicht konnte nicht erzeugt werden\n".data(using: .utf8)!)
+        FileHandle.standardError.write("Could not create the view\n".data(using: .utf8)!)
         exit(1)
     }
     view.fixedTime = (11, 55)

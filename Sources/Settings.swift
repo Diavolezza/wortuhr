@@ -1,29 +1,29 @@
 import AppKit
 import ScreenSaver
 
-/// Alle Einstellungen der Wortuhr. Voreinstellungen = abgestimmte Werte aus dem Prototyp.
+/// All Wortuhr settings. Defaults = values tuned in the prototype.
 struct Settings {
-    var language: Language = .hoch
-    var intro = true              // „ES IST“ / „IT IS“ immer anzeigen
+    var language: Language = .de
+    var intro = true              // always show "ES IST" / "IT IS"
     var front = NSColor(hex: "#0e0f11")
     var lit = NSColor(hex: "#fff1d6")
-    var dim: Double = 14          // Helligkeit unbeleuchteter Buchstaben in %
-    var glow: Double = 35         // Leuchten in %
-    var edge: Double = 40         // Betonung der Plattenkante in %
+    var dim: Double = 14          // brightness of unlit letters in %
+    var glow: Double = 35         // glow in %
+    var edge: Double = 40         // emphasis of the plate edge in %
     var font = "Avenir Next"
     var weight = 400
     var letterScale: Double = 100 // %
-    var flat = false              // true = vollflächig, false = Frontplatte
-    var size: Double = 92         // % der kürzeren Bildschirmseite
-    var fade: Double = 0.8        // Sekunden
+    var flat = false              // true = full screen, false = front plate
+    var size: Double = 92         // % of the shorter screen side
+    var fade: Double = 0.8        // seconds
     var dots = true
     var drift = false
 
     static let moduleName = "de.wanner-it.wortuhr"
 
-    /// Schriften (Schlüssel; „System“ = SF Pro, Anzeigename in Texts.systemFont)
+    /// Typefaces (keys; "System" = SF Pro, display name in Texts.systemFont)
     static let fonts = ["Helvetica Neue", "System", "Avenir Next", "Futura", "DIN Alternate", "Gill Sans", "SF Mono"]
-    /// Farben (Hex; Namen je Sprache in Texts.frontNames / Texts.litNames)
+    /// Colours (hex; names per language in Texts.frontNames / Texts.litNames)
     static let frontPresets = ["#0e0f11", "#2a2c30", "#101b2c", "#14261e", "#5e231d", "#e9e7e1"]
     static let litPresets = ["#fff1d6", "#f3f7ff", "#ffb24a", "#9ad7ff", "#9ff0c8", "#1d1f22"]
     static let weights: [(String, Int)] = [("Light", 300), ("Regular", 400), ("Medium", 500), ("Bold", 700)]
@@ -37,10 +37,9 @@ struct Settings {
         guard let d = store else { return s }
         func dbl(_ k: String, _ def: Double) -> Double { d.object(forKey: k) != nil ? d.double(forKey: k) : def }
         func bool(_ k: String, _ def: Bool) -> Bool { d.object(forKey: k) != nil ? d.bool(forKey: k) : def }
-        // „dialect“: Schlüssel aus der Zeit, als es nur Deutsch gab
-        if let v = d.string(forKey: "language") ?? d.string(forKey: "dialect"),
+        if let v = d.string(forKey: "language"),
            let x = Language(rawValue: v) { s.language = x }
-        s.intro = bool("esIst", s.intro)
+        s.intro = bool("intro", s.intro)
         if let v = d.string(forKey: "front") { s.front = NSColor(hex: v) }
         if let v = d.string(forKey: "lit") { s.lit = NSColor(hex: v) }
         s.dim = dbl("dim", s.dim)
@@ -60,7 +59,7 @@ struct Settings {
     func save() {
         guard let d = Settings.store else { return }
         d.set(language.rawValue, forKey: "language")
-        d.set(intro, forKey: "esIst")
+        d.set(intro, forKey: "intro")
         d.set(front.hexString, forKey: "front")
         d.set(lit.hexString, forKey: "lit")
         d.set(dim, forKey: "dim")
@@ -77,7 +76,7 @@ struct Settings {
         d.synchronize()
     }
 
-    /// Farbe der unbeleuchteten Buchstaben: dim % Leuchtfarbe, Rest Frontfarbe.
+    /// Colour of unlit letters: dim % light colour, the rest front colour.
     var offColor: NSColor { NSColor.mix(lit, front, CGFloat(dim / 100)) }
 
     func makeFont(size pt: CGFloat) -> NSFont {
@@ -92,7 +91,7 @@ struct Settings {
         case "System":  return NSFont.systemFont(ofSize: pt, weight: w)
         case "SF Mono": return NSFont.monospacedSystemFont(ofSize: pt, weight: w)
         default:
-            // NSFontManager-Gewichte: 3 light, 5 regular, 6/7 medium, 9 bold
+            // NSFontManager weights: 3 light, 5 regular, 6/7 medium, 9 bold
             let fmWeight = [300: 3, 400: 5, 500: 7, 700: 9][weight] ?? 5
             let traits: NSFontTraitMask = weight >= 700 ? .boldFontMask : []
             if let f = NSFontManager.shared.font(withFamily: font, traits: traits, weight: fmWeight, size: pt) {
@@ -122,7 +121,7 @@ extension NSColor {
         return String(format: "#%02x%02x%02x", b(c.redComponent), b(c.greenComponent), b(c.blueComponent))
     }
 
-    /// Mischung wie CSS color-mix(in srgb, a t, b).
+    /// Mix like CSS color-mix(in srgb, a t, b).
     static func mix(_ a: NSColor, _ b: NSColor, _ t: CGFloat) -> NSColor {
         let x = a.srgb, y = b.srgb
         return NSColor(srgbRed: x.redComponent * t + y.redComponent * (1 - t),

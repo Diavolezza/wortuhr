@@ -1,93 +1,94 @@
-# Wortuhr – Bildschirmschoner für macOS
+# Wortuhr – word clock screen saver for macOS
 
-Wortuhr im 11×10-Raster mit vier Minutenpunkten. Zeitansage in sieben Varianten:
+**English** · [Deutsch](README.de.md)
 
-| Sprache | Beispiel (3:15 · 3:45) |
+A word clock on an 11×10 letter grid with four minute dots. The time is spelled out in seven variants:
+
+| Language | Example (3:15 · 3:45) |
 |---|---|
-| Hochdeutsch | viertel nach drei · viertel vor vier |
-| Süddeutsch | viertel vier · dreiviertel vier |
-| Englisch (britisch) | a quarter past three · a quarter to four |
-| Englisch (amerikanisch) | a quarter after three · a quarter to four |
-| Französisch | trois heures et quart · quatre heures moins le quart (12 Uhr: midi, 0 Uhr: minuit) |
-| Italienisch | le tre e un quarto · le quattro meno un quarto (1 Uhr: è l’una) |
-| Spanisch | las tres y cuarto · las cuatro menos cuarto (1 Uhr: es la una) |
+| German (standard) | viertel nach drei · viertel vor vier |
+| German (southern) | viertel vier · dreiviertel vier |
+| English (British) | a quarter past three · a quarter to four |
+| English (American) | a quarter after three · a quarter to four |
+| French | trois heures et quart · quatre heures moins le quart (12:00 midi, 0:00 minuit) |
+| Italian | le tre e un quarto · le quattro meno un quarto (1:00 è l’una) |
+| Spanish | las tres y cuarto · las cuatro menos cuarto (1:00 es la una) |
 
-Farben, Schrift, Größe und Einbrennschutz im Optionen-Dialog einstellbar; der Dialog
-spricht die gewählte Sprache.
+Colours, typeface, size and burn-in protection can be set in the options dialog; the
+dialog speaks the selected language.
 
-![Wortuhr um 11:55 – „ES IST FÜNF VOR ZWÖLF“](docs/wortuhr.png)
+![Wortuhr at 11:55 – “ES IST FÜNF VOR ZWÖLF”](docs/wortuhr.png)
 
-Getestet unter macOS 27 auf Apple Silicon; gebaut wird für Apple Silicon und Intel (ab macOS 13).
+Tested on macOS 27 on Apple Silicon; built for Apple Silicon and Intel (macOS 13 or later).
 
-## Bauen und installieren
+## Build and install
 
     ./build.sh --system
 
-Braucht Xcode (oder die Command Line Tools). Das Skript baut für Apple Silicon und Intel,
-erzeugt das Vorschaubild, signiert ad hoc und installiert nach `/Library/Screen Savers`
-(fragt nach dem Administrator-Passwort). Danach in den Systemeinstellungen die Kachel
-„Wortuhr“ einmal anklicken.
+Requires Xcode (or the Command Line Tools). The script builds for Apple Silicon and Intel,
+creates the thumbnail, signs ad hoc and installs to `/Library/Screen Savers`
+(asks for the administrator password). Then click the “Wortuhr” tile once in System Settings.
 
-Nur aus `/Library/Screen Savers` zeigen die Systemeinstellungen das eigene Vorschaubild;
-`./build.sh` ohne Option installiert nach `~/Library/Screen Savers` (dann mit Standard-Strudel).
+System Settings shows the custom thumbnail only for savers in `/Library/Screen Savers`;
+`./build.sh` without options installs to `~/Library/Screen Savers` (with the default swirl).
 
-Mit `--arm-only` wird nur für Apple Silicon gebaut – schneller, reicht für den eigenen Mac
-(z. B. `./build.sh --system --arm-only`). Zum Weitergeben ohne die Option bauen.
+`--arm-only` builds for Apple Silicon only – faster, and enough for your own Mac
+(e.g. `./build.sh --system --arm-only`). Build without it to share the saver.
 
-## Wenn etwas nicht geht
+## When something goes wrong
 
     ./diag.sh
 
-schreibt Systemprotokoll (letzte 20 Minuten) und Absturzberichte nach `diag.log`.
+writes the system log (last 20 minutes) and crash reports to `diag.log`.
 
-## Eigenheiten von macOS 26+, die der Code abfängt
+## macOS 26+ quirks the code works around
 
-- Der Bildschirmschoner läuft hinter dem Anmeldefenster weiter → bei Eingabe ausblenden.
-- Das Anmeldefenster verschwindet nach 30 s ohne Eingabe wieder → dann Uhr wieder einblenden.
-- Die Vorschau in den Systemeinstellungen meldet `isPreview = false` → Eingabeerkennung nur beim echten
-  Bildschirmschoner: nach `didstart` oder wenn der Bildschirm gesperrt ist (`CGSSessionScreenIsLocked`).
-  Die Größe taugt nicht als Merkmal – die Vorschau ist intern ebenfalls bildschirmgroß.
-- `didstart` ist unzuverlässig: kommt manchmal gar nicht, manchmal bevor macOS eine zweite Ansicht anlegt
-  → Zustand gilt prozessweit, zusätzlich Prüfung auf gesperrten Bildschirm.
-- Hinter dem Anmeldefenster bleiben `animateOneFrame` bzw. die Animation aus → eigener Takt (`DispatchSourceTimer`), `stopAnimation` hält die Uhr nicht an.
-- `legacyScreenSaver` beendet sich nicht → `exit(0)` nach `willstop`.
-- NSColorPanel ist im Bildschirmschoner-Prozess unzuverlässig → Farben als Auswahllisten.
+- The screen saver keeps running behind the login window → fade out on input.
+- The login window disappears again after 30 s without input → then fade the clock back in.
+- The preview in System Settings reports `isPreview = false` → input detection only for the real
+  screen saver: after `didstart` or when the screen is locked (`CGSSessionScreenIsLocked`).
+  The size is no indicator – the preview is screen-sized internally as well.
+- `didstart` is unreliable: sometimes it never arrives, sometimes it arrives before macOS creates
+  a second view → the state is process-wide, plus a check for a locked screen.
+- Behind the login window `animateOneFrame` (or the animation) stops → own timer
+  (`DispatchSourceTimer`); `stopAnimation` does not stop the clock.
+- `legacyScreenSaver` does not exit → `exit(0)` after `willstop`.
+- NSColorPanel is unreliable in the screen saver process → colours as pop-up lists.
 
-## Bekanntes Problem: „Optionen …“ öffnet nur einmal
+## Known issue: “Options…” opens only once
 
-In den Systemeinstellungen öffnet „Optionen …“ den Dialog pro Sitzung nur einmal. Wird die
-Kachel erneut angeklickt, fragt macOS den Dialog zwar bei der Wortuhr ab, blendet ihn aber
-nicht ein. Abhilfe: Systemeinstellungen ganz beenden und neu öffnen.
+In System Settings, “Options…” opens the dialog only once per session. After the tile is
+clicked again, macOS still requests the dialog from Wortuhr but never shows it.
+Workaround: quit System Settings completely and open it again.
 
-Der Fehler liegt bei macOS 26 und betrifft auch andere Bildschirmschoner von Drittanbietern
-(siehe [cowsaver#1](https://github.com/matthewsundling/cowsaver/issues/1)); Apples eigene
-Bildschirmschoner laufen anders und sind nicht betroffen. Versuche, das Blatt von der Wortuhr
-aus zu erzwingen, haben nicht funktioniert oder es verschlimmert.
+This is a macOS 26 bug that also affects other third-party screen savers
+(see [cowsaver#1](https://github.com/matthewsundling/cowsaver/issues/1)); Apple’s own
+screen savers work differently and are not affected. Attempts to force the sheet from
+within Wortuhr did not work or made things worse.
 
-## Prototyp
+## Prototype
 
-`prototype/index.html` im Browser öffnen: dieselbe Uhr zum Ausprobieren von Zeitansage,
-Farben, Schrift und Größe, mit Zeitraffer. Die Einstellungen lassen sich als JSON kopieren.
+Open `prototype/index.html` in a browser: the same clock for trying out languages, colours,
+typeface and size, with a fast-forward mode. The settings can be copied as JSON.
 
-Raster und Zeitlogik stehen in `prototype/faces.js` und identisch in `Sources/ClockFace.swift`.
-Nach jeder Änderung daran:
+Grids and time logic live in `prototype/faces.js` and, identically, in `Sources/ClockFace.swift`.
+After every change to them run
 
     node prototype/check.mjs
 
-prüft alle Zeitansagen (jedes Wort im Raster, Lesereihenfolge, keine Überlappung,
-gleichzeitig leuchtende Wörter nicht aneinandergeklebt) und
-vergleicht Prototyp und Swift Zeile für Zeile.
+It checks every time phrase (each word is in the grid, reading order, no overlap, words lit
+at the same time don’t touch) and compares prototype and Swift line by line.
 
-## Aufbau
+## Structure
 
-- `Sources/ClockFace.swift` – Buchstabenraster und Zeitlogik je Sprache
-- `Sources/Settings.swift` – Einstellungen, Voreinstellungen, Speichern (ScreenSaverDefaults)
-- `Sources/WortuhrView.swift` – Darstellung mit Core Animation (ein Glyphen-Layer pro Buchstabe)
-- `Sources/ConfigController.swift` – Optionen-Dialog in allen Sprachen
-- `Sources/Log.swift` – Diagnose-Ausgaben (`./diag.sh` sammelt sie)
-- `Tools/main.swift` – erzeugt das Vorschaubild für die Systemeinstellungen (11:55)
-- `Tools/Phrases/main.swift` – gibt alle Zeitansagen aus Swift aus (für `prototype/check.mjs`)
+- `Sources/ClockFace.swift` – letter grids and time logic per language
+- `Sources/Settings.swift` – settings, defaults, persistence (ScreenSaverDefaults)
+- `Sources/WortuhrView.swift` – rendering with Core Animation (one glyph layer per letter)
+- `Sources/ConfigController.swift` – options dialog in all languages
+- `Sources/Log.swift` – diagnostic messages (collected by `./diag.sh`)
+- `Tools/main.swift` – creates the thumbnail for System Settings (11:55)
+- `Tools/Phrases/main.swift` – prints all time phrases from Swift (for `prototype/check.mjs`)
 
-## Lizenz
+## Licence
 
-MIT – siehe [LICENSE](LICENSE).
+MIT – see [LICENSE](LICENSE).

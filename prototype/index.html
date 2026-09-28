@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Wortuhr Prototyp</title>
+<title>Wortuhr Prototype</title>
 <style>
 :root{
   color-scheme: dark;
   --page:#0b0c0e; --panel:#15171a; --panel2:#1c1f23; --line:#2a2e33;
   --ink:#ebe7df; --muted:#9b978e; --accent:#e6b56a; --focus:#f2cf93;
-  /* Uhr – wird per JS gesetzt */
+  /* clock – set via JS */
   --front:#141517; --lit:#fff3dc; --dim:14%; --glow:0.35; --font:"Helvetica Neue",Helvetica,Arial,sans-serif;
   --weight:400; --lscale:1; --size:.92; --edge:.4; --fade:.8s; --drift:0px; --stagebg:#000;
 }
@@ -19,7 +19,7 @@ body{background:var(--page);color:var(--ink);font:14px/1.45 system-ui,-apple-sys
 .app.nopanel{grid-template-columns:1fr}
 .app.nopanel .panel{display:none}
 
-/* ---------- Bühne ---------- */
+/* ---------- Stage ---------- */
 .stage{position:relative;background:var(--stagebg);container-type:size;overflow:hidden;min-height:0;transition:background .4s}
 .clock{position:absolute;left:50%;top:50%;
   width:calc(min(100cqw,100cqh) * var(--size));aspect-ratio:1;
@@ -111,14 +111,14 @@ kbd{font:11px ui-monospace,Menlo,monospace;border:1px solid var(--line);border-b
 
 <div class="app" id="app">
   <div class="stage" id="stage">
-    <div class="clock" id="clock" role="img" aria-label="Wortuhr">
+    <div class="clock" id="clock" role="img" aria-label="Word clock">
       <div class="grid" id="grid"></div>
       <span class="dot" data-i="1"></span><span class="dot" data-i="2"></span>
       <span class="dot" data-i="3"></span><span class="dot" data-i="4"></span>
     </div>
     <div class="stagebar">
-      <button class="btn" id="bPanel" title="Taste H">Einstellungen</button>
-      <button class="btn" id="bFull" title="Taste F">Vollbild</button>
+      <button class="btn" id="bPanel" title="Key H">Settings</button>
+      <button class="btn" id="bFull" title="Key F">Full screen</button>
     </div>
   </div>
 
@@ -129,33 +129,33 @@ kbd{font:11px ui-monospace,Menlo,monospace;border:1px solid var(--line);border-b
     </div>
 
     <section>
-      <h2>Zeitansage</h2>
-      <div class="row"><select id="lang" aria-label="Sprache">
-        <option value="hoch">🇩🇪 Deutsch – Hochdeutsch</option><option value="sued">🇩🇪 Deutsch – Süddeutsch</option>
+      <h2>Time</h2>
+      <div class="row"><select id="language" aria-label="Language">
+        <option value="de">🇩🇪 Deutsch – Hochdeutsch</option><option value="deSouth">🇩🇪 Deutsch – Süddeutsch</option>
         <option value="en">🇬🇧 English – UK</option><option value="us">🇺🇸 English – US</option>
         <option value="es">🇪🇸 Español</option><option value="fr">🇫🇷 Français</option><option value="it">🇮🇹 Italiano</option>
       </select>
-      <p class="hint" id="langHint"></p></div>
-      <label class="check"><input type="checkbox" id="intro"> <span id="introLabel"></span> immer anzeigen</label>
+      <p class="hint" id="languageHint"></p></div>
+      <label class="check"><input type="checkbox" id="intro"> Always show <span id="introLabel"></span></label>
     </section>
 
     <section>
-      <h2>Farben</h2>
+      <h2>Colours</h2>
       <div class="row"><span class="lab">Front</span><div class="swatches" id="swFront"></div></div>
-      <div class="row"><span class="lab">Leuchtfarbe</span><div class="swatches" id="swLit"></div></div>
-      <div class="row"><span class="lab"><span>Unbeleuchtete Buchstaben</span><output id="oDim"></output></span>
+      <div class="row"><span class="lab">Light colour</span><div class="swatches" id="swLit"></div></div>
+      <div class="row"><span class="lab"><span>Unlit letters</span><output id="oDim"></output></span>
         <input type="range" id="dim" min="0" max="40" step="1"></div>
-      <div class="row"><span class="lab"><span>Leuchten</span><output id="oGlow"></output></span>
+      <div class="row"><span class="lab"><span>Glow</span><output id="oGlow"></output></span>
         <input type="range" id="glow" min="0" max="100" step="5"></div>
-      <div class="row"><span class="lab"><span>Rand</span><output id="oEdge"></output></span>
+      <div class="row"><span class="lab"><span>Edge</span><output id="oEdge"></output></span>
         <input type="range" id="edge" min="0" max="100" step="5"></div>
     </section>
 
     <section>
-      <h2>Schrift</h2>
-      <div class="row"><select id="font" aria-label="Schriftart">
+      <h2>Typeface</h2>
+      <div class="row"><select id="font" aria-label="Typeface">
         <option value='"Helvetica Neue",Helvetica,Arial,sans-serif'>Helvetica Neue</option>
-        <option value='system-ui,-apple-system,sans-serif'>SF Pro (Systemschrift)</option>
+        <option value='system-ui,-apple-system,sans-serif'>SF Pro (system font)</option>
         <option value='"Avenir Next",Avenir,sans-serif'>Avenir Next</option>
         <option value='Futura,"Century Gothic",sans-serif'>Futura</option>
         <option value='"DIN Alternate","DIN Condensed",sans-serif'>DIN Alternate</option>
@@ -165,65 +165,63 @@ kbd{font:11px ui-monospace,Menlo,monospace;border:1px solid var(--line);border-b
       <div class="row"><div class="seg" data-key="weight">
         <button data-v="300">Light</button><button data-v="400">Regular</button><button data-v="500">Medium</button><button data-v="700">Bold</button>
       </div></div>
-      <div class="row"><span class="lab"><span>Buchstabengröße</span><output id="oLscale"></output></span>
+      <div class="row"><span class="lab"><span>Letter size</span><output id="oLscale"></output></span>
         <input type="range" id="lscale" min="70" max="140" step="5"></div>
     </section>
 
     <section>
-      <h2>Darstellung</h2>
+      <h2>Appearance</h2>
       <div class="row"><div class="seg" data-key="look">
-        <button data-v="plate">Frontplatte</button><button data-v="flat">Vollflächig</button>
+        <button data-v="plate">Front plate</button><button data-v="flat">Full screen</button>
       </div></div>
-      <div class="row"><span class="lab"><span>Größe auf dem Bildschirm</span><output id="oSize"></output></span>
+      <div class="row"><span class="lab"><span>Size on screen</span><output id="oSize"></output></span>
         <input type="range" id="size" min="40" max="100" step="2"></div>
-      <div class="row"><span class="lab"><span>Überblendung</span><output id="oFade"></output></span>
+      <div class="row"><span class="lab"><span>Cross-fade</span><output id="oFade"></output></span>
         <input type="range" id="fade" min="0" max="3" step="0.1"></div>
-      <div class="row"><label class="check"><input type="checkbox" id="dots"> Minutenpunkte</label></div>
-      <label class="check"><input type="checkbox" id="drift"> Langsam wandern (Einbrennschutz)</label>
+      <div class="row"><label class="check"><input type="checkbox" id="dots"> Minute dots</label></div>
+      <label class="check"><input type="checkbox" id="drift"> Drift slowly (burn-in protection)</label>
     </section>
 
     <section>
-      <h2>Zeit</h2>
+      <h2>Clock time</h2>
       <div class="row"><div class="seg" data-key="tmode">
-        <button data-v="live">Live</button><button data-v="manual">Manuell</button><button data-v="fast">Zeitraffer</button>
+        <button data-v="live">Live</button><button data-v="manual">Manual</button><button data-v="fast">Fast-forward</button>
       </div></div>
-      <div class="row" id="manualRow" hidden><span class="lab"><span>Uhrzeit</span><output id="oMan"></output></span>
+      <div class="row" id="manualRow" hidden><span class="lab"><span>Time of day</span><output id="oMan"></output></span>
         <input type="range" id="man" min="0" max="1439" step="1"></div>
-      <p class="hint">Zeitraffer: eine Minute pro Sekunde, zum Durchsehen aller Stellungen.</p>
+      <p class="hint">Fast-forward: one minute per second, to review all positions.</p>
     </section>
 
     <section>
-      <h2>Einstellungen übernehmen</h2>
-      <p class="hint" style="margin-bottom:8px">Diese Werte bitte an Claude schicken. Sie werden die Voreinstellung im Bildschirmschoner.</p>
-      <textarea id="json" readonly aria-label="Einstellungen als JSON"></textarea>
+      <h2>Export settings</h2>
+      <p class="hint" style="margin-bottom:8px">Send these values to Claude; they become the defaults of the screen saver.</p>
+      <textarea id="json" readonly aria-label="Settings as JSON"></textarea>
       <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
-        <button class="btn" id="bCopy">Kopieren</button><button class="btn" id="bReset">Zurücksetzen</button>
+        <button class="btn" id="bCopy">Copy</button><button class="btn" id="bReset">Reset</button>
         <span class="hint" id="copyMsg"></span>
       </div>
     </section>
-    <p class="hint"><kbd>H</kbd> Einstellungen ein/aus · <kbd>F</kbd> Vollbild</p>
+    <p class="hint"><kbd>H</kbd> settings on/off · <kbd>F</kbd> full screen</p>
   </aside>
 </div>
 
 <script src="faces.js"></script>
 <script>
-/* ---------- Einstellungen ---------- */
-const FRONTS=[["Tiefschwarz","#0e0f11"],["Graphit","#2a2c30"],["Nachtblau","#101b2c"],["Tannengrün","#14261e"],["Ziegelrot","#5e231d"],["Kalkweiß","#e9e7e1"]];
-const LITS=[["Warmweiß","#fff1d6"],["Kaltweiß","#f3f7ff"],["Bernstein","#ffb24a"],["Eisblau","#9ad7ff"],["Mint","#9ff0c8"],["Anthrazit","#1d1f22"]];
-const DEF={lang:"hoch",intro:true,front:"#0e0f11",lit:"#fff1d6",dim:14,glow:35,edge:40,
+/* ---------- Settings ---------- */
+const FRONTS=[["Deep black","#0e0f11"],["Graphite","#2a2c30"],["Midnight blue","#101b2c"],["Forest green","#14261e"],["Brick red","#5e231d"],["Chalk white","#e9e7e1"]];
+const LITS=[["Warm white","#fff1d6"],["Cool white","#f3f7ff"],["Amber","#ffb24a"],["Ice blue","#9ad7ff"],["Mint","#9ff0c8"],["Anthracite","#1d1f22"]];
+const DEF={language:"de",intro:true,front:"#0e0f11",lit:"#fff1d6",dim:14,glow:35,edge:40,
   font:'"Avenir Next",Avenir,sans-serif',weight:"400",lscale:100,look:"plate",size:92,fade:0.8,dots:true,drift:false,tmode:"live",man:945};
 let S={...DEF};
-try{const s=JSON.parse(localStorage.getItem("wortuhr2")||"null");
-  if(s){if(s.dialect&&!s.lang)s.lang=s.dialect;if("esIst" in s&&!("intro" in s))s.intro=s.esIst;
-    delete s.dialect;delete s.esIst;S={...DEF,...s}}}catch(e){}
-const save=()=>{try{localStorage.setItem("wortuhr2",JSON.stringify(S))}catch(e){}};
+try{const s=JSON.parse(localStorage.getItem("wortuhr-prototype")||"null");if(s)S={...DEF,...s}}catch(e){}
+const save=()=>{try{localStorage.setItem("wortuhr-prototype",JSON.stringify(S))}catch(e){}};
 
 const $=id=>document.getElementById(id), root=document.documentElement;
 const gridEl=$("grid");
 let cells=[], marks=[], face=null;
-/* Raster der gewählten Sprache aufbauen (nur wenn es sich ändert) */
+/* Build the grid of the selected language (only when it changes) */
 function buildGrid(){
-  const f=FACES[LANGS[S.lang]];
+  const f=FACES[LANGS[S.language]];
   if(f===face)return;face=f;
   gridEl.innerHTML="";cells=[];marks=[];
   f.grid.forEach((row,r)=>{cells[r]=[];[...row.normalize("NFC")].forEach((ch,c)=>{const s=document.createElement("span");s.className="cell";s.textContent=ch;gridEl.appendChild(s);cells[r][c]=s;});});
@@ -236,7 +234,7 @@ function swatches(el,list,key){
   el.innerHTML="";
   list.forEach(([name,hex])=>{const b=document.createElement("button");b.className="sw";b.style.background=hex;
     b.title=name;b.setAttribute("aria-label",name);b.dataset.v=hex;b.onclick=()=>{S[key]=hex;apply()};el.appendChild(b);});
-  const inp=document.createElement("input");inp.type="color";inp.id="c_"+key;inp.title="Eigene Farbe";inp.setAttribute("aria-label","Eigene Farbe");
+  const inp=document.createElement("input");inp.type="color";inp.id="c_"+key;inp.title="Custom colour";inp.setAttribute("aria-label","Custom colour");
   inp.oninput=()=>{S[key]=inp.value;apply()};el.appendChild(inp);
 }
 swatches($("swFront"),FRONTS,"front");swatches($("swLit"),LITS,"lit");
@@ -245,7 +243,7 @@ document.querySelectorAll(".seg").forEach(seg=>seg.querySelectorAll("button").fo
 ["dim","glow","edge","lscale","size","fade","man"].forEach(k=>$(k).oninput=e=>{S[k]=+e.target.value;apply()});
 ["intro","dots","drift"].forEach(k=>$(k).onchange=e=>{S[k]=e.target.checked;apply()});
 $("font").onchange=e=>{S.font=e.target.value;apply()};
-$("lang").onchange=e=>{S.lang=e.target.value;apply()};
+$("language").onchange=e=>{S.language=e.target.value;apply()};
 
 const fmt=min=>String(Math.floor(min/60)).padStart(2,"0")+":"+String(min%60).padStart(2,"0");
 function apply(){
@@ -264,27 +262,27 @@ function apply(){
   $("c_front").value=S.front;$("c_lit").value=S.lit;
   ["dim","glow","edge","lscale","size","fade","man"].forEach(k=>$(k).value=S[k]);
   ["intro","dots","drift"].forEach(k=>$(k).checked=S[k]);
-  $("lang").value=S.lang;
-  $("introLabel").textContent={hoch:"„ES IST“",sued:"„ES IST“",en:"„IT IS“",us:"„IT IS“",fr:"„IL EST“",it:"„SONO“/„È“",es:"„SON“/„ES“"}[S.lang];
+  $("language").value=S.language;
+  $("introLabel").textContent={de:"“ES IST”",deSouth:"“ES IST”",en:"“IT IS”",us:"“IT IS”",fr:"“IL EST”",it:"“SONO”/“È”",es:"“SON”/“ES”"}[S.language];
   $("font").value=S.font;
   $("oDim").textContent=S.dim+" %";$("oGlow").textContent=S.glow+" %";$("oEdge").textContent=S.edge+" %";$("oLscale").textContent=S.lscale+" %";
-  $("oSize").textContent=S.size+" %";$("oFade").textContent=S.fade.toFixed(1).replace(".",",")+" s";$("oMan").textContent=fmt(S.man);
+  $("oSize").textContent=S.size+" %";$("oFade").textContent=S.fade.toFixed(1)+" s";$("oMan").textContent=fmt(S.man);
   $("manualRow").hidden=S.tmode!=="manual";
-  $("langHint").textContent={
-    hoch:"3:15 viertel nach drei · 3:20 zwanzig nach drei · 3:45 viertel vor vier",
-    sued:"3:15 viertel vier · 3:20 zehn vor halb vier · 3:45 dreiviertel vier",
+  $("languageHint").textContent={
+    de:"3:15 viertel nach drei · 3:20 zwanzig nach drei · 3:45 viertel vor vier",
+    deSouth:"3:15 viertel vier · 3:20 zehn vor halb vier · 3:45 dreiviertel vier",
     en:"3:15 a quarter past three · 3:35 twenty five to four · 3:00 three o’clock",
     us:"3:15 a quarter after three · 3:30 half past three · 3:35 twenty five to four",
     fr:"3:15 trois heures et quart · 3:45 quatre heures moins le quart · 12:00 midi",
     it:"3:15 le tre e un quarto · 3:45 le quattro meno un quarto · 1:00 è l’una",
-    es:"3:15 las tres y cuarto · 3:45 las cuatro menos cuarto · 1:00 es la una"}[S.lang];
+    es:"3:15 las tres y cuarto · 3:45 las cuatro menos cuarto · 1:00 es la una"}[S.language];
   buildGrid();
   const {tmode,man,...out}=S;
   $("json").value=JSON.stringify(out,null,1);
   save();render(true);
 }
 
-/* ---------- Anzeige ---------- */
+/* ---------- Display ---------- */
 let fastMin=null,lastKey="";
 function currentMinutes(){
   if(S.tmode==="manual")return S.man;
@@ -293,29 +291,29 @@ function currentMinutes(){
 }
 function render(force){
   const t=currentMinutes(),h=Math.floor(t/60),m=t%60;
-  const key=t+S.lang+S.intro;
+  const key=t+S.language+S.intro;
   if(!force&&key===lastKey)return;lastKey=key;
-  const p=phrase(h,m,S.lang,S.intro),on=new Set(),W=face.words;
+  const p=phrase(h,m,S.language,S.intro),on=new Set(),W=face.words;
   p.words.forEach(w=>{const[r,c,l]=W[w];for(let i=0;i<l;i++)on.add(r*11+c+i)});
   cells.forEach((row,r)=>row.forEach((el,c)=>el.classList.toggle("on",on.has(r*11+c))));
   marks.forEach(mk=>mk.el.classList.toggle("on",p.words.includes(mk.word)));
   dotEls.forEach((d,i)=>d.classList.toggle("on",i<p.dots));
-  const words=spell(S.lang,p.words);
+  const words=spell(S.language,p.words);
   $("rTime").textContent=fmt(t);
-  $("rPhrase").textContent=words+(p.dots?"  + "+p.dots+(p.dots===1?" Punkt":" Punkte"):"");
+  $("rPhrase").textContent=words+(p.dots?"  + "+p.dots+(p.dots===1?" dot":" dots"):"");
   $("clock").setAttribute("aria-label",fmt(t)+" – "+words.toLowerCase());
 }
 setInterval(()=>{if(S.tmode==="fast")fastMin=(currentMinutes()+1)%1440;render(false)},1000);
 
-/* ---------- Bedienung ---------- */
+/* ---------- Controls ---------- */
 function togglePanel(){$("app").classList.toggle("nopanel")}
 function full(){const st=$("stage");if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});else if(st.requestFullscreen)st.requestFullscreen().catch(()=>{});}
 $("bPanel").onclick=togglePanel;$("bFull").onclick=full;
 document.addEventListener("keydown",e=>{if(e.target.closest("input,select,textarea"))return;
   if(e.key==="h"||e.key==="H")togglePanel();if(e.key==="f"||e.key==="F")full();});
 $("bCopy").onclick=()=>{const ta=$("json");
-  navigator.clipboard.writeText(ta.value).then(()=>$("copyMsg").textContent="Kopiert.")
-  .catch(()=>{ta.focus();ta.select();$("copyMsg").textContent="Markiert – mit ⌘C kopieren."});};
+  navigator.clipboard.writeText(ta.value).then(()=>$("copyMsg").textContent="Copied.")
+  .catch(()=>{ta.focus();ta.select();$("copyMsg").textContent="Selected – press ⌘C to copy."});};
 $("bReset").onclick=()=>{S={...DEF};fastMin=null;apply()};
 apply();
 </script>

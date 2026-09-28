@@ -1,9 +1,9 @@
 import AppKit
 
-/// Optionen-Dialog (Systemeinstellungen → Bildschirmschoner → Optionen …).
-/// Änderungen wirken sofort auf die Vorschau; „Abbrechen“ stellt den alten Stand wieder her.
-/// Farben als Auswahllisten statt NSColorWell: das Farbfenster (NSColorPanel) ist im
-/// abgeschotteten legacyScreenSaver-Prozess unzuverlässig.
+/// Options dialog (System Settings → Screen Saver → Options …).
+/// Changes apply to the preview immediately; "Cancel" restores the previous state.
+/// Colours as pop-up lists instead of NSColorWell: the colour panel (NSColorPanel) is
+/// unreliable in the sandboxed legacyScreenSaver process.
 @MainActor
 final class ConfigController: NSObject {
 
@@ -30,7 +30,7 @@ final class ConfigController: NSObject {
     private let reset = NSButton(title: "", target: nil, action: nil)
     private let cancel = NSButton(title: "", target: nil, action: nil)
     private let ok = NSButton(title: "", target: nil, action: nil)
-    /// Beschriftungen, deren Text von der Sprache abhängt: Feld -> Schlüssel in Texts
+    /// Labels whose text depends on the language: field -> key path in Texts
     private var labels: [(NSTextField, KeyPath<Texts, String>, Bool)] = []
     private var ui: UILanguage = .de
     private var t: Texts { Texts.for(ui) }
@@ -55,10 +55,10 @@ final class ConfigController: NSObject {
         fill()
     }
 
-    // MARK: - Aufbau
+    // MARK: - Layout
 
     private func buildUI() {
-        // Sprachen immer in ihrer eigenen Sprache, mit Flagge
+        // Languages always in their own language, with a flag
         language.addItems(withTitles: Language.allCases.map { $0.menuTitle })
         weight.addItems(withTitles: Settings.weights.map { $0.0 })
 
@@ -147,7 +147,7 @@ final class ConfigController: NSObject {
         applyTexts()
     }
 
-    /// Alle Beschriftungen in der Sprache des Dialogs setzen und die Fenstergröße anpassen.
+    /// Sets all labels in the dialog's language and adjusts the window size.
     private func applyTexts() {
         let t = self.t
         for (l, k, isSection) in labels {
@@ -178,7 +178,7 @@ final class ConfigController: NSObject {
         }
     }
 
-    // MARK: - Werte
+    // MARK: - Values
 
     private func swatch(_ hex: String) -> NSImage {
         let c = NSColor(hex: hex)
@@ -255,7 +255,7 @@ final class ConfigController: NSObject {
         fadeValue.stringValue = t.decimalComma ? f.replacingOccurrences(of: ".", with: ",") : f
     }
 
-    // MARK: - Aktionen
+    // MARK: - Actions
 
     @objc private func changed(_ sender: Any?) {
         read()
@@ -267,7 +267,7 @@ final class ConfigController: NSObject {
         onChange(s)
     }
 
-    /// Standardwerte – die gewählte Sprache bleibt.
+    /// Default values – the chosen language is kept.
     @objc private func resetDefaults() {
         let keep = s.language
         s = Settings()
@@ -298,28 +298,28 @@ final class ConfigController: NSObject {
 }
 
 extension Language {
-    /// Eintrag in der Sprachliste: Flagge und Name in der eigenen Sprache.
+    /// Entry in the language list: flag and name in its own language.
     var menuTitle: String {
         switch self {
-        case .hoch: return "🇩🇪 Deutsch – Hochdeutsch (viertel nach drei)"
-        case .sued: return "🇩🇪 Deutsch – Süddeutsch (viertel vier)"
-        case .en:   return "🇬🇧 English – UK (a quarter past three)"
-        case .us:   return "🇺🇸 English – US (a quarter after three)"
-        case .es:   return "🇪🇸 Español (las tres y cuarto)"
-        case .fr:   return "🇫🇷 Français (trois heures et quart)"
-        case .it:   return "🇮🇹 Italiano (le tre e un quarto)"
+        case .de:      return "🇩🇪 Deutsch – Hochdeutsch (viertel nach drei)"
+        case .deSouth: return "🇩🇪 Deutsch – Süddeutsch (viertel vier)"
+        case .en:      return "🇬🇧 English – UK (a quarter past three)"
+        case .us:      return "🇺🇸 English – US (a quarter after three)"
+        case .es:      return "🇪🇸 Español (las tres y cuarto)"
+        case .fr:      return "🇫🇷 Français (trois heures et quart)"
+        case .it:      return "🇮🇹 Italiano (le tre e un quarto)"
         }
     }
 }
 
-/// Texte des Optionen-Dialogs.
+/// Texts of the options dialog.
 struct Texts {
     let sectionTime, language, intro: String
     let sectionColors, front, lit, dim, glow, edge, custom: String
     let sectionFont, font, weight, letterScale, systemFont: String
     let sectionLook, look, plate, flat, size, fade, dots, drift: String
     let reset, cancel, ok: String
-    /// Farbnamen in der Reihenfolge von Settings.frontPresets / Settings.litPresets
+    /// Colour names in the order of Settings.frontPresets / Settings.litPresets
     let frontNames, litNames: [String]
     let decimalComma: Bool
 
@@ -376,7 +376,7 @@ struct Texts {
         litNames: ["Warm white", "Cool white", "Amber", "Ice blue", "Mint", "Anthracite"],
         decimalComma: false)
 
-    // Französisch: schmales geschütztes Leerzeichen vor dem Doppelpunkt
+    // French: narrow no-break space before the colon
     static let fr = Texts(
         sectionTime: "Heure", language: "Langue\u{202F}:", intro: "Toujours afficher «\u{202F}IL EST\u{202F}»",
         sectionColors: "Couleurs", front: "Façade\u{202F}:", lit: "Couleur lumineuse\u{202F}:",

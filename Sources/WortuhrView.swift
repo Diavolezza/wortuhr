@@ -14,28 +14,28 @@ final class WortuhrView: ScreenSaverView {
     private let rimBottom = CALayer()
     private var cellLayers: [CAShapeLayer] = []
     private var dotLayers: [CAShapeLayer] = []
-    /// Zusatzzeichen zwischen den Feldern (Apostroph in O'CLOCK) mit ihrem Wort.
+    /// Extra glyphs between cells (apostrophe in O'CLOCK) with the word they light up with.
     private var markLayers: [(layer: CAShapeLayer, word: String)] = []
     private var lastKey = ""
     private var startDate = Date()
     private var plateCenter = CGPoint.zero
     private var config: ConfigController?
     private var hiddenForActivity = false
-    /// true erst nach „didstart“: Nur der echte Bildschirmschoner reagiert auf Eingaben.
-    /// (Die Vorschau in den Systemeinstellungen meldet sich unter macOS 26+ fälschlich mit isPreview=false.)
-    /// Gilt für den ganzen Prozess: macOS legt nach „didstart“ oft noch eine weitere Ansicht an,
-    /// die das Signal sonst nie sähe und dann nicht auf Eingaben reagierte.
+    /// True only after "didstart": only the real screen saver reacts to input.
+    /// (On macOS 26+ the preview in System Settings wrongly reports isPreview = false.)
+    /// Process-wide: after "didstart" macOS often creates another view, which would
+    /// otherwise never see the notification and would ignore input.
     private static var saverRunning = false
     private var saverRunning: Bool {
         get { Self.saverRunning }
         set { Self.saverRunning = newValue }
     }
-    /// true nach „willstop“: Der Prozess wird gleich verlassen.
+    /// True after "willstop": the process is about to exit.
     private static var stopping = false
-    /// Echter Bildschirmschoner (nicht die Vorschau): „didstart“ kam, oder der Bildschirm ist
-    /// gesperrt. Auf „didstart“ allein ist kein Verlass – es kommt manchmal vor dem Anlegen
-    /// der Ansicht und manchmal gar nicht. (Die Größe taugt nicht: Die Vorschau in den
-    /// Systemeinstellungen ist intern ebenfalls bildschirmgroß.)
+    /// Real screen saver (not the preview): "didstart" arrived, or the screen is locked.
+    /// "didstart" alone is unreliable – it sometimes arrives before the view is created and
+    /// sometimes not at all. (The size is no indicator: the System Settings preview is
+    /// screen-sized internally as well.)
     private var isRealSaver: Bool {
         guard !isPreview, !Self.stopping else { return false }
         return saverRunning || Self.screenIsLocked
@@ -45,15 +45,15 @@ final class WortuhrView: ScreenSaverView {
         let d = CGSessionCopyCurrentDictionary() as? [String: Any]
         return (d?["CGSSessionScreenIsLocked"] as? Bool) ?? false
     }
-    /// Feste Uhrzeit (Stunde, Minute) – nur für das Vorschaubild.
+    /// Fixed time (hour, minute) – only for the thumbnail.
     var fixedTime: (Int, Int)?
     private var snapshotScale: CGFloat?
     private var builtSize = CGSize.zero
-    /// Eigener Takt statt animateOneFrame: Hinter dem Anmeldefenster ruft macOS
-    /// animateOneFrame nicht mehr auf (bzw. stopAnimation), die Uhr bliebe stehen.
+    /// Own timer instead of animateOneFrame: behind the login window macOS stops calling
+    /// animateOneFrame (or calls stopAnimation), and the clock would freeze.
     private var ticker: DispatchSourceTimer?
 
-    // MARK: - Lebenszyklus
+    // MARK: - Lifecycle
 
     override init?(frame: NSRect, isPreview: Bool) {
         super.init(frame: frame, isPreview: isPreview)
@@ -72,7 +72,7 @@ final class WortuhrView: ScreenSaverView {
 
     private func setUp() {
         animationTimeInterval = 0.25
-        // Layer-hosting: eigene Layer-Hierarchie, kein draw(_:)
+        // Layer hosting: own layer tree, no draw(_:)
         layer = root
         wantsLayer = true
         root.backgroundColor = NSColor.black.cgColor
@@ -89,9 +89,9 @@ final class WortuhrView: ScreenSaverView {
         rebuild()
     }
 
-    /// Der echte Bildschirmschoner läuft: ab jetzt auf Maus und Tastatur reagieren.
+    /// The real screen saver is running: react to mouse and keyboard from now on.
     @objc private func screenSaverDidStart(_ note: Notification) {
-        Log.n("Bildschirmschoner gestartet")
+        Log.n("Screen saver started")
         saverRunning = true
         startDate = Date()
         startTicker()
@@ -101,13 +101,13 @@ final class WortuhrView: ScreenSaverView {
         }
     }
 
-    /// Seit macOS 14 beendet sich legacyScreenSaver nach dem Bildschirmschoner nicht mehr.
-    /// Ohne diesen Ausstieg laufen alte Instanzen im Hintergrund weiter.
+    /// Since macOS 14, legacyScreenSaver no longer exits after the screen saver ends.
+    /// Without this exit, old instances keep running in the background.
     @objc private func screenSaverWillStop(_ note: Notification) {
         saverRunning = false
         if !isPreview { Self.stopping = true }
         guard !isPreview else { return }
-        Log.n("Bildschirmschoner beendet → Prozess wird verlassen")
+        Log.n("Screen saver stopped → exiting process")
         CATransaction.begin()
         CATransaction.setAnimationDuration(0.25)
         plate.opacity = 0
@@ -143,17 +143,17 @@ final class WortuhrView: ScreenSaverView {
 
     override func stopAnimation() {
         super.stopAnimation()
-        // Der echte Bildschirmschoner bekommt stopAnimation auch, wenn nur das
-        // Anmeldefenster erscheint – dann weiterlaufen. Beendet wird über willstop.
+        // The real screen saver also gets stopAnimation when only the login window
+        // appears – keep running then. It ends via willstop.
         if !isRealSaver {
             stopTicker()
         } else {
-            Log.n("stopAnimation während der Bildschirmschoner läuft → Uhr läuft weiter")
+            Log.n("stopAnimation while the screen saver is running → clock keeps running")
         }
     }
 
     override func animateOneFrame() {
-        // Leer: Die Arbeit macht tick().
+        // Empty: tick() does the work.
     }
 
     private func startTicker() {
@@ -171,14 +171,14 @@ final class WortuhrView: ScreenSaverView {
     }
 
     private func tick() {
-        // Manche macOS-Versionen ändern die Größe, ohne setFrameSize aufzurufen.
+        // Some macOS versions change the size without calling setFrameSize.
         if bounds.size != builtSize { rebuild() }
         checkActivity()
         updateTime(animated: true)
         if settings.drift { moveDrift() }
     }
 
-    // MARK: - Aufbau
+    // MARK: - Layout
 
     private var backingScale: CGFloat {
         snapshotScale ?? window?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 2
@@ -198,7 +198,7 @@ final class WortuhrView: ScreenSaverView {
         root.contentsScale = scale
         root.backgroundColor = (s.flat ? s.front : NSColor.black).cgColor
 
-        // Platte
+        // Plate
         let side = floor(min(b.width, b.height) * CGFloat(s.size / 100))
         plateCenter = CGPoint(x: b.midX, y: b.midY)
         plate.bounds = CGRect(x: 0, y: 0, width: side, height: side)
@@ -207,7 +207,7 @@ final class WortuhrView: ScreenSaverView {
         plate.cornerRadius = side * 0.012
         plate.backgroundColor = s.flat ? nil : s.front.cgColor
 
-        // Kante: feiner heller Rand + Lichtkante oben, Schattenkante unten
+        // Edge: fine light border, highlight at the top, shadow at the bottom
         let e = CGFloat(s.edge / 100)
         plate.borderWidth = s.flat ? 0 : 1
         plate.borderColor = NSColor(white: 1, alpha: 0.03 + e * 0.22).cgColor
@@ -219,7 +219,7 @@ final class WortuhrView: ScreenSaverView {
         rimTop.isHidden = s.flat
         rimBottom.isHidden = s.flat
 
-        // Glanz: leichter Verlauf von oben links nach unten rechts
+        // Sheen: subtle gradient from top left to bottom right
         sheen.frame = plate.bounds
         sheen.cornerRadius = plate.cornerRadius
         sheen.masksToBounds = true
@@ -231,7 +231,7 @@ final class WortuhrView: ScreenSaverView {
         sheen.endPoint = CGPoint(x: 0.67, y: 0)
         sheen.isHidden = s.flat
 
-        // Buchstaben
+        // Letters
         cellLayers.forEach { $0.removeFromSuperlayer() }
         cellLayers.removeAll()
         markLayers.forEach { $0.layer.removeFromSuperlayer() }
@@ -245,12 +245,12 @@ final class WortuhrView: ScreenSaverView {
         let cw = gw / CGFloat(ClockFace.cols), ch = gh / CGFloat(ClockFace.rows)
         let glowRadius = font.pointSize * 0.35 * CGFloat(s.glow / 100)
 
-        /// Zeichen mittig über x, Grundlinie wie alle Buchstaben der Zeile r.
+        /// Glyph centred on x, on the same baseline as all letters of row r.
         func glyphLayer(_ letter: String, x: CGFloat, row r: Int) -> CAShapeLayer {
             let l = CAShapeLayer()
             l.contentsScale = scale
             let glyph = glyphPath(letter, font: ctFont)
-            let cy = side - (gy0 + ch * (CGFloat(r) + 0.5))   // Layer-Koordinaten: y nach oben
+            let cy = side - (gy0 + ch * (CGFloat(r) + 0.5))   // layer coordinates: y points up
             let bb = glyph.boundingBoxOfPath
             var t = CGAffineTransform(translationX: x - bb.midX, y: cy - capHeight / 2)
             l.path = glyph.copy(using: &t)
@@ -273,7 +273,7 @@ final class WortuhrView: ScreenSaverView {
             markLayers.append((glyphLayer(mark.glyph, x: x, row: mark.row), mark.word))
         }
 
-        // Minutenpunkte: 1 oben links, 2 oben rechts, 3 unten rechts, 4 unten links
+        // Minute dots: 1 top left, 2 top right, 3 bottom right, 4 bottom left
         dotLayers.forEach { $0.removeFromSuperlayer() }
         dotLayers.removeAll()
         let d = side * 0.0105
@@ -309,7 +309,7 @@ final class WortuhrView: ScreenSaverView {
         return path
     }
 
-    // MARK: - Zeit
+    // MARK: - Time
 
     private func updateTime(animated: Bool) {
         guard !cellLayers.isEmpty else { return }
@@ -351,20 +351,20 @@ final class WortuhrView: ScreenSaverView {
         CATransaction.commit()
     }
 
-    // MARK: - Anmeldebildschirm
+    // MARK: - Login window
 
-    /// Sekunden seit der letzten Eingabe (Maus, Tastatur, Trackpad).
+    /// Seconds since the last input (mouse, keyboard, trackpad).
     private func secondsSinceInput() -> Double {
         let types: [CGEventType] = [.mouseMoved, .keyDown, .leftMouseDown, .rightMouseDown,
                                     .scrollWheel, .flagsChanged, .leftMouseDragged]
         return types.map { CGEventSource.secondsSinceLastEventType(.combinedSessionState, eventType: $0) }.min() ?? .infinity
     }
 
-    /// Seit Sonoma läuft der Bildschirmschoner hinter dem Anmeldefenster weiter, bis man
-    /// sich angemeldet hat. Sobald Maus oder Tastatur benutzt werden, blendet die Uhr aus,
-    /// damit das Anmeldefenster auf ruhigem Schwarz steht. Nach 30 s ohne Eingabe blendet
-    /// macOS das Anmeldefenster wieder aus („standard timeout of: 30“) – dann kommt die Uhr zurück.
-    /// So lange zeigt macOS das Anmeldefenster ohne Eingabe, dann wieder den Bildschirmschoner.
+    /// Since Sonoma the screen saver keeps running behind the login window until the user
+    /// logs in. As soon as mouse or keyboard are used, the clock fades out so the login window
+    /// sits on plain black. After 30 s without input macOS hides the login window again
+    /// ("standard timeout of: 30") – then the clock comes back.
+    /// How long macOS shows the login window without input before returning to the screen saver.
     private static let loginTimeout: Double = 30
 
     private func checkActivity() {
@@ -372,11 +372,11 @@ final class WortuhrView: ScreenSaverView {
         let idle = secondsSinceInput()
         let running = Date().timeIntervalSince(startDate)
         if !hiddenForActivity && running > 2 && idle < 1.0 {
-            Log.n("Eingabe erkannt → Uhr ausblenden")
+            Log.n("Input detected → hiding clock")
             hiddenForActivity = true
             setClockVisible(false)
         } else if hiddenForActivity && idle > Self.loginTimeout {
-            Log.n("\(Int(Self.loginTimeout)) s keine Eingabe → Uhr wieder einblenden")
+            Log.n("No input for \(Int(Self.loginTimeout)) s → showing clock again")
             hiddenForActivity = false
             setClockVisible(true)
         }
@@ -390,16 +390,16 @@ final class WortuhrView: ScreenSaverView {
         CATransaction.commit()
     }
 
-    // MARK: - Vorschaubild
+    // MARK: - Thumbnail
 
-    /// Baut die Uhr für eine Momentaufnahme ohne Fenster auf (siehe Tools/main.swift).
+    /// Builds the clock for a snapshot without a window (see Tools/main.swift).
     func prepareSnapshot(scale: CGFloat) {
         snapshotScale = scale
         rebuild()
     }
 
-    /// Einbrennschutz: die Uhr wandert langsam, aber nur im freien Bereich.
-    /// Oben und unten bleibt immer ein Rand sichtbar.
+    /// Burn-in protection: the clock drifts slowly, but only within the free area.
+    /// A margin always stays visible at the top and bottom.
     private func moveDrift() {
         let b = bounds
         let side = plate.bounds.width
@@ -415,7 +415,7 @@ final class WortuhrView: ScreenSaverView {
         CATransaction.commit()
     }
 
-    // MARK: - Optionen
+    // MARK: - Options
 
     override var hasConfigureSheet: Bool { true }
 

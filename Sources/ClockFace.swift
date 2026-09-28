@@ -1,20 +1,19 @@
 import Foundation
 
-/// Sprache der Zeitansage, in der Reihenfolge der Auswahlliste (alphabetisch).
-/// Die Rohwerte sind die gespeicherten Schlüssel
-/// („hoch“ und „sued“ stammen noch aus der Zeit, als es nur Deutsch gab).
+/// Language of the time phrase, in the order of the selection list (alphabetical).
+/// The raw values are stored in the settings – changing them resets the saved language.
 enum Language: String, CaseIterable {
-    case hoch   // VIERTEL NACH DREI, ZWANZIG NACH DREI, VIERTEL VOR VIER
-    case sued   // VIERTEL VIER, ZEHN VOR HALB VIER, DREIVIERTEL VIER
-    case en     // A QUARTER PAST THREE, TWENTY FIVE TO FOUR (britisch)
-    case us     // A QUARTER AFTER THREE, HALF PAST THREE (amerikanisch)
-    case es     // LAS TRES Y CUARTO, ES LA UNA
-    case fr     // TROIS HEURES ET QUART, QUATRE HEURES MOINS LE QUART, MIDI, MINUIT
-    case it     // LE TRE E UN QUARTO, È L'UNA
+    case de       // VIERTEL NACH DREI, ZWANZIG NACH DREI, VIERTEL VOR VIER
+    case deSouth  // VIERTEL VIER, ZEHN VOR HALB VIER, DREIVIERTEL VIER (southern German)
+    case en       // A QUARTER PAST THREE, TWENTY FIVE TO FOUR (British)
+    case us       // A QUARTER AFTER THREE, HALF PAST THREE (American)
+    case es       // LAS TRES Y CUARTO, ES LA UNA
+    case fr       // TROIS HEURES ET QUART, QUATRE HEURES MOINS LE QUART, MIDI, MINUIT
+    case it       // LE TRE E UN QUARTO, È L'UNA
 
     var face: ClockFace {
         switch self {
-        case .hoch, .sued: return .german
+        case .de, .deSouth: return .german
         case .en:          return .english
         case .us:          return .american
         case .fr:          return .french
@@ -23,10 +22,10 @@ enum Language: String, CaseIterable {
         }
     }
 
-    /// Sprache des Optionen-Dialogs.
+    /// Language of the options dialog.
     var ui: UILanguage {
         switch self {
-        case .hoch, .sued: return .de
+        case .de, .deSouth: return .de
         case .en:          return .enGB
         case .us:          return .enUS
         case .fr:          return .fr
@@ -38,26 +37,26 @@ enum Language: String, CaseIterable {
 
 enum UILanguage { case de, enGB, enUS, fr, it, es }
 
-/// Buchstabenraster und Zeitlogik der Wortuhr, je Sprache.
-/// Identisch zum HTML-Prototyp (prototype/faces.js); `node prototype/check.mjs` prüft beide.
+/// Letter grid and time logic of the word clock, per language.
+/// Identical to the HTML prototype (prototype/faces.js); `node prototype/check.mjs` checks both.
 struct ClockFace {
     static let rows = 10
     static let cols = 11
 
     let grid: [String]
-    /// Wort -> (Zeile, Spalte, Länge)
+    /// word -> (row, column, length)
     let words: [String: (Int, Int, Int)]
-    /// Zusatzzeichen zwischen zwei Feldern (Apostroph in O'CLOCK, Bindestrich in VINGT-CINQ):
-    /// Zeichen, Zeile, Spalte links davon, Wort, mit dem es leuchtet.
+    /// Extra glyphs between two cells (apostrophe in O'CLOCK, hyphen in VINGT-CINQ):
+    /// glyph, row, column to its left, word it lights up with.
     let marks: [(glyph: String, row: Int, afterCol: Int, word: String)]
 
-    /// Buchstabe an Zeile/Spalte (vorkomponiert, damit Ü/Ö/È ein einzelnes Zeichen sind).
+    /// Letter at row/column (precomposed so that Ü/Ö/È are single characters).
     func letter(row: Int, col: Int) -> String {
         let chars = Array(grid[row].precomposedStringWithCanonicalMapping)
         return String(chars[col])
     }
 
-    /// Indizes (Zeile * 11 + Spalte) der leuchtenden Buchstaben.
+    /// Indices (row * 11 + column) of the lit letters.
     func litCells(for words: [String]) -> Set<Int> {
         var on = Set<Int>()
         for word in words {
@@ -68,14 +67,14 @@ struct ClockFace {
         return on
     }
 
-    /// Zeitansage: Einleitung („ES IST“, „IT IS“ …, abschaltbar), Wörter und Minutenpunkte.
+    /// Time phrase: intro ("ES IST", "IT IS" …, optional), words and minute dots.
     static func phrase(hour24: Int, minute: Int, language: Language, intro: Bool) -> (words: [String], dots: Int) {
         let m5 = (minute / 5) * 5
         let h = hour24 % 12
         let n = (h + 1) % 12
         let p: (intro: [String], words: [String])
         switch language {
-        case .hoch, .sued: p = germanWords(m5: m5, h: h, n: n, sued: language == .sued)
+        case .de, .deSouth: p = germanWords(m5: m5, h: h, n: n, south: language == .deSouth)
         case .en, .us:     p = englishWords(m5: m5, h: h, n: n, american: language == .us)
         case .fr:          p = frenchWords(m5: m5, h24: hour24)
         case .it:          p = italianWords(m5: m5, h: h, n: n)
@@ -86,7 +85,7 @@ struct ClockFace {
 
     private static func H(_ x: Int) -> String { "H\(x)" }
 
-    // MARK: - Deutsch
+    // MARK: - German
 
     static let german = ClockFace(
         grid: [
@@ -99,7 +98,7 @@ struct ClockFace {
             "ZWEIDREIELF",
             "VIERYFÜNFOT",
             "SECHSRACHTN",
-            "ZEHNEUNXUHR",   // ZEHN und NEUN teilen sich das N, Lücke vor UHR
+            "ZEHNEUNXUHR",   // ZEHN and NEUN share the N, gap before UHR
         ],
         words: [
             "ES": (0, 0, 2), "IST": (0, 3, 3),
@@ -115,28 +114,28 @@ struct ClockFace {
         marks: []
     )
 
-    private static func germanWords(m5: Int, h: Int, n: Int, sued: Bool) -> ([String], [String]) {
+    private static func germanWords(m5: Int, h: Int, n: Int, south: Bool) -> ([String], [String]) {
         let w: [String]
         switch m5 {
         case 0:  w = [h == 1 ? "EIN" : H(h), "UHR"]
         case 5:  w = ["M5", "NACH", H(h)]
         case 10: w = ["M10", "NACH", H(h)]
-        case 15: w = sued ? ["V", H(n)] : ["V", "NACH", H(h)]
-        case 20: w = sued ? ["M10", "VOR", "HALB", H(n)] : ["M20", "NACH", H(h)]
+        case 15: w = south ? ["V", H(n)] : ["V", "NACH", H(h)]
+        case 20: w = south ? ["M10", "VOR", "HALB", H(n)] : ["M20", "NACH", H(h)]
         case 25: w = ["M5", "VOR", "HALB", H(n)]
         case 30: w = ["HALB", H(n)]
         case 35: w = ["M5", "NACH", "HALB", H(n)]
-        case 40: w = sued ? ["M10", "NACH", "HALB", H(n)] : ["M20", "VOR", H(n)]
-        case 45: w = sued ? ["DV", H(n)] : ["V", "VOR", H(n)]
+        case 40: w = south ? ["M10", "NACH", "HALB", H(n)] : ["M20", "VOR", H(n)]
+        case 45: w = south ? ["DV", H(n)] : ["V", "VOR", H(n)]
         case 50: w = ["M10", "VOR", H(n)]
         default: w = ["M5", "VOR", H(n)]
         }
         return (["ES", "IST"], w)
     }
 
-    // MARK: - Englisch (britisch und amerikanisch)
+    // MARK: - English (British and American)
 
-    /// Stundenzeilen und -wörter: in beiden englischen Rastern gleich.
+    /// Hour rows and words: identical in both English grids.
     private static let englishHourRows = [
         "ONEXTWOVSIX",
         "THREEKSEVEN",
@@ -206,7 +205,7 @@ struct ClockFace {
         return (["IT", "IS"], w)
     }
 
-    // MARK: - Französisch
+    // MARK: - French
 
     static let french = ClockFace(
         grid: [
@@ -237,7 +236,7 @@ struct ClockFace {
     )
 
     private static func frenchWords(m5: Int, h24: Int) -> ([String], [String]) {
-        // Stunde (24 h) -> Stundenwort und „heure(s)“; 12 Uhr = midi, 0 Uhr = minuit
+        // hour (24 h) -> hour word and "heure(s)"; 12:00 = midi, 0:00 = minuit
         func hw(_ x: Int) -> [String] {
             if x == 0 { return ["MINUIT"] }
             if x == 12 { return ["MIDI"] }
@@ -263,7 +262,7 @@ struct ClockFace {
         return (["IL", "EST"], w)
     }
 
-    // MARK: - Italienisch
+    // MARK: - Italian
 
     static let italian = ClockFace(
         grid: [
@@ -316,7 +315,7 @@ struct ClockFace {
         return ([hr == 1 ? "È" : "SONO"], w)
     }
 
-    // MARK: - Spanisch
+    // MARK: - Spanish
 
     static let spanish = ClockFace(
         grid: [

@@ -1,7 +1,7 @@
 import Foundation
 
-// Gibt Raster, Wörter und alle Zeitansagen aus – zum Vergleich mit dem Prototyp
-// (prototype/check.mjs). Aufruf über: node prototype/check.mjs
+// Prints grids, words and all time phrases – for comparison with the prototype
+// (prototype/check.mjs). Run via: node prototype/check.mjs
 
 let faces: [(String, ClockFace)] = [("de", .german), ("en", .english), ("us", .american),
                                     ("fr", .french), ("it", .italian), ("es", .spanish)]

@@ -1,12 +1,12 @@
 #!/bin/bash
-# Baut Wortuhr.saver (arm64 + x86_64), signiert ad hoc und installiert nach ~/Library/Screen Savers.
-# Aufruf:  ./build.sh            bauen und installieren
-#          ./build.sh --no-install   nur bauen
-#          ./build.sh --system       für alle Benutzer nach /Library/Screen Savers (Administrator-Passwort)
-#          --arm-only                nur für Apple Silicon (schneller; kombinierbar, z. B. ./build.sh --system --arm-only)
+# Builds Wortuhr.saver (arm64 + x86_64), signs it ad hoc and installs it to ~/Library/Screen Savers.
+# Usage:  ./build.sh                build and install
+#         ./build.sh --no-install   build only
+#         ./build.sh --system       install for all users to /Library/Screen Savers (admin password)
+#         --arm-only                Apple Silicon only (faster; combinable, e.g. ./build.sh --system --arm-only)
 set -euo pipefail
 cd "$(dirname "$0")"
-# Ausgabe zusätzlich in build.log (damit Claude Fehler mitlesen kann)
+# Also write the output to build.log (so Claude can read errors)
 exec > >(tee build.log) 2>&1
 
 NAME=Wortuhr
@@ -17,7 +17,7 @@ for arg in "$@"; do
   case "$arg" in
     --arm-only) ARCHS=(arm64) ;;
     --no-install|--system) MODE="$arg" ;;
-    *) echo "Unbekannte Option: $arg" >&2; exit 1 ;;
+    *) echo "Unknown option: $arg" >&2; exit 1 ;;
   esac
 done
 BUILD=build
@@ -30,12 +30,12 @@ mkdir -p "$BUNDLE/Contents/MacOS" "$BUNDLE/Contents/Resources"
 
 BINS=()
 for ARCH in "${ARCHS[@]}"; do
-  echo "▸ Kompiliere $ARCH"
+  echo "▸ Compiling $ARCH"
   xcrun swiftc -parse-as-library -wmo -O \
     -module-name "$NAME" \
     -target "$ARCH-apple-macos$MIN_OS" -sdk "$SDK" \
     -c Sources/*.swift -o "$BUILD/$NAME-$ARCH.o"
-  echo "▸ Linke $ARCH"
+  echo "▸ Linking $ARCH"
   xcrun clang -bundle -target "$ARCH-apple-macos$MIN_OS" -isysroot "$SDK" \
     "$BUILD/$NAME-$ARCH.o" -o "$BUILD/$NAME-$ARCH" \
     -L"$SDK/usr/lib/swift" -L"$TOOLCHAIN_LIB" \
@@ -46,23 +46,23 @@ done
 
 lipo -create "${BINS[@]}" -output "$BUNDLE/Contents/MacOS/$NAME"
 cp Info.plist "$BUNDLE/Contents/Info.plist"
-# Neue Build-Nummer bei jedem Bau, damit macOS zwischengespeicherte Vorschaubilder verwirft.
+# New build number on every build so macOS discards cached thumbnails.
 /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $(date +%Y%m%d%H%M%S)" "$BUNDLE/Contents/Info.plist"
-echo "▸ Vorschaubild (11:55)"
+echo "▸ Thumbnail (11:55)"
 xcrun swiftc -O -module-name WortuhrThumb -sdk "$SDK" \
   Sources/*.swift Tools/main.swift -o "$BUILD/makethumb" -framework ScreenSaver
 "$BUILD/makethumb" "$BUNDLE/Contents/Resources"
 tiffutil -cathidpicheck "$BUNDLE/Contents/Resources/thumbnail.png" "$BUNDLE/Contents/Resources/thumbnail@2x.png" -out "$BUNDLE/Contents/Resources/thumbnail.tiff" >/dev/null
-# Wie bei Xcode-Projekten nur die kombinierte TIFF-Datei ausliefern, keine PNGs.
+# Like Xcode projects, ship only the combined TIFF file, no PNGs.
 rm -f "$BUNDLE/Contents/Resources/thumbnail.png" "$BUNDLE/Contents/Resources/thumbnail@2x.png"
-# Alles für alle lesbar machen – sonst kann macOS das Paket aus /Library nicht laden.
+# Make everything world-readable – otherwise macOS cannot load the bundle from /Library.
 chmod -R u+rwX,go+rX-w "$BUNDLE"
 codesign --force --sign - "$BUNDLE"
-echo "✓ Gebaut: $BUNDLE"
+echo "✓ Built: $BUNDLE"
 
 if [ "$MODE" != "--no-install" ]; then
   if [ "$MODE" = "--system" ]; then
-    # Für alle Benutzer nach /Library (fragt nach dem Administrator-Passwort)
+    # For all users into /Library (asks for the admin password)
     DEST="/Library/Screen Savers"
     rm -rf "$HOME/Library/Screen Savers/$NAME.saver"
     sudo rm -rf "$DEST/$NAME.saver"
@@ -75,14 +75,14 @@ if [ "$MODE" != "--no-install" ]; then
     rm -rf "$DEST/$NAME.saver"
     cp -R "$BUNDLE" "$DEST/"
     if [ -d "/Library/Screen Savers/$NAME.saver" ]; then
-      echo "  Hinweis: Es liegt noch eine Kopie in /Library/Screen Savers (mit --system gebaut)."
+      echo "  Note: there is still a copy in /Library/Screen Savers (built with --system)."
     fi
   fi
-  # Alte Instanzen beenden, sonst lädt macOS weiter den vorigen Build.
+  # Quit old instances, otherwise macOS keeps loading the previous build.
   pkill -f legacyScreenSaver 2>/dev/null || true
-  # Systemeinstellungen und Hintergrund-Agent neu starten, damit Liste und Vorschaubild neu geladen werden.
+  # Restart System Settings and the wallpaper agent so the list and thumbnail are reloaded.
   osascript -e 'quit app "System Settings"' 2>/dev/null || true
   killall WallpaperAgent 2>/dev/null || true
-  echo "✓ Installiert: $DEST/$NAME.saver"
-  echo "  Systemeinstellungen → Bildschirmschoner → Wortuhr"
+  echo "✓ Installed: $DEST/$NAME.saver"
+  echo "  System Settings → Screen Saver → Wortuhr"
 fi
