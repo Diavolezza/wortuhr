@@ -1,8 +1,10 @@
 # Wortuhr – Bildschirmschoner für macOS
 
 Wortuhr im 11×10-Raster mit vier Minutenpunkten. Zeitansage Hochdeutsch
-(„viertel nach drei“) oder Süddeutsch („viertel vier“, „dreiviertel vier“),
-Farben, Schrift, Größe und Einbrennschutz im Optionen-Dialog einstellbar.
+(„viertel nach drei“), Süddeutsch („viertel vier“, „dreiviertel vier“) oder
+britisches Englisch („a quarter past three“, „three o’clock“). Farben, Schrift,
+Größe und Einbrennschutz im Optionen-Dialog einstellbar; der Dialog spricht die
+gewählte Sprache.
 
 ![Wortuhr um 11:55 – „ES IST FÜNF VOR ZWÖLF“](docs/wortuhr.png)
 
@@ -47,14 +49,23 @@ schreibt Systemprotokoll (letzte 20 Minuten) und Absturzberichte nach `diag.log`
 `prototype/index.html` im Browser öffnen: dieselbe Uhr zum Ausprobieren von Zeitansage,
 Farben, Schrift und Größe, mit Zeitraffer. Die Einstellungen lassen sich als JSON kopieren.
 
+Raster und Zeitlogik stehen in `prototype/faces.js` und identisch in `Sources/ClockFace.swift`.
+Nach jeder Änderung daran:
+
+    node prototype/check.mjs
+
+prüft alle Zeitansagen (jedes Wort im Raster, Lesereihenfolge, keine Überlappung) und
+vergleicht Prototyp und Swift Zeile für Zeile.
+
 ## Aufbau
 
-- `Sources/ClockFace.swift` – Buchstabenraster und Zeitlogik
+- `Sources/ClockFace.swift` – Buchstabenraster und Zeitlogik je Sprache
 - `Sources/Settings.swift` – Einstellungen, Voreinstellungen, Speichern (ScreenSaverDefaults)
 - `Sources/WortuhrView.swift` – Darstellung mit Core Animation (ein Glyphen-Layer pro Buchstabe)
-- `Sources/ConfigController.swift` – Optionen-Dialog
+- `Sources/ConfigController.swift` – Optionen-Dialog (deutsch/englisch)
 - `Sources/Log.swift` – Diagnose-Ausgaben (`./diag.sh` sammelt sie)
 - `Tools/main.swift` – erzeugt das Vorschaubild für die Systemeinstellungen (11:55)
+- `Tools/Phrases/main.swift` – gibt alle Zeitansagen aus Swift aus (für `prototype/check.mjs`)
 
 ## Lizenz
 

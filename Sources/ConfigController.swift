@@ -12,8 +12,8 @@ final class ConfigController: NSObject {
     private var s: Settings
     private let onChange: (Settings) -> Void
 
-    private let dialect = NSPopUpButton()
-    private let esIst = NSButton(checkboxWithTitle: "„ES IST“ immer anzeigen", target: nil, action: nil)
+    private let language = NSPopUpButton()
+    private let intro = NSButton(checkboxWithTitle: "", target: nil, action: nil)
     private let front = NSPopUpButton()
     private let lit = NSPopUpButton()
     private let dim = NSSlider(value: 0, minValue: 0, maxValue: 40, target: nil, action: nil)
@@ -25,8 +25,15 @@ final class ConfigController: NSObject {
     private let look = NSPopUpButton()
     private let size = NSSlider(value: 92, minValue: 40, maxValue: 100, target: nil, action: nil)
     private let fade = NSSlider(value: 0.8, minValue: 0, maxValue: 3, target: nil, action: nil)
-    private let dots = NSButton(checkboxWithTitle: "Minutenpunkte", target: nil, action: nil)
-    private let drift = NSButton(checkboxWithTitle: "Langsam wandern (Einbrennschutz)", target: nil, action: nil)
+    private let dots = NSButton(checkboxWithTitle: "", target: nil, action: nil)
+    private let drift = NSButton(checkboxWithTitle: "", target: nil, action: nil)
+    private let reset = NSButton(title: "", target: nil, action: nil)
+    private let cancel = NSButton(title: "", target: nil, action: nil)
+    private let ok = NSButton(title: "", target: nil, action: nil)
+    /// Beschriftungen, deren Text von der Sprache abhängt: Feld -> Schlüssel in Texts
+    private var labels: [(NSTextField, KeyPath<Texts, String>, Bool)] = []
+    private var ui: UILanguage = .de
+    private var t: Texts { Texts.for(ui) }
 
     private let dimValue = NSTextField(labelWithString: "")
     private let glowValue = NSTextField(labelWithString: "")
@@ -42,6 +49,7 @@ final class ConfigController: NSObject {
         self.window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 500, height: 600),
                                styleMask: [.titled], backing: .buffered, defer: false)
         window.isReleasedWhenClosed = false
+        self.ui = settings.language.ui
         super.init()
         buildUI()
         fill()
@@ -50,12 +58,11 @@ final class ConfigController: NSObject {
     // MARK: - Aufbau
 
     private func buildUI() {
-        dialect.addItems(withTitles: ["Hochdeutsch (viertel nach drei)", "Süddeutsch (viertel vier)"])
-        font.addItems(withTitles: Settings.fonts.map { $0.0 })
+        // Sprachen immer in ihrer eigenen Sprache, mit Flagge
+        language.addItems(withTitles: Language.allCases.map { $0.menuTitle })
         weight.addItems(withTitles: Settings.weights.map { $0.0 })
-        look.addItems(withTitles: ["Frontplatte", "Vollflächig"])
 
-        let controls: [NSControl] = [dialect, esIst, front, lit, dim, glow, edge, font, weight,
+        let controls: [NSControl] = [language, intro, front, lit, dim, glow, edge, font, weight,
                                      letterScale, look, size, fade, dots, drift]
         for c in controls {
             c.target = self
@@ -71,37 +78,39 @@ final class ConfigController: NSObject {
             v.font = .monospacedDigitSystemFont(ofSize: NSFont.smallSystemFontSize + 1, weight: .regular)
         }
 
-        func label(_ t: String) -> NSTextField {
-            let l = NSTextField(labelWithString: t)
+        func label(_ k: KeyPath<Texts, String>) -> NSTextField {
+            let l = NSTextField(labelWithString: "")
             l.alignment = .right
+            labels.append((l, k, false))
             return l
         }
-        func section(_ t: String) -> NSTextField {
-            let l = NSTextField(labelWithString: t.uppercased())
+        func section(_ k: KeyPath<Texts, String>) -> NSTextField {
+            let l = NSTextField(labelWithString: "")
             l.font = .systemFont(ofSize: NSFont.smallSystemFontSize, weight: .semibold)
             l.textColor = .secondaryLabelColor
+            labels.append((l, k, true))
             return l
         }
         let e = { NSGridCell.emptyContentView }
 
         let grid = NSGridView(views: [
-            [section("Zeitansage"), e(), e()],
-            [label("Sprache:"), dialect, e()],
-            [e(), esIst, e()],
-            [section("Farben"), e(), e()],
-            [label("Front:"), front, e()],
-            [label("Leuchtfarbe:"), lit, e()],
-            [label("Unbeleuchtet:"), dim, dimValue],
-            [label("Leuchten:"), glow, glowValue],
-            [label("Rand:"), edge, edgeValue],
-            [section("Schrift"), e(), e()],
-            [label("Schrift:"), font, e()],
-            [label("Schnitt:"), weight, e()],
-            [label("Buchstabengröße:"), letterScale, letterScaleValue],
-            [section("Darstellung"), e(), e()],
-            [label("Darstellung:"), look, e()],
-            [label("Größe:"), size, sizeValue],
-            [label("Überblendung:"), fade, fadeValue],
+            [section(\.sectionTime), e(), e()],
+            [label(\.language), language, e()],
+            [e(), intro, e()],
+            [section(\.sectionColors), e(), e()],
+            [label(\.front), front, e()],
+            [label(\.lit), lit, e()],
+            [label(\.dim), dim, dimValue],
+            [label(\.glow), glow, glowValue],
+            [label(\.edge), edge, edgeValue],
+            [section(\.sectionFont), e(), e()],
+            [label(\.font), font, e()],
+            [label(\.weight), weight, e()],
+            [label(\.letterScale), letterScale, letterScaleValue],
+            [section(\.sectionLook), e(), e()],
+            [label(\.look), look, e()],
+            [label(\.size), size, sizeValue],
+            [label(\.fade), fade, fadeValue],
             [e(), dots, e()],
             [e(), drift, e()],
         ])
@@ -113,10 +122,10 @@ final class ConfigController: NSObject {
         grid.columnSpacing = 10
         for i in [3, 9, 13] { grid.row(at: i).topPadding = 10 }
 
-        let reset = NSButton(title: "Standard", target: self, action: #selector(resetDefaults))
-        let cancel = NSButton(title: "Abbrechen", target: self, action: #selector(cancelSheet))
+        reset.target = self; reset.action = #selector(resetDefaults)
+        cancel.target = self; cancel.action = #selector(cancelSheet)
         cancel.keyEquivalent = "\u{1b}"
-        let ok = NSButton(title: "OK", target: self, action: #selector(okSheet))
+        ok.target = self; ok.action = #selector(okSheet)
         ok.keyEquivalent = "\r"
         let buttons = NSStackView(views: [reset, NSView(), cancel, ok])
         buttons.orientation = .horizontal
@@ -135,8 +144,38 @@ final class ConfigController: NSObject {
             buttons.bottomAnchor.constraint(equalTo: content.bottomAnchor, constant: -20),
         ])
         window.contentView = content
-        let fit = content.fittingSize
-        if fit.width > 100 && fit.height > 100 { window.setContentSize(fit) }
+        applyTexts()
+    }
+
+    /// Alle Beschriftungen in der Sprache des Dialogs setzen und die Fenstergröße anpassen.
+    private func applyTexts() {
+        let t = self.t
+        for (l, k, isSection) in labels {
+            l.stringValue = isSection ? t[keyPath: k].uppercased() : t[keyPath: k]
+        }
+        intro.title = t.intro
+        dots.title = t.dots
+        drift.title = t.drift
+        reset.title = t.reset
+        cancel.title = t.cancel
+        ok.title = t.ok
+
+        let fontIndex = max(font.indexOfSelectedItem, 0)
+        font.removeAllItems()
+        font.addItems(withTitles: Settings.fonts.map { ui == .en ? $0.1 : $0.0 })
+        font.selectItem(at: fontIndex)
+        let lookIndex = max(look.indexOfSelectedItem, 0)
+        look.removeAllItems()
+        look.addItems(withTitles: [t.plate, t.flat])
+        look.selectItem(at: lookIndex)
+        fillColors(front, Settings.frontPresets, current: s.front)
+        fillColors(lit, Settings.litPresets, current: s.lit)
+
+        if let content = window.contentView {
+            content.layoutSubtreeIfNeeded()
+            let fit = content.fittingSize
+            if fit.width > 100 && fit.height > 100 { window.setContentSize(fit) }
+        }
     }
 
     // MARK: - Werte
@@ -151,18 +190,18 @@ final class ConfigController: NSObject {
         }
     }
 
-    private func fillColors(_ popup: NSPopUpButton, _ presets: [(String, String)], current: NSColor) {
+    private func fillColors(_ popup: NSPopUpButton, _ presets: [(String, String, String)], current: NSColor) {
         popup.removeAllItems()
         let cur = current.hexString
-        for (name, hex) in presets {
-            popup.addItem(withTitle: name)
+        for (de, en, hex) in presets {
+            popup.addItem(withTitle: ui == .en ? en : de)
             popup.lastItem?.image = swatch(hex)
             popup.lastItem?.representedObject = hex
         }
-        if let i = presets.firstIndex(where: { $0.1 == cur }) {
+        if let i = presets.firstIndex(where: { $0.2 == cur }) {
             popup.selectItem(at: i)
         } else {
-            popup.addItem(withTitle: "Eigene (\(cur))")
+            popup.addItem(withTitle: "\(t.custom) (\(cur))")
             popup.lastItem?.image = swatch(cur)
             popup.lastItem?.representedObject = cur
             popup.selectItem(at: presets.count)
@@ -170,14 +209,14 @@ final class ConfigController: NSObject {
     }
 
     private func fill() {
-        dialect.selectItem(at: s.dialect == .hoch ? 0 : 1)
-        esIst.state = s.esIst ? .on : .off
+        language.selectItem(at: Language.allCases.firstIndex(of: s.language) ?? 0)
+        intro.state = s.intro ? .on : .off
         fillColors(front, Settings.frontPresets, current: s.front)
         fillColors(lit, Settings.litPresets, current: s.lit)
         dim.doubleValue = s.dim
         glow.doubleValue = s.glow
         edge.doubleValue = s.edge
-        font.selectItem(at: Settings.fonts.firstIndex { $0.1 == s.font } ?? 0)
+        font.selectItem(at: Settings.fonts.firstIndex { $0.2 == s.font } ?? 0)
         weight.selectItem(at: Settings.weights.firstIndex { $0.1 == s.weight } ?? 1)
         letterScale.doubleValue = s.letterScale
         look.selectItem(at: s.flat ? 1 : 0)
@@ -189,14 +228,14 @@ final class ConfigController: NSObject {
     }
 
     private func read() {
-        s.dialect = dialect.indexOfSelectedItem == 1 ? .sued : .hoch
-        s.esIst = esIst.state == .on
+        s.language = Language.allCases[max(language.indexOfSelectedItem, 0)]
+        s.intro = intro.state == .on
         if let hex = front.selectedItem?.representedObject as? String { s.front = NSColor(hex: hex) }
         if let hex = lit.selectedItem?.representedObject as? String { s.lit = NSColor(hex: hex) }
         s.dim = dim.doubleValue.rounded()
         s.glow = (glow.doubleValue / 5).rounded() * 5
         s.edge = (edge.doubleValue / 5).rounded() * 5
-        s.font = Settings.fonts[max(font.indexOfSelectedItem, 0)].1
+        s.font = Settings.fonts[max(font.indexOfSelectedItem, 0)].2
         s.weight = Settings.weights[max(weight.indexOfSelectedItem, 0)].1
         s.letterScale = (letterScale.doubleValue / 5).rounded() * 5
         s.flat = look.indexOfSelectedItem == 1
@@ -212,19 +251,27 @@ final class ConfigController: NSObject {
         edgeValue.stringValue = "\(Int(s.edge)) %"
         letterScaleValue.stringValue = "\(Int(s.letterScale)) %"
         sizeValue.stringValue = "\(Int(s.size)) %"
-        fadeValue.stringValue = String(format: "%.1f s", s.fade).replacingOccurrences(of: ".", with: ",")
+        let f = String(format: "%.1f s", s.fade)
+        fadeValue.stringValue = ui == .de ? f.replacingOccurrences(of: ".", with: ",") : f
     }
 
     // MARK: - Aktionen
 
     @objc private func changed(_ sender: Any?) {
         read()
+        if s.language.ui != ui {
+            ui = s.language.ui
+            applyTexts()
+        }
         updateLabels()
         onChange(s)
     }
 
+    /// Standardwerte – die gewählte Sprache bleibt.
     @objc private func resetDefaults() {
+        let keep = s.language
         s = Settings()
+        s.language = keep
         fill()
         onChange(s)
     }
@@ -248,4 +295,46 @@ final class ConfigController: NSObject {
             window.orderOut(nil)
         }
     }
+}
+
+extension Language {
+    /// Eintrag in der Sprachliste: Flagge und Name in der eigenen Sprache.
+    var menuTitle: String {
+        switch self {
+        case .hoch: return "🇩🇪 Hochdeutsch (viertel nach drei)"
+        case .sued: return "🇩🇪 Süddeutsch (viertel vier)"
+        case .en:   return "🇬🇧 English (a quarter past three)"
+        }
+    }
+}
+
+/// Texte des Optionen-Dialogs.
+struct Texts {
+    let sectionTime, language, intro: String
+    let sectionColors, front, lit, dim, glow, edge, custom: String
+    let sectionFont, font, weight, letterScale: String
+    let sectionLook, look, plate, flat, size, fade, dots, drift: String
+    let reset, cancel, ok: String
+
+    static func `for`(_ ui: UILanguage) -> Texts { ui == .en ? en : de }
+
+    static let de = Texts(
+        sectionTime: "Zeitansage", language: "Sprache:", intro: "„ES IST“ immer anzeigen",
+        sectionColors: "Farben", front: "Front:", lit: "Leuchtfarbe:", dim: "Unbeleuchtet:",
+        glow: "Leuchten:", edge: "Rand:", custom: "Eigene",
+        sectionFont: "Schrift", font: "Schrift:", weight: "Schnitt:", letterScale: "Buchstabengröße:",
+        sectionLook: "Darstellung", look: "Darstellung:", plate: "Frontplatte", flat: "Vollflächig",
+        size: "Größe:", fade: "Überblendung:", dots: "Minutenpunkte",
+        drift: "Langsam wandern (Einbrennschutz)",
+        reset: "Standard", cancel: "Abbrechen", ok: "OK")
+
+    static let en = Texts(
+        sectionTime: "Time", language: "Language:", intro: "Always show “IT IS”",
+        sectionColors: "Colours", front: "Front:", lit: "Light colour:", dim: "Unlit letters:",
+        glow: "Glow:", edge: "Edge:", custom: "Custom",
+        sectionFont: "Typeface", font: "Typeface:", weight: "Weight:", letterScale: "Letter size:",
+        sectionLook: "Appearance", look: "Style:", plate: "Front plate", flat: "Full screen",
+        size: "Size:", fade: "Cross-fade:", dots: "Minute dots",
+        drift: "Drift slowly (burn-in protection)",
+        reset: "Defaults", cancel: "Cancel", ok: "OK")
 }

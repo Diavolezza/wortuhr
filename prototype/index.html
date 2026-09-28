@@ -52,6 +52,12 @@ body{background:var(--page);color:var(--ink);font:14px/1.45 system-ui,-apple-sys
 .cell.on{color:var(--lit);
   text-shadow:0 0 calc(.35em * var(--glow)) color-mix(in srgb,var(--lit) 70%,transparent),
               0 0 calc(1.1em * var(--glow)) color-mix(in srgb,var(--lit) 35%,transparent)}
+.mark{position:absolute;height:10%;display:grid;place-items:center;translate:-50% 0;
+  color:color-mix(in srgb,var(--lit) var(--dim),var(--front));
+  transition:color var(--fade) ease, text-shadow var(--fade) ease;}
+.mark.on{color:var(--lit);
+  text-shadow:0 0 calc(.35em * var(--glow)) color-mix(in srgb,var(--lit) 70%,transparent),
+              0 0 calc(1.1em * var(--glow)) color-mix(in srgb,var(--lit) 35%,transparent)}
 .dot{position:absolute;width:1.05%;aspect-ratio:1;border-radius:50%;
   background:color-mix(in srgb,var(--lit) var(--dim),var(--front));
   transition:background var(--fade) ease, box-shadow var(--fade) ease}
@@ -124,11 +130,11 @@ kbd{font:11px ui-monospace,Menlo,monospace;border:1px solid var(--line);border-b
 
     <section>
       <h2>Zeitansage</h2>
-      <div class="row"><div class="seg" data-key="dialect">
-        <button data-v="hoch">Hochdeutsch</button><button data-v="sued">Süddeutsch</button>
+      <div class="row"><div class="seg" data-key="lang">
+        <button data-v="hoch">🇩🇪 Hoch</button><button data-v="sued">🇩🇪 Süd</button><button data-v="en">🇬🇧 English</button>
       </div>
-      <p class="hint" id="dialectHint"></p></div>
-      <label class="check"><input type="checkbox" id="esIst"> „ES IST“ immer anzeigen</label>
+      <p class="hint" id="langHint"></p></div>
+      <label class="check"><input type="checkbox" id="intro"> <span id="introLabel"></span> immer anzeigen</label>
     </section>
 
     <section>
@@ -197,40 +203,31 @@ kbd{font:11px ui-monospace,Menlo,monospace;border:1px solid var(--line);border-b
   </aside>
 </div>
 
+<script src="faces.js"></script>
 <script>
-/* ---------- Raster & Zeitlogik (identisch in Swift zu übernehmen) ---------- */
-const GRID = ["ESRISTLZEHN","FÜNFZWANZIG","DREIVIERTEL","NACHQTVORMJ","HALBXSIEBEN",
-              "ZWÖLFKEINSA","ZWEIDREIELF","VIERYFÜNFOT","SECHSRACHTN","NEUNZEHNUHR"];
-const W = { ES:[0,0,2], IST:[0,3,3], M5:[1,0,4], M10:[0,7,4], M20:[1,4,7],
-  DV:[2,0,11], V:[2,4,7], NACH:[3,0,4], VOR:[3,6,3], HALB:[4,0,4],
-  H7:[4,5,6], H0:[5,0,5], EIN:[5,6,3], H1:[5,6,4], H2:[6,0,4], H3:[6,4,4],
-  H11:[6,8,3], H4:[7,0,4], H5:[7,5,4], H6:[8,0,5], H8:[8,6,4], H9:[9,0,4],
-  H10:[9,4,4], UHR:[9,8,3] };
-function phrase(h24, m, dialect, esIst){
-  const m5 = Math.floor(m/5)*5, h = h24%12, n = (h+1)%12, H = x=>"H"+x, sued = dialect==="sued";
-  const T = {
-    0:[h===1?"EIN":H(h),"UHR"], 5:["M5","NACH",H(h)], 10:["M10","NACH",H(h)],
-    15: sued?["V",H(n)]:["V","NACH",H(h)],
-    20: sued?["M10","VOR","HALB",H(n)]:["M20","NACH",H(h)],
-    25:["M5","VOR","HALB",H(n)], 30:["HALB",H(n)], 35:["M5","NACH","HALB",H(n)],
-    40: sued?["M10","NACH","HALB",H(n)]:["M20","VOR",H(n)],
-    45: sued?["DV",H(n)]:["V","VOR",H(n)],
-    50:["M10","VOR",H(n)], 55:["M5","VOR",H(n)] };
-  return { words:(esIst?["ES","IST"]:[]).concat(T[m5]), dots:m%5 };
-}
-
 /* ---------- Einstellungen ---------- */
 const FRONTS=[["Tiefschwarz","#0e0f11"],["Graphit","#2a2c30"],["Nachtblau","#101b2c"],["Tannengrün","#14261e"],["Ziegelrot","#5e231d"],["Kalkweiß","#e9e7e1"]];
 const LITS=[["Warmweiß","#fff1d6"],["Kaltweiß","#f3f7ff"],["Bernstein","#ffb24a"],["Eisblau","#9ad7ff"],["Mint","#9ff0c8"],["Anthrazit","#1d1f22"]];
-const DEF={dialect:"hoch",esIst:true,front:"#0e0f11",lit:"#fff1d6",dim:14,glow:35,edge:40,
+const DEF={lang:"hoch",intro:true,front:"#0e0f11",lit:"#fff1d6",dim:14,glow:35,edge:40,
   font:'"Avenir Next",Avenir,sans-serif',weight:"400",lscale:100,look:"plate",size:92,fade:0.8,dots:true,drift:false,tmode:"live",man:945};
 let S={...DEF};
-try{const s=JSON.parse(localStorage.getItem("wortuhr2")||"null");if(s)S={...DEF,...s}}catch(e){}
+try{const s=JSON.parse(localStorage.getItem("wortuhr2")||"null");
+  if(s){if(s.dialect&&!s.lang)s.lang=s.dialect;if("esIst" in s&&!("intro" in s))s.intro=s.esIst;
+    delete s.dialect;delete s.esIst;S={...DEF,...s}}}catch(e){}
 const save=()=>{try{localStorage.setItem("wortuhr2",JSON.stringify(S))}catch(e){}};
 
 const $=id=>document.getElementById(id), root=document.documentElement;
-const gridEl=$("grid"), cells=[];
-GRID.forEach((row,r)=>{cells[r]=[];[...row].forEach((ch,c)=>{const s=document.createElement("span");s.className="cell";s.textContent=ch;gridEl.appendChild(s);cells[r][c]=s;});});
+const gridEl=$("grid");
+let cells=[], marks=[], face=null;
+/* Raster der gewählten Sprache aufbauen (nur wenn es sich ändert) */
+function buildGrid(){
+  const f=FACES[LANGS[S.lang]];
+  if(f===face)return;face=f;
+  gridEl.innerHTML="";cells=[];marks=[];
+  f.grid.forEach((row,r)=>{cells[r]=[];[...row.normalize("NFC")].forEach((ch,c)=>{const s=document.createElement("span");s.className="cell";s.textContent=ch;gridEl.appendChild(s);cells[r][c]=s;});});
+  f.marks.forEach(mk=>{const s=document.createElement("span");s.className="mark";s.textContent=mk.glyph;
+    s.style.left=((mk.afterCol+1)/11*100)+"%";s.style.top=(mk.row*10)+"%";gridEl.appendChild(s);marks.push({el:s,word:mk.word});});
+}
 const dotEls=[...document.querySelectorAll(".dot")];
 
 function swatches(el,list,key){
@@ -244,7 +241,7 @@ swatches($("swFront"),FRONTS,"front");swatches($("swLit"),LITS,"lit");
 
 document.querySelectorAll(".seg").forEach(seg=>seg.querySelectorAll("button").forEach(b=>b.onclick=()=>{S[seg.dataset.key]=b.dataset.v;apply()}));
 ["dim","glow","edge","lscale","size","fade","man"].forEach(k=>$(k).oninput=e=>{S[k]=+e.target.value;apply()});
-["esIst","dots","drift"].forEach(k=>$(k).onchange=e=>{S[k]=e.target.checked;apply()});
+["intro","dots","drift"].forEach(k=>$(k).onchange=e=>{S[k]=e.target.checked;apply()});
 $("font").onchange=e=>{S.font=e.target.value;apply()};
 
 const fmt=min=>String(Math.floor(min/60)).padStart(2,"0")+":"+String(min%60).padStart(2,"0");
@@ -263,13 +260,17 @@ function apply(){
   document.querySelectorAll(".sw").forEach(b=>{const key=b.parentElement.id==="swFront"?"front":"lit";b.setAttribute("aria-pressed",String(S[key].toLowerCase()===b.dataset.v))});
   $("c_front").value=S.front;$("c_lit").value=S.lit;
   ["dim","glow","edge","lscale","size","fade","man"].forEach(k=>$(k).value=S[k]);
-  ["esIst","dots","drift"].forEach(k=>$(k).checked=S[k]);
+  ["intro","dots","drift"].forEach(k=>$(k).checked=S[k]);
+  $("introLabel").textContent=S.lang==="en"?"„IT IS“":"„ES IST“";
   $("font").value=S.font;
   $("oDim").textContent=S.dim+" %";$("oGlow").textContent=S.glow+" %";$("oEdge").textContent=S.edge+" %";$("oLscale").textContent=S.lscale+" %";
   $("oSize").textContent=S.size+" %";$("oFade").textContent=S.fade.toFixed(1).replace(".",",")+" s";$("oMan").textContent=fmt(S.man);
   $("manualRow").hidden=S.tmode!=="manual";
-  $("dialectHint").textContent=S.dialect==="sued"?"3:15 viertel vier · 3:20 zehn vor halb vier · 3:45 dreiviertel vier"
-                                                  :"3:15 viertel nach drei · 3:20 zwanzig nach drei · 3:45 viertel vor vier";
+  $("langHint").textContent={
+    hoch:"3:15 viertel nach drei · 3:20 zwanzig nach drei · 3:45 viertel vor vier",
+    sued:"3:15 viertel vier · 3:20 zehn vor halb vier · 3:45 dreiviertel vier",
+    en:"3:15 a quarter past three · 3:35 twenty five to four · 3:00 three o’clock"}[S.lang];
+  buildGrid();
   const {tmode,man,...out}=S;
   $("json").value=JSON.stringify(out,null,1);
   save();render(true);
@@ -284,13 +285,14 @@ function currentMinutes(){
 }
 function render(force){
   const t=currentMinutes(),h=Math.floor(t/60),m=t%60;
-  const key=t+S.dialect+S.esIst;
+  const key=t+S.lang+S.intro;
   if(!force&&key===lastKey)return;lastKey=key;
-  const p=phrase(h,m,S.dialect,S.esIst),on=new Set();
+  const p=phrase(h,m,S.lang,S.intro),on=new Set(),W=face.words;
   p.words.forEach(w=>{const[r,c,l]=W[w];for(let i=0;i<l;i++)on.add(r*11+c+i)});
   cells.forEach((row,r)=>row.forEach((el,c)=>el.classList.toggle("on",on.has(r*11+c))));
+  marks.forEach(mk=>mk.el.classList.toggle("on",p.words.includes(mk.word)));
   dotEls.forEach((d,i)=>d.classList.toggle("on",i<p.dots));
-  const words=p.words.map(w=>{const[r,c,l]=W[w];return GRID[r].slice(c,c+l)}).join(" ");
+  const words=p.words.map(w=>{const[r,c,l]=W[w];const t=[...face.grid[r].normalize("NFC")].slice(c,c+l).join("");return w==="OCLOCK"?"O’CLOCK":t}).join(" ");
   $("rTime").textContent=fmt(t);
   $("rPhrase").textContent=words+(p.dots?"  + "+p.dots+(p.dots===1?" Punkt":" Punkte"):"");
   $("clock").setAttribute("aria-label",fmt(t)+" – "+words.toLowerCase());

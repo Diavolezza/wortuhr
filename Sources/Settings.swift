@@ -3,8 +3,8 @@ import ScreenSaver
 
 /// Alle Einstellungen der Wortuhr. Voreinstellungen = abgestimmte Werte aus dem Prototyp.
 struct Settings {
-    var dialect: Dialect = .hoch
-    var esIst = true
+    var language: Language = .hoch
+    var intro = true              // „ES IST“ / „IT IS“ immer anzeigen
     var front = NSColor(hex: "#0e0f11")
     var lit = NSColor(hex: "#fff1d6")
     var dim: Double = 14          // Helligkeit unbeleuchteter Buchstaben in %
@@ -21,23 +21,26 @@ struct Settings {
 
     static let moduleName = "de.wanner-it.wortuhr"
 
-    /// Schriften: (Anzeigename, Schlüssel)
-    static let fonts: [(String, String)] = [
-        ("Helvetica Neue", "Helvetica Neue"),
-        ("SF Pro (Systemschrift)", "System"),
-        ("Avenir Next", "Avenir Next"),
-        ("Futura", "Futura"),
-        ("DIN Alternate", "DIN Alternate"),
-        ("Gill Sans", "Gill Sans"),
-        ("SF Mono", "SF Mono"),
+    /// Schriften: (Anzeigename deutsch, englisch, Schlüssel)
+    static let fonts: [(String, String, String)] = [
+        ("Helvetica Neue", "Helvetica Neue", "Helvetica Neue"),
+        ("SF Pro (Systemschrift)", "SF Pro (system font)", "System"),
+        ("Avenir Next", "Avenir Next", "Avenir Next"),
+        ("Futura", "Futura", "Futura"),
+        ("DIN Alternate", "DIN Alternate", "DIN Alternate"),
+        ("Gill Sans", "Gill Sans", "Gill Sans"),
+        ("SF Mono", "SF Mono", "SF Mono"),
     ]
-    static let frontPresets: [(String, String)] = [
-        ("Tiefschwarz", "#0e0f11"), ("Graphit", "#2a2c30"), ("Nachtblau", "#101b2c"),
-        ("Tannengrün", "#14261e"), ("Ziegelrot", "#5e231d"), ("Kalkweiß", "#e9e7e1"),
+    /// Farben: (Name deutsch, englisch, Hex)
+    static let frontPresets: [(String, String, String)] = [
+        ("Tiefschwarz", "Deep black", "#0e0f11"), ("Graphit", "Graphite", "#2a2c30"),
+        ("Nachtblau", "Midnight blue", "#101b2c"), ("Tannengrün", "Forest green", "#14261e"),
+        ("Ziegelrot", "Brick red", "#5e231d"), ("Kalkweiß", "Chalk white", "#e9e7e1"),
     ]
-    static let litPresets: [(String, String)] = [
-        ("Warmweiß", "#fff1d6"), ("Kaltweiß", "#f3f7ff"), ("Bernstein", "#ffb24a"),
-        ("Eisblau", "#9ad7ff"), ("Mint", "#9ff0c8"), ("Anthrazit", "#1d1f22"),
+    static let litPresets: [(String, String, String)] = [
+        ("Warmweiß", "Warm white", "#fff1d6"), ("Kaltweiß", "Cool white", "#f3f7ff"),
+        ("Bernstein", "Amber", "#ffb24a"), ("Eisblau", "Ice blue", "#9ad7ff"),
+        ("Mint", "Mint", "#9ff0c8"), ("Anthrazit", "Anthracite", "#1d1f22"),
     ]
     static let weights: [(String, Int)] = [("Light", 300), ("Regular", 400), ("Medium", 500), ("Bold", 700)]
 
@@ -50,8 +53,10 @@ struct Settings {
         guard let d = store else { return s }
         func dbl(_ k: String, _ def: Double) -> Double { d.object(forKey: k) != nil ? d.double(forKey: k) : def }
         func bool(_ k: String, _ def: Bool) -> Bool { d.object(forKey: k) != nil ? d.bool(forKey: k) : def }
-        if let v = d.string(forKey: "dialect"), let x = Dialect(rawValue: v) { s.dialect = x }
-        s.esIst = bool("esIst", s.esIst)
+        // „dialect“: Schlüssel aus der Zeit, als es nur Deutsch gab
+        if let v = d.string(forKey: "language") ?? d.string(forKey: "dialect"),
+           let x = Language(rawValue: v) { s.language = x }
+        s.intro = bool("esIst", s.intro)
         if let v = d.string(forKey: "front") { s.front = NSColor(hex: v) }
         if let v = d.string(forKey: "lit") { s.lit = NSColor(hex: v) }
         s.dim = dbl("dim", s.dim)
@@ -70,8 +75,8 @@ struct Settings {
 
     func save() {
         guard let d = Settings.store else { return }
-        d.set(dialect.rawValue, forKey: "dialect")
-        d.set(esIst, forKey: "esIst")
+        d.set(language.rawValue, forKey: "language")
+        d.set(intro, forKey: "esIst")
         d.set(front.hexString, forKey: "front")
         d.set(lit.hexString, forKey: "lit")
         d.set(dim, forKey: "dim")

@@ -6,7 +6,7 @@ import CoreGraphics
 @objc(WortuhrView)
 final class WortuhrView: ScreenSaverView {
 
-    private var settings = Settings.load()
+    var settings = Settings.load()
     private let root = CALayer()
     private let plate = CALayer()
     private let sheen = CAGradientLayer()
@@ -14,6 +14,8 @@ final class WortuhrView: ScreenSaverView {
     private let rimBottom = CALayer()
     private var cellLayers: [CAShapeLayer] = []
     private var dotLayers: [CAShapeLayer] = []
+    /// Zusatzzeichen zwischen den Feldern (Apostroph in O'CLOCK) mit ihrem Wort.
+    private var markLayers: [(layer: CAShapeLayer, word: String)] = []
     private var lastKey = ""
     private var startDate = Date()
     private var plateCenter = CGPoint.zero
@@ -232,6 +234,9 @@ final class WortuhrView: ScreenSaverView {
         // Buchstaben
         cellLayers.forEach { $0.removeFromSuperlayer() }
         cellLayers.removeAll()
+        markLayers.forEach { $0.layer.removeFromSuperlayer() }
+        markLayers.removeAll()
+        let face = s.language.face
         let font = s.makeFont(size: side * 0.043 * CGFloat(s.letterScale / 100))
         let ctFont = font as CTFont
         let capHeight = font.capHeight
@@ -240,24 +245,32 @@ final class WortuhrView: ScreenSaverView {
         let cw = gw / CGFloat(ClockFace.cols), ch = gh / CGFloat(ClockFace.rows)
         let glowRadius = font.pointSize * 0.35 * CGFloat(s.glow / 100)
 
+        /// Zeichen mittig über x, Grundlinie wie alle Buchstaben der Zeile r.
+        func glyphLayer(_ letter: String, x: CGFloat, row r: Int) -> CAShapeLayer {
+            let l = CAShapeLayer()
+            l.contentsScale = scale
+            let glyph = glyphPath(letter, font: ctFont)
+            let cy = side - (gy0 + ch * (CGFloat(r) + 0.5))   // Layer-Koordinaten: y nach oben
+            let bb = glyph.boundingBoxOfPath
+            var t = CGAffineTransform(translationX: x - bb.midX, y: cy - capHeight / 2)
+            l.path = glyph.copy(using: &t)
+            l.shadowColor = s.lit.cgColor
+            l.shadowOffset = .zero
+            l.shadowRadius = glowRadius
+            l.shadowOpacity = 0
+            l.fillColor = s.offColor.cgColor
+            plate.addSublayer(l)
+            return l
+        }
         for r in 0..<ClockFace.rows {
             for c in 0..<ClockFace.cols {
-                let l = CAShapeLayer()
-                l.contentsScale = scale
-                let glyph = glyphPath(ClockFace.letter(row: r, col: c), font: ctFont)
                 let cx = gx0 + cw * (CGFloat(c) + 0.5)
-                let cy = side - (gy0 + ch * (CGFloat(r) + 0.5))   // Layer-Koordinaten: y nach oben
-                let bb = glyph.boundingBoxOfPath
-                var t = CGAffineTransform(translationX: cx - bb.midX, y: cy - capHeight / 2)
-                l.path = glyph.copy(using: &t)
-                l.shadowColor = s.lit.cgColor
-                l.shadowOffset = .zero
-                l.shadowRadius = glowRadius
-                l.shadowOpacity = 0
-                l.fillColor = s.offColor.cgColor
-                plate.addSublayer(l)
-                cellLayers.append(l)
+                cellLayers.append(glyphLayer(face.letter(row: r, col: c), x: cx, row: r))
             }
+        }
+        for mark in face.marks {
+            let x = gx0 + cw * CGFloat(mark.afterCol + 1)
+            markLayers.append((glyphLayer(mark.glyph, x: x, row: mark.row), mark.word))
         }
 
         // Minutenpunkte: 1 oben links, 2 oben rechts, 3 unten rechts, 4 unten links
@@ -307,8 +320,8 @@ final class WortuhrView: ScreenSaverView {
         lastKey = key
 
         let s = settings
-        let p = ClockFace.phrase(hour24: h, minute: m, dialect: s.dialect, esIst: s.esIst)
-        let on = ClockFace.litCells(for: p.words)
+        let p = ClockFace.phrase(hour24: h, minute: m, language: s.language, intro: s.intro)
+        let on = s.language.face.litCells(for: p.words)
         let litColor = s.lit.cgColor
         let offColor = s.offColor.cgColor
         let glowOpacity: Float = s.glow > 0 ? 0.9 : 0
@@ -322,6 +335,11 @@ final class WortuhrView: ScreenSaverView {
         }
         for (i, l) in cellLayers.enumerated() {
             let lit = on.contains(i)
+            l.fillColor = lit ? litColor : offColor
+            l.shadowOpacity = lit ? glowOpacity : 0
+        }
+        for (l, word) in markLayers {
+            let lit = p.words.contains(word)
             l.fillColor = lit ? litColor : offColor
             l.shadowOpacity = lit ? glowOpacity : 0
         }
