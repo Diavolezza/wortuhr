@@ -330,8 +330,8 @@ function render(force){
   p.words.forEach(w=>{const[r,c,l]=W[w];for(let i=0;i<l;i++)on.add(r*11+c+i)});
   cells.forEach((row,r)=>row.forEach((el,c)=>el.classList.toggle("on",on.has(r*11+c))));
   marks.forEach(mk=>mk.el.classList.toggle("on",p.words.includes(mk.word)));
-  /* latest edge brightest, each earlier one dimmed by the trail factor */
-  edgeEls.forEach((d,i)=>d.style.opacity=i<p.edges?Math.pow(S.mtrail/100,p.edges-1-i):0);
+  /* latest edge at full strength, all earlier ones at the trail value */
+  edgeEls.forEach((d,i)=>d.style.opacity=i>=p.edges?0:(i===p.edges-1?1:S.mtrail/100));
   const words=spell(S.language,p.words);
   $("rTime").textContent=fmt(t);
   $("rPhrase").textContent=words+(p.edges?"  + "+p.edges+(p.edges===1?" edge":" edges"):"");

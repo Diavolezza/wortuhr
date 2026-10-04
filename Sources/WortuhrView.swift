@@ -428,11 +428,11 @@ final class WortuhrView: ScreenSaverView {
             c.set(lit: p.words.contains(word), litColor: litColor, offColor: offColor, glow: glow)
         }
         // Minute edges go dark together with the old words and light up one by one.
-        // The latest edge is brightest; each earlier one is dimmed by the trail factor
+        // The latest edge at full strength, all earlier ones at the trail value
         // (trail 100 % = all equally bright, 0 % = only the latest edge).
         let trail = Float(s.edgeTrail / 100)
         for (i, l) in edgeLayers.enumerated() {
-            l.opacity = s.minuteEdges && i < p.edges ? powf(trail, Float(p.edges - 1 - i)) : 0
+            l.opacity = !s.minuteEdges || i >= p.edges ? 0 : (i == p.edges - 1 ? 1 : trail)
         }
         CATransaction.commit()
     }

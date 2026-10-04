@@ -18,8 +18,8 @@ struct Settings {
     var minuteEdges = true        // minutes past the five-minute step light up the edges
     var edgeStrength: Double = 100 // brightness of the minute edges in % (10 … 200)
     var edgeSpread: Double = 50   // light outside the plate: 0 = none … 100 = wide halo
-    var edgeTrail: Double = 40    // brightness of the earlier edges: 0 = only the latest edge lit,
-                                  // 40 = trail fading backwards, 100 = all lit edges equally bright
+    var edgeTrail: Double = 40    // brightness of the earlier edges (the latest is always at full strength):
+                                  // 0 = only the latest edge lit, 100 = all lit edges equally bright
     var drift = false
     var mainScreenOnly = false    // other displays stay black
 
