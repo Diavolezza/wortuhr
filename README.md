@@ -5,10 +5,11 @@
 [![CI](https://github.com/Diavolezza/wortuhr/actions/workflows/ci.yml/badge.svg)](https://github.com/Diavolezza/wortuhr/actions/workflows/ci.yml)
 · **[Try it in the browser](https://diavolezza.github.io/wortuhr/)**
 · **[Download](https://github.com/Diavolezza/wortuhr/releases/latest)**
+· **[Support on Ko-fi](https://ko-fi.com/diavolezza)**
 
 A word clock on an 11×10 letter grid. The minutes between the five-minute steps light up the edges of the
 plate one after the other – top, right, bottom, left – and go dark again with the next words. The latest edge
-is the brightest; how much the earlier ones still glow (“trail”) is adjustable, from only the latest edge to all
+is the brightest; how much the earlier ones still glow (“afterglow”) is adjustable, from only the latest edge to all
 equally bright.
 The time is spelled out in eight variants:
 
@@ -113,6 +114,11 @@ at the same time don’t touch) and compares prototype and Swift line by line.
 - `Tools/Docs/main.swift` – renders the README images (`./build.sh --docs`)
 - `Tools/Phrases/main.swift` – prints all time phrases from Swift (for `prototype/check.mjs`)
 - `.github/workflows/` – CI (build + check), live demo on GitHub Pages, release on version tags (`v1.2` …)
+
+## Support
+
+Wortuhr is free. If you like it, you can buy me a coffee on [Ko-fi](https://ko-fi.com/diavolezza) ☕
+or support it via [GitHub Sponsors](https://github.com/sponsors/Diavolezza).
 
 ## Licence
 

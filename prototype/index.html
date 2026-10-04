@@ -158,12 +158,12 @@ kbd{font:11px ui-monospace,Menlo,monospace;border:1px solid var(--line);border-b
     <section>
       <h2>Colours</h2>
       <div class="row"><span class="lab">Front</span><div class="swatches" id="swFront"></div></div>
-      <div class="row"><span class="lab">Light colour</span><div class="swatches" id="swLit"></div></div>
+      <div class="row"><span class="lab">Lit colour</span><div class="swatches" id="swLit"></div></div>
       <div class="row"><span class="lab"><span>Unlit letters</span><output id="oDim"></output></span>
         <input type="range" id="dim" min="0" max="40" step="1"></div>
       <div class="row"><span class="lab"><span>Glow</span><output id="oGlow"></output></span>
         <input type="range" id="glow" min="0" max="100" step="5"></div>
-      <div class="row"><span class="lab"><span>Edge</span><output id="oEdge"></output></span>
+      <div class="row"><span class="lab"><span>Rim</span><output id="oEdge"></output></span>
         <input type="range" id="edge" min="0" max="100" step="5"></div>
     </section>
 
@@ -197,17 +197,17 @@ kbd{font:11px ui-monospace,Menlo,monospace;border:1px solid var(--line);border-b
     <section>
       <h2>Minutes at the edges</h2>
       <div class="row"><label class="check"><input type="checkbox" id="minutes"> Show minutes at the edges</label></div>
-      <div class="row"><span class="lab"><span>Strength</span><output id="oMstr"></output></span>
+      <div class="row"><span class="lab"><span>Edge light</span><output id="oMstr"></output></span>
         <input type="range" id="mstr" min="10" max="200" step="5"></div>
       <div class="row"><span class="lab"><span>Spread</span><output id="oMspread"></output></span>
         <input type="range" id="mspread" min="0" max="100" step="5"></div>
-      <div class="row"><span class="lab"><span>Trail</span><output id="oMtrail"></output></span>
+      <div class="row"><span class="lab"><span>Afterglow</span><output id="oMtrail"></output></span>
         <input type="range" id="mtrail" min="0" max="100" step="5"></div>
-      <p class="hint">Spread: how far the light reaches outside the plate – 0 % only the fine line on the edge.<br>Trail: brightness of the earlier edges – 0 % only the latest edge, 100 % all equally bright.<br>After 1 minute the top edge glows, then right, bottom and left. With the next words all edges go dark.</p>
+      <p class="hint">Spread: how far the light reaches outside the plate – 0 % only the fine line on the edge.<br>Afterglow: brightness of the earlier edges – 0 % only the latest edge, 100 % all equally bright.<br>After 1 minute the top edge glows, then right, bottom and left. With the next words all edges go dark.</p>
     </section>
 
     <section>
-      <h2>Clock time</h2>
+      <h2>Time mode</h2>
       <div class="row"><div class="seg" data-key="tmode">
         <button data-v="live">Live</button><button data-v="manual">Manual</button><button data-v="fast">Fast-forward</button>
       </div></div>
@@ -226,6 +226,7 @@ kbd{font:11px ui-monospace,Menlo,monospace;border:1px solid var(--line);border-b
       </div>
     </section>
     <p class="hint"><kbd>H</kbd> settings on/off · <kbd>F</kbd> full screen</p>
+    <p class="hint">Wortuhr is free – <a href="https://ko-fi.com/diavolezza" target="_blank" rel="noopener" style="color:var(--accent)">support it on Ko-fi ☕</a> · <a href="https://github.com/Diavolezza/wortuhr" target="_blank" rel="noopener" style="color:var(--accent)">source on GitHub</a></p>
   </aside>
 </div>
 
@@ -233,7 +234,7 @@ kbd{font:11px ui-monospace,Menlo,monospace;border:1px solid var(--line);border-b
 <script>
 /* ---------- Settings ---------- */
 const FRONTS=[["Deep black","#0e0f11"],["Graphite","#2a2c30"],["Midnight blue","#101b2c"],["Forest green","#14261e"],["Brick red","#5e231d"],["Chalk white","#e9e7e1"]];
-const LITS=[["Warm white","#fff1d6"],["Cool white","#f3f7ff"],["Amber","#ffb24a"],["Ice blue","#9ad7ff"],["Mint","#9ff0c8"],["Anthracite","#1d1f22"]];
+const LITS=[["Warm white","#fff1d6"],["Cool white","#f3f7ff"],["Amber","#ffb24a"],["Ice blue","#9ad7ff"],["Mint","#9ff0c8"],["Charcoal","#1d1f22"]];
 /* Default language: the browser's, British English otherwise */
 const browserLanguage=(()=>{const l=(navigator.language||"en").toLowerCase();
   return l.startsWith("de-ch")?"deCH":l.startsWith("de")?"de":l.startsWith("en-us")?"us":["es","fr","it"].find(x=>l.startsWith(x))||"en"})();

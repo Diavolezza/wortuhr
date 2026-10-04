@@ -42,5 +42,8 @@ jobs:
           3. System Settings → Screen Saver → select “Wortuhr”.
 
           Runs on Apple Silicon and Intel, macOS 13 or later.
+
+          Wortuhr is free. If you like it, you can buy me a coffee on [Ko-fi](https://ko-fi.com/diavolezza) ☕
+          or support it via [GitHub Sponsors](https://github.com/sponsors/Diavolezza).
           EOF
           gh release create "$GITHUB_REF_NAME" "Wortuhr-$VERSION.zip" --title "Wortuhr $VERSION" --notes-file notes.md
