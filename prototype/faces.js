@@ -146,7 +146,7 @@ function phrase(h24, m, lang, intro){
         50:["M10","VOR",H(n)], 55:["M5","VOR",H(n)] }[m5] };
     }
   }
-  return { words:(intro?p.intro:[]).concat(p.words), dots:m%5 };
+  return { words:(intro?p.intro:[]).concat(p.words), edges:m%5 };
 }
 
 /* Words as readable text (for display and checks) */

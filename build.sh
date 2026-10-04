@@ -4,6 +4,7 @@
 #         ./build.sh --no-install   build only
 #         ./build.sh --system       install for all users to /Library/Screen Savers (admin password)
 #         --arm-only                Apple Silicon only (faster; combinable, e.g. ./build.sh --system --arm-only)
+#         --docs                    also render the README images in docs/ (combinable)
 set -euo pipefail
 cd "$(dirname "$0")"
 # Also write the output to build.log (so Claude can read errors)
@@ -13,9 +14,11 @@ NAME=Wortuhr
 MIN_OS=13.0
 ARCHS=(arm64 x86_64)
 MODE=""
+DOCS=0
 for arg in "$@"; do
   case "$arg" in
     --arm-only) ARCHS=(arm64) ;;
+    --docs) DOCS=1 ;;
     --no-install|--system) MODE="$arg" ;;
     *) echo "Unknown option: $arg" >&2; exit 1 ;;
   esac
@@ -55,6 +58,12 @@ xcrun swiftc -O -module-name WortuhrThumb -sdk "$SDK" \
 tiffutil -cathidpicheck "$BUNDLE/Contents/Resources/thumbnail.png" "$BUNDLE/Contents/Resources/thumbnail@2x.png" -out "$BUNDLE/Contents/Resources/thumbnail.tiff" >/dev/null
 # Like Xcode projects, ship only the combined TIFF file, no PNGs.
 rm -f "$BUNDLE/Contents/Resources/thumbnail.png" "$BUNDLE/Contents/Resources/thumbnail@2x.png"
+if [ "$DOCS" = 1 ]; then
+  echo "▸ README images (docs/)"
+  xcrun swiftc -O -module-name WortuhrDocs -sdk "$SDK" \
+    Sources/*.swift Tools/Docs/main.swift -o "$BUILD/makedocs" -framework ScreenSaver
+  "$BUILD/makedocs" docs
+fi
 # Make everything world-readable – otherwise macOS cannot load the bundle from /Library.
 chmod -R u+rwX,go+rX-w "$BUNDLE"
 codesign --force --sign - "$BUNDLE"

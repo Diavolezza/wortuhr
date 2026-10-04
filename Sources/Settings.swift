@@ -13,10 +13,13 @@ struct Settings {
     var font = "Avenir Next"
     var weight = 400
     var letterScale: Double = 100 // %
-    var flat = false              // true = full screen, false = front plate
     var size: Double = 92         // % of the shorter screen side
     var fade: Double = 0.8        // seconds
-    var dots = true
+    var minuteEdges = true        // minutes past the five-minute step light up the edges
+    var edgeStrength: Double = 100 // brightness of the minute edges in % (10 … 200)
+    var edgeSpread: Double = 50   // light outside the plate: 0 = none … 100 = wide halo
+    var edgeTrail: Double = 40    // brightness of the earlier edges: 0 = only the latest edge lit,
+                                  // 40 = trail fading backwards, 100 = all lit edges equally bright
     var drift = false
     var mainScreenOnly = false    // other displays stay black
 
@@ -49,10 +52,12 @@ struct Settings {
         if let v = d.string(forKey: "font") { s.font = v }
         if d.object(forKey: "weight") != nil { s.weight = d.integer(forKey: "weight") }
         s.letterScale = dbl("letterScale", s.letterScale)
-        s.flat = bool("flat", s.flat)
         s.size = dbl("size", s.size)
         s.fade = dbl("fade", s.fade)
-        s.dots = bool("dots", s.dots)
+        s.minuteEdges = bool("minuteEdges", s.minuteEdges)
+        s.edgeStrength = dbl("edgeStrength", s.edgeStrength)
+        s.edgeSpread = dbl("edgeSpread", s.edgeSpread)
+        s.edgeTrail = dbl("edgeTrail", s.edgeTrail)
         s.drift = bool("drift", s.drift)
         s.mainScreenOnly = bool("mainScreenOnly", s.mainScreenOnly)
         return s
@@ -70,13 +75,26 @@ struct Settings {
         d.set(font, forKey: "font")
         d.set(weight, forKey: "weight")
         d.set(letterScale, forKey: "letterScale")
-        d.set(flat, forKey: "flat")
         d.set(size, forKey: "size")
         d.set(fade, forKey: "fade")
-        d.set(dots, forKey: "dots")
+        d.set(minuteEdges, forKey: "minuteEdges")
+        d.set(edgeStrength, forKey: "edgeStrength")
+        d.set(edgeSpread, forKey: "edgeSpread")
+        d.set(edgeTrail, forKey: "edgeTrail")
+        // Keys of removed options (full-screen style, minute dots)
+        d.removeObject(forKey: "flat")
+        d.removeObject(forKey: "dots")
         d.set(drift, forKey: "drift")
         d.set(mainScreenOnly, forKey: "mainScreenOnly")
         d.synchronize()
+    }
+
+    /// Glow of the minute edges as fractions of the plate width, same as edgeSpread() in the prototype:
+    /// depth = how far the glow reaches into the plate (fixed: a hint), halo = light outside the plate,
+    /// set by the spread (0 % none, 50 % 0.7 %, 100 % 2 % of the plate width).
+    var edgeGeometry: (depth: CGFloat, halo: CGFloat) {
+        let v = CGFloat(edgeSpread) / 100
+        return (0.005, 0.02 * pow(v, 1.5))
     }
 
     /// Colour of unlit letters: dim % light colour, the rest front colour.

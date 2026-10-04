@@ -43,7 +43,7 @@ for (const lang of Object.keys(LANGS)) {
         fail(`${lang} ${h}:${m}: ${w} touches the previous word ("${spell(lang, p.words)}")`);
       last = start + l - 1; lastRow = r; lastEnd = c + l - 1;
     }
-    table.push(`time ${lang} ${intro ? 1 : 0} ${h}:${m} ${p.words.join(",")} ${p.dots}`);
+    table.push(`time ${lang} ${intro ? 1 : 0} ${h}:${m} ${p.words.join(",")} ${p.edges}`);
   }
 }
 

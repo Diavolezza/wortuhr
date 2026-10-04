@@ -6,7 +6,11 @@
 · **[Try it in the browser](https://diavolezza.github.io/wortuhr/)**
 · **[Download](https://github.com/Diavolezza/wortuhr/releases/latest)**
 
-A word clock on an 11×10 letter grid with four minute dots. The time is spelled out in eight variants:
+A word clock on an 11×10 letter grid. The minutes between the five-minute steps light up the edges of the
+plate one after the other – top, right, bottom, left – and go dark again with the next words. The latest edge
+is the brightest; how much the earlier ones still glow (“trail”) is adjustable, from only the latest edge to all
+equally bright.
+The time is spelled out in eight variants:
 
 | Language | Example (3:15 · 3:45) |
 |---|---|
@@ -19,10 +23,11 @@ A word clock on an 11×10 letter grid with four minute dots. The time is spelled
 | Italian | le tre e un quarto · le quattro meno un quarto (1:00 è l’una) |
 | Spanish | las tres y cuarto · las cuatro menos cuarto (1:00 es la una) |
 
-Colours, typeface, size, burn-in protection and “main display only” can be set in the options dialog; the
+Colours, typeface, size, the glow of the minute edges, burn-in protection and “main display only” can be set
+in the options dialog; the
 dialog speaks the selected language. On first start the clock uses the Mac's language.
 
-![Wortuhr running from 3:00 to 3:55 in German](docs/wortuhr.gif)
+![Wortuhr running from 3:00 to 3:15 in German](docs/wortuhr.gif)
 
 Tested on macOS 27 on Apple Silicon; built for Apple Silicon and Intel (macOS 13 or later).
 
@@ -49,6 +54,8 @@ System Settings shows the custom thumbnail only for savers in `/Library/Screen S
 
 `--arm-only` builds for Apple Silicon only – faster, and enough for your own Mac
 (e.g. `./build.sh --system --arm-only`). Build without it to share the saver.
+
+`--docs` also renders the README images in `docs/` with the screen saver itself.
 
 ## When something goes wrong
 
@@ -103,6 +110,7 @@ at the same time don’t touch) and compares prototype and Swift line by line.
 - `Sources/ConfigController.swift` – options dialog in all languages
 - `Sources/Log.swift` – diagnostic messages (collected by `./diag.sh`)
 - `Tools/main.swift` – creates the thumbnail for System Settings (11:55)
+- `Tools/Docs/main.swift` – renders the README images (`./build.sh --docs`)
 - `Tools/Phrases/main.swift` – prints all time phrases from Swift (for `prototype/check.mjs`)
 - `.github/workflows/` – CI (build + check), live demo on GitHub Pages, release on version tags (`v1.2` …)
 

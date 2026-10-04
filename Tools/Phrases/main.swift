@@ -18,7 +18,7 @@ for lang in Language.allCases {
         for h in 0..<24 {
             for m in 0..<60 {
                 let p = ClockFace.phrase(hour24: h, minute: m, language: lang, intro: intro)
-                print("time \(lang.rawValue) \(intro ? 1 : 0) \(h):\(m) \(p.words.joined(separator: ",")) \(p.dots)")
+                print("time \(lang.rawValue) \(intro ? 1 : 0) \(h):\(m) \(p.words.joined(separator: ",")) \(p.edges)")
             }
         }
     }

@@ -84,8 +84,9 @@ struct ClockFace {
         return on
     }
 
-    /// Time phrase: intro ("ES IST", "IT IS" …, optional), words and minute dots.
-    static func phrase(hour24: Int, minute: Int, language: Language, intro: Bool) -> (words: [String], dots: Int) {
+    /// Time phrase: intro ("ES IST", "IT IS" …, optional), words and the minutes past the
+    /// five-minute step (0–4), shown by the glowing edges of the plate.
+    static func phrase(hour24: Int, minute: Int, language: Language, intro: Bool) -> (words: [String], edges: Int) {
         let m5 = (minute / 5) * 5
         let h = hour24 % 12
         let n = (h + 1) % 12

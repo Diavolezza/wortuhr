@@ -11,7 +11,8 @@
   --ink:#ebe7df; --muted:#9b978e; --accent:#e6b56a; --focus:#f2cf93;
   /* clock – set via JS */
   --front:#141517; --lit:#fff3dc; --dim:14%; --glow:0.35; --font:"Helvetica Neue",Helvetica,Arial,sans-serif;
-  --weight:400; --lscale:1; --size:.92; --edge:.4; --fade:.8s; --drift:0px; --stagebg:#000;
+  --weight:400; --lscale:1; --size:.92; --edge:.4; --fade:.8s; --drift:0px;
+  --mstr:1; --mdepth:.005; --mhalo:0;
 }
 html,body{height:100%}
 body{background:var(--page);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;margin:0}
@@ -20,10 +21,13 @@ body{background:var(--page);color:var(--ink);font:14px/1.45 system-ui,-apple-sys
 .app.nopanel .panel{display:none}
 
 /* ---------- Stage ---------- */
-.stage{position:relative;background:var(--stagebg);container-type:size;overflow:hidden;min-height:0;transition:background .4s}
+.stage{position:relative;background:#000;container-type:size;overflow:hidden;min-height:0}
 .clock{position:absolute;left:50%;top:50%;
   width:calc(min(100cqw,100cqh) * var(--size));aspect-ratio:1;
   translate:-50% -50%;border-radius:1.2%;
+  --S:calc(min(100cqw,100cqh) * var(--size));
+  --lw:calc(1.5px * max(1, var(--mstr)));
+  --in:max(calc(3px * max(1, var(--mstr))), calc(var(--S) * var(--mdepth))); --out:calc(var(--S) * var(--mhalo));
   background:var(--front);
   box-shadow:0 0 0 1px rgba(255,255,255,calc(.03 + var(--edge) * .22)),
     inset 0 1px 0 rgba(255,255,255,calc(var(--edge) * .20)), inset 0 -1px 0 rgba(0,0,0,.45),
@@ -31,8 +35,6 @@ body{background:var(--page);color:var(--ink);font:14px/1.45 system-ui,-apple-sys
 }
 .clock::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
   background:linear-gradient(160deg,rgba(255,255,255,.055),rgba(255,255,255,0) 45%,rgba(0,0,0,.12));}
-.stage.flat .clock{box-shadow:none;background:transparent}
-.stage.flat .clock::after{display:none}
 .drift .clock{animation:drift 180s ease-in-out infinite}
 @keyframes drift{
   0%{transform:translate(0,0)}
@@ -41,30 +43,44 @@ body{background:var(--page);color:var(--ink);font:14px/1.45 system-ui,-apple-sys
   75%{transform:translate(calc(var(--drift) * -1),calc(var(--drift) * -.3))}
   100%{transform:translate(0,0)}
 }
-.grid{position:absolute;inset:10.5% 10% 10.5%;display:grid;
+.grid{position:absolute;inset:7% 6.67% 7%;display:grid;
   grid-template-columns:repeat(11,1fr);grid-template-rows:repeat(10,1fr);
   font-family:var(--font);font-weight:var(--weight);
-  font-size:calc(min(100cqw,100cqh) * var(--size) * .043 * var(--lscale));
+  font-size:calc(min(100cqw,100cqh) * var(--size) * .0466 * var(--lscale));
   line-height:1;text-align:center}
 .cell{display:grid;place-items:center;
   color:color-mix(in srgb,var(--lit) var(--dim),var(--front));
   transition:color var(--fade) ease, text-shadow var(--fade) ease;}
 .cell.on{color:var(--lit);
-  text-shadow:0 0 calc(.35em * var(--glow)) color-mix(in srgb,var(--lit) 70%,transparent),
-              0 0 calc(1.1em * var(--glow)) color-mix(in srgb,var(--lit) 35%,transparent)}
+  text-shadow:0 0 calc(.3em * var(--glow)) color-mix(in srgb,var(--lit) 90%,transparent),
+              0 0 calc(.9em * var(--glow)) color-mix(in srgb,var(--lit) 60%,transparent),
+              0 0 calc(2.2em * var(--glow)) color-mix(in srgb,var(--lit) 30%,transparent)}
 .mark{position:absolute;height:10%;display:grid;place-items:center;translate:-50% 0;
   color:color-mix(in srgb,var(--lit) var(--dim),var(--front));
   transition:color var(--fade) ease, text-shadow var(--fade) ease;}
 .mark.on{color:var(--lit);
-  text-shadow:0 0 calc(.35em * var(--glow)) color-mix(in srgb,var(--lit) 70%,transparent),
-              0 0 calc(1.1em * var(--glow)) color-mix(in srgb,var(--lit) 35%,transparent)}
-.dot{position:absolute;width:1.05%;aspect-ratio:1;border-radius:50%;
-  background:color-mix(in srgb,var(--lit) var(--dim),var(--front));
-  transition:background var(--fade) ease, box-shadow var(--fade) ease}
-.dot.on{background:var(--lit);box-shadow:0 0 calc(1.6cqh * var(--glow)) color-mix(in srgb,var(--lit) 55%,transparent)}
-.dot[data-i="1"]{left:5%;top:5%}.dot[data-i="2"]{right:5%;top:5%}
-.dot[data-i="3"]{right:5%;bottom:5%}.dot[data-i="4"]{left:5%;bottom:5%}
-.nodots .dot{display:none}
+  text-shadow:0 0 calc(.3em * var(--glow)) color-mix(in srgb,var(--lit) 90%,transparent),
+              0 0 calc(.9em * var(--glow)) color-mix(in srgb,var(--lit) 60%,transparent),
+              0 0 calc(2.2em * var(--glow)) color-mix(in srgb,var(--lit) 30%,transparent)}
+/* Minute edges: after 1 minute the top edge glows, then right, bottom, left.
+   A thin line on the edge, a soft glow towards the inside, an optional halo outside.
+   The ends taper off so the corners stay dark. */
+.medge{position:absolute;pointer-events:none;opacity:0;transition:opacity var(--fade) ease;
+  /* Edge light 10 … 200 %: alphas scale with it (capped at 100 %), above 100 % the line gets wider */
+  --line:color-mix(in srgb,var(--lit) calc(min(1, .9 * var(--mstr)) * 100%),transparent);
+  --near:color-mix(in srgb,var(--lit) calc(min(1, .34 * var(--mstr)) * 100%),transparent);
+  --mid:color-mix(in srgb,var(--lit) calc(min(1, .10 * var(--mstr)) * 100%),transparent);
+  --halo:color-mix(in srgb,var(--lit) calc(min(1, .22 * var(--mstr)) * 100%),transparent);
+  background:linear-gradient(var(--to),transparent 0,var(--halo) calc(var(--out) - 1px),
+    var(--line) var(--out),var(--line) calc(var(--out) + var(--lw)),var(--near) calc(var(--out) + var(--lw) + 1px),
+    var(--mid) calc(var(--out) + var(--in) * .35),transparent 100%);
+  --taper:linear-gradient(var(--along),transparent 0,#000 22%,#000 78%,transparent 100%);
+  -webkit-mask-image:var(--taper);mask-image:var(--taper)}
+.medge[data-i="1"]{--to:to bottom;--along:to right;left:6%;right:6%;top:calc(-1 * var(--out));height:calc(var(--out) + var(--in))}
+.medge[data-i="2"]{--to:to left;--along:to bottom;top:6%;bottom:6%;right:calc(-1 * var(--out));width:calc(var(--out) + var(--in))}
+.medge[data-i="3"]{--to:to top;--along:to right;left:6%;right:6%;bottom:calc(-1 * var(--out));height:calc(var(--out) + var(--in))}
+.medge[data-i="4"]{--to:to right;--along:to bottom;top:6%;bottom:6%;left:calc(-1 * var(--out));width:calc(var(--out) + var(--in))}
+.nominutes .medge{display:none}
 
 .stagebar{position:absolute;top:12px;right:12px;display:flex;gap:8px;opacity:.35;transition:opacity .2s}
 .stage:hover .stagebar,.stagebar:focus-within{opacity:1}
@@ -113,8 +129,8 @@ kbd{font:11px ui-monospace,Menlo,monospace;border:1px solid var(--line);border-b
   <div class="stage" id="stage">
     <div class="clock" id="clock" role="img" aria-label="Word clock">
       <div class="grid" id="grid"></div>
-      <span class="dot" data-i="1"></span><span class="dot" data-i="2"></span>
-      <span class="dot" data-i="3"></span><span class="dot" data-i="4"></span>
+      <span class="medge" data-i="1"></span><span class="medge" data-i="2"></span>
+      <span class="medge" data-i="3"></span><span class="medge" data-i="4"></span>
     </div>
     <div class="stagebar">
       <button class="btn" id="bPanel" title="Key H">Settings</button>
@@ -171,15 +187,23 @@ kbd{font:11px ui-monospace,Menlo,monospace;border:1px solid var(--line);border-b
 
     <section>
       <h2>Appearance</h2>
-      <div class="row"><div class="seg" data-key="look">
-        <button data-v="plate">Front plate</button><button data-v="flat">Full screen</button>
-      </div></div>
       <div class="row"><span class="lab"><span>Size on screen</span><output id="oSize"></output></span>
         <input type="range" id="size" min="40" max="100" step="2"></div>
       <div class="row"><span class="lab"><span>Cross-fade</span><output id="oFade"></output></span>
         <input type="range" id="fade" min="0" max="3" step="0.1"></div>
-      <div class="row"><label class="check"><input type="checkbox" id="dots"> Minute dots</label></div>
       <label class="check"><input type="checkbox" id="drift"> Drift slowly (burn-in protection)</label>
+    </section>
+
+    <section>
+      <h2>Minutes at the edges</h2>
+      <div class="row"><label class="check"><input type="checkbox" id="minutes"> Show minutes at the edges</label></div>
+      <div class="row"><span class="lab"><span>Strength</span><output id="oMstr"></output></span>
+        <input type="range" id="mstr" min="10" max="200" step="5"></div>
+      <div class="row"><span class="lab"><span>Spread</span><output id="oMspread"></output></span>
+        <input type="range" id="mspread" min="0" max="100" step="5"></div>
+      <div class="row"><span class="lab"><span>Trail</span><output id="oMtrail"></output></span>
+        <input type="range" id="mtrail" min="0" max="100" step="5"></div>
+      <p class="hint">Spread: how far the light reaches outside the plate – 0 % only the fine line on the edge.<br>Trail: brightness of the earlier edges – 0 % only the latest edge, 100 % all equally bright.<br>After 1 minute the top edge glows, then right, bottom and left. With the next words all edges go dark.</p>
     </section>
 
     <section>
@@ -214,9 +238,9 @@ const LITS=[["Warm white","#fff1d6"],["Cool white","#f3f7ff"],["Amber","#ffb24a"
 const browserLanguage=(()=>{const l=(navigator.language||"en").toLowerCase();
   return l.startsWith("de-ch")?"deCH":l.startsWith("de")?"de":l.startsWith("en-us")?"us":["es","fr","it"].find(x=>l.startsWith(x))||"en"})();
 const DEF={language:browserLanguage,intro:true,front:"#0e0f11",lit:"#fff1d6",dim:10,glow:40,edge:40,
-  font:'"Avenir Next",Avenir,sans-serif',weight:"400",lscale:100,look:"plate",size:92,fade:0.8,dots:true,drift:false,tmode:"live",man:945};
+  font:'"Avenir Next",Avenir,sans-serif',weight:"400",lscale:100,size:92,fade:0.8,minutes:true,mstr:100,mspread:50,mtrail:40,drift:false,tmode:"live",man:945};
 let S={...DEF};
-try{const s=JSON.parse(localStorage.getItem("wortuhr-prototype")||"null");if(s)S={...DEF,...s}}catch(e){}
+try{const s=JSON.parse(localStorage.getItem("wortuhr-prototype")||"null");if(s){S={...DEF,...s};delete S.look;delete S.dots;delete S.mdepth;delete S.mhalo}}catch(e){}
 const save=()=>{try{localStorage.setItem("wortuhr-prototype",JSON.stringify(S))}catch(e){}};
 
 const $=id=>document.getElementById(id), root=document.documentElement;
@@ -231,7 +255,7 @@ function buildGrid(){
   f.marks.forEach(mk=>{const s=document.createElement("span");s.className="mark";s.textContent=mk.glyph;
     s.style.left=((mk.afterCol+1)/11*100)+"%";s.style.top=(mk.row*10)+"%";gridEl.appendChild(s);marks.push({el:s,word:mk.word});});
 }
-const dotEls=[...document.querySelectorAll(".dot")];
+const edgeEls=[...document.querySelectorAll(".medge")];
 
 function swatches(el,list,key){
   el.innerHTML="";
@@ -243,11 +267,16 @@ function swatches(el,list,key){
 swatches($("swFront"),FRONTS,"front");swatches($("swLit"),LITS,"lit");
 
 document.querySelectorAll(".seg").forEach(seg=>seg.querySelectorAll("button").forEach(b=>b.onclick=()=>{S[seg.dataset.key]=b.dataset.v;apply()}));
-["dim","glow","edge","lscale","size","fade","man"].forEach(k=>$(k).oninput=e=>{S[k]=+e.target.value;apply()});
-["intro","dots","drift"].forEach(k=>$(k).onchange=e=>{S[k]=e.target.checked;apply()});
+["dim","glow","edge","lscale","size","fade","man","mstr","mspread","mtrail"].forEach(k=>$(k).oninput=e=>{S[k]=+e.target.value;apply()});
+["intro","minutes","drift"].forEach(k=>$(k).onchange=e=>{S[k]=e.target.checked;apply()});
 $("font").onchange=e=>{S.font=e.target.value;apply()};
 $("language").onchange=e=>{S.language=e.target.value;apply()};
 
+/* Spread 0…100 → halo outside the plate (fraction of the plate width); the glow inside
+   stays a hint (0.5 %). 0 = no halo, 50 = 0.7 %, 100 = 2 %. Same as Settings.edgeGeometry. */
+function edgeSpread(v){
+  return {depth:0.005, halo:0.02*Math.pow(v/100,1.5)};
+}
 const fmt=min=>String(Math.floor(min/60)).padStart(2,"0")+":"+String(min%60).padStart(2,"0");
 function apply(){
   root.style.setProperty("--front",S.front);root.style.setProperty("--lit",S.lit);
@@ -255,21 +284,21 @@ function apply(){
   root.style.setProperty("--font",S.font);root.style.setProperty("--weight",S.weight);
   root.style.setProperty("--lscale",S.lscale/100);root.style.setProperty("--size",S.size/100);
   root.style.setProperty("--fade",S.fade+"s");
-  root.style.setProperty("--stagebg",S.look==="flat"?S.front:"#000");
+  root.style.setProperty("--mstr",S.mstr/100);const sp=edgeSpread(S.mspread);root.style.setProperty("--mdepth",sp.depth);root.style.setProperty("--mhalo",sp.halo);
   root.style.setProperty("--drift",S.drift?"3cqh":"0px");
-  $("stage").classList.toggle("flat",S.look==="flat");
   $("stage").classList.toggle("drift",S.drift);
-  $("clock").classList.toggle("nodots",!S.dots);
+  $("clock").classList.toggle("nominutes",!S.minutes);
   document.querySelectorAll(".seg").forEach(seg=>seg.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(S[seg.dataset.key]===b.dataset.v))));
   document.querySelectorAll(".sw").forEach(b=>{const key=b.parentElement.id==="swFront"?"front":"lit";b.setAttribute("aria-pressed",String(S[key].toLowerCase()===b.dataset.v))});
   $("c_front").value=S.front;$("c_lit").value=S.lit;
-  ["dim","glow","edge","lscale","size","fade","man"].forEach(k=>$(k).value=S[k]);
-  ["intro","dots","drift"].forEach(k=>$(k).checked=S[k]);
+  ["dim","glow","edge","lscale","size","fade","man","mstr","mspread","mtrail"].forEach(k=>$(k).value=S[k]);
+  ["intro","minutes","drift"].forEach(k=>$(k).checked=S[k]);
   $("language").value=S.language;
   $("introLabel").textContent={de:"“ES IST”",deCH:"“ES ISCH”",deSouth:"“ES IST”",en:"“IT IS”",us:"“IT IS”",fr:"“IL EST”",it:"“SONO”/“È”",es:"“SON”/“ES”"}[S.language];
   $("font").value=S.font;
   $("oDim").textContent=S.dim+" %";$("oGlow").textContent=S.glow+" %";$("oEdge").textContent=S.edge+" %";$("oLscale").textContent=S.lscale+" %";
   $("oSize").textContent=S.size+" %";$("oFade").textContent=S.fade.toFixed(1)+" s";$("oMan").textContent=fmt(S.man);
+  $("oMstr").textContent=S.mstr+" %";$("oMspread").textContent=S.mspread+" %";$("oMtrail").textContent=S.mtrail+" %";
   $("manualRow").hidden=S.tmode!=="manual";
   $("languageHint").textContent={
     de:"3:15 viertel nach drei · 3:20 zwanzig nach drei · 3:45 viertel vor vier",
@@ -295,16 +324,17 @@ function currentMinutes(){
 }
 function render(force){
   const t=currentMinutes(),h=Math.floor(t/60),m=t%60;
-  const key=t+S.language+S.intro;
+  const key=t+S.language+S.intro+S.mtrail;
   if(!force&&key===lastKey)return;lastKey=key;
   const p=phrase(h,m,S.language,S.intro),on=new Set(),W=face.words;
   p.words.forEach(w=>{const[r,c,l]=W[w];for(let i=0;i<l;i++)on.add(r*11+c+i)});
   cells.forEach((row,r)=>row.forEach((el,c)=>el.classList.toggle("on",on.has(r*11+c))));
   marks.forEach(mk=>mk.el.classList.toggle("on",p.words.includes(mk.word)));
-  dotEls.forEach((d,i)=>d.classList.toggle("on",i<p.dots));
+  /* latest edge brightest, each earlier one dimmed by the trail factor */
+  edgeEls.forEach((d,i)=>d.style.opacity=i<p.edges?Math.pow(S.mtrail/100,p.edges-1-i):0);
   const words=spell(S.language,p.words);
   $("rTime").textContent=fmt(t);
-  $("rPhrase").textContent=words+(p.dots?"  + "+p.dots+(p.dots===1?" dot":" dots"):"");
+  $("rPhrase").textContent=words+(p.edges?"  + "+p.edges+(p.edges===1?" edge":" edges"):"");
   $("clock").setAttribute("aria-label",fmt(t)+" – "+words.toLowerCase());
 }
 setInterval(()=>{if(S.tmode==="fast")fastMin=(currentMinutes()+1)%1440;render(false)},1000);

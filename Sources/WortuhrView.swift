@@ -12,10 +12,24 @@ final class WortuhrView: ScreenSaverView {
     private let sheen = CAGradientLayer()
     private let rimTop = CALayer()
     private let rimBottom = CALayer()
-    private var cellLayers: [CAShapeLayer] = []
-    private var dotLayers: [CAShapeLayer] = []
+    /// One letter: the glyph with a close glow, and beneath it the same glyph again,
+    /// which only contributes a wide, faint halo (a layer has only one shadow).
+    private struct Glyph {
+        let main: CAShapeLayer
+        let halo: CAShapeLayer
+        func remove() { main.removeFromSuperlayer(); halo.removeFromSuperlayer() }
+        func set(lit: Bool, litColor: CGColor, offColor: CGColor, glow: Float) {
+            main.fillColor = lit ? litColor : offColor
+            halo.fillColor = main.fillColor
+            main.shadowOpacity = lit && glow > 0 ? 0.95 : 0
+            halo.shadowOpacity = lit && glow > 0 ? 0.6 : 0
+        }
+    }
+    private var cells: [Glyph] = []
     /// Extra glyphs between cells (apostrophe in O'CLOCK) with the word they light up with.
-    private var markLayers: [(layer: CAShapeLayer, word: String)] = []
+    private var marks: [(glyph: Glyph, word: String)] = []
+    /// Minute edges: top, right, bottom, left
+    private var edgeLayers: [CALayer] = []
     private var lastKey = ""
     private var startDate = Date()
     private var plateCenter = CGPoint.zero
@@ -204,7 +218,7 @@ final class WortuhrView: ScreenSaverView {
 
         root.frame = b
         root.contentsScale = scale
-        root.backgroundColor = (s.flat && !blankedDisplay && !hiddenForActivity ? s.front : NSColor.black).cgColor
+        root.backgroundColor = NSColor.black.cgColor
 
         // Plate
         let side = floor(min(b.width, b.height) * CGFloat(s.size / 100))
@@ -213,19 +227,17 @@ final class WortuhrView: ScreenSaverView {
         plate.position = plateCenter
         plate.contentsScale = scale
         plate.cornerRadius = side * 0.012
-        plate.backgroundColor = s.flat ? nil : s.front.cgColor
+        plate.backgroundColor = s.front.cgColor
 
         // Edge: fine light border, highlight at the top, shadow at the bottom
         let e = CGFloat(s.edge / 100)
-        plate.borderWidth = s.flat ? 0 : 1
+        plate.borderWidth = 1
         plate.borderColor = NSColor(white: 1, alpha: 0.03 + e * 0.22).cgColor
         let inset = plate.cornerRadius
         rimTop.frame = CGRect(x: inset, y: side - 2, width: side - 2 * inset, height: 1)
         rimTop.backgroundColor = NSColor(white: 1, alpha: e * 0.20).cgColor
         rimBottom.frame = CGRect(x: inset, y: 1, width: side - 2 * inset, height: 1)
         rimBottom.backgroundColor = NSColor(white: 0, alpha: 0.45).cgColor
-        rimTop.isHidden = s.flat
-        rimBottom.isHidden = s.flat
 
         // Sheen: subtle gradient from top left to bottom right
         sheen.frame = plate.bounds
@@ -237,74 +249,142 @@ final class WortuhrView: ScreenSaverView {
         sheen.locations = [0, 0.45, 1]
         sheen.startPoint = CGPoint(x: 0.33, y: 1)
         sheen.endPoint = CGPoint(x: 0.67, y: 0)
-        sheen.isHidden = s.flat
 
         // Letters
-        cellLayers.forEach { $0.removeFromSuperlayer() }
-        cellLayers.removeAll()
-        markLayers.forEach { $0.layer.removeFromSuperlayer() }
-        markLayers.removeAll()
+        cells.forEach { $0.remove() }
+        cells.removeAll()
+        marks.forEach { $0.glyph.remove() }
+        marks.removeAll()
         let face = s.language.face
-        let font = s.makeFont(size: side * 0.043 * CGFloat(s.letterScale / 100))
+        // Letter area: the margin around it is 2/3 of the former one (the minute dots are gone)
+        let font = s.makeFont(size: side * 0.0466 * CGFloat(s.letterScale / 100))
         let ctFont = font as CTFont
         let capHeight = font.capHeight
-        let gx0 = side * 0.10, gw = side * 0.80
-        let gy0 = side * 0.105, gh = side * 0.79
+        let gx0 = side * 0.0667, gw = side * 0.8667
+        let gy0 = side * 0.07, gh = side * 0.86
         let cw = gw / CGFloat(ClockFace.cols), ch = gh / CGFloat(ClockFace.rows)
-        let glowRadius = font.pointSize * 0.35 * CGFloat(s.glow / 100)
+        let g = CGFloat(s.glow / 100)
 
         /// Glyph centred on x, on the same baseline as all letters of row r.
-        func glyphLayer(_ letter: String, x: CGFloat, row r: Int) -> CAShapeLayer {
-            let l = CAShapeLayer()
-            l.contentsScale = scale
-            let glyph = glyphPath(letter, font: ctFont)
+        func glyph(_ letter: String, x: CGFloat, row r: Int) -> Glyph {
+            let path = glyphPath(letter, font: ctFont)
             let cy = side - (gy0 + ch * (CGFloat(r) + 0.5))   // layer coordinates: y points up
-            let bb = glyph.boundingBoxOfPath
+            let bb = path.boundingBoxOfPath
             var t = CGAffineTransform(translationX: x - bb.midX, y: cy - capHeight / 2)
-            l.path = glyph.copy(using: &t)
-            l.shadowColor = s.lit.cgColor
-            l.shadowOffset = .zero
-            l.shadowRadius = glowRadius
-            l.shadowOpacity = 0
-            l.fillColor = s.offColor.cgColor
-            plate.addSublayer(l)
-            return l
+            let placed = path.copy(using: &t)
+            func layer(radius: CGFloat) -> CAShapeLayer {
+                let l = CAShapeLayer()
+                l.contentsScale = scale
+                l.path = placed
+                l.shadowColor = s.lit.cgColor
+                l.shadowOffset = .zero
+                l.shadowRadius = radius
+                l.shadowOpacity = 0
+                l.fillColor = s.offColor.cgColor
+                return l
+            }
+            // Same look as the three text shadows in the prototype
+            let halo = layer(radius: font.pointSize * 1.1 * g)
+            let main = layer(radius: font.pointSize * 0.3 * g)
+            plate.addSublayer(halo)
+            plate.addSublayer(main)
+            return Glyph(main: main, halo: halo)
         }
         for r in 0..<ClockFace.rows {
             for c in 0..<ClockFace.cols {
                 let cx = gx0 + cw * (CGFloat(c) + 0.5)
-                cellLayers.append(glyphLayer(face.letter(row: r, col: c), x: cx, row: r))
+                cells.append(glyph(face.letter(row: r, col: c), x: cx, row: r))
             }
         }
         for mark in face.marks {
             let x = gx0 + cw * CGFloat(mark.afterCol + 1)
-            markLayers.append((glyphLayer(mark.glyph, x: x, row: mark.row), mark.word))
+            marks.append((glyph(mark.glyph, x: x, row: mark.row), mark.word))
         }
 
-        // Minute dots: 1 top left, 2 top right, 3 bottom right, 4 bottom left
-        dotLayers.forEach { $0.removeFromSuperlayer() }
-        dotLayers.removeAll()
-        let d = side * 0.0105
-        let m = side * 0.05 + d / 2
-        let centers = [CGPoint(x: m, y: side - m), CGPoint(x: side - m, y: side - m),
-                       CGPoint(x: side - m, y: m), CGPoint(x: m, y: m)]
-        for p in centers {
-            let l = CAShapeLayer()
-            l.contentsScale = scale
-            l.path = CGPath(ellipseIn: CGRect(x: p.x - d / 2, y: p.y - d / 2, width: d, height: d), transform: nil)
-            l.shadowColor = s.lit.cgColor
-            l.shadowOffset = .zero
-            l.shadowRadius = side * 0.008 * CGFloat(s.glow / 100) + 0.5
-            l.shadowOpacity = 0
-            l.fillColor = s.offColor.cgColor
-            l.isHidden = !s.dots
-            plate.addSublayer(l)
-            dotLayers.append(l)
-        }
+        buildEdges(side: side)
 
         CATransaction.commit()
         lastKey = ""
         updateTime(animated: false)
+    }
+
+    /// Minute edges: one layer per edge, centred on the plate's edge line.
+    /// From outside to inside: halo (optional) – fine bright line – glow fading into the plate.
+    /// The ends taper off so the corners stay dark. Same geometry as .medge in the prototype.
+    /// Drawn into a bitmap instead of CAGradientLayer + mask: CALayer.render(in:) – used for
+    /// the thumbnail and the README images – skips layers with a mask.
+    private func buildEdges(side: CGFloat) {
+        edgeLayers.forEach { $0.removeFromSuperlayer() }
+        edgeLayers.removeAll()
+        let s = settings
+        let scale = backingScale
+        let (depth, halo) = s.edgeGeometry
+        let inner = max(3 * max(1, CGFloat(s.edgeStrength / 100)), side * depth)   // points inside the plate
+        let outer = side * halo                   // points outside the plate
+        let thick = inner + outer
+        let margin = side * 0.06
+        let len = side - 2 * margin
+        let lit = s.lit.srgb
+        // Edge light 10 … 200 %: above 100 % the line gets wider and the glow denser
+        let k = CGFloat(s.edgeStrength / 100)
+        let line = 1.5 * max(1, k)
+        // Stop positions in points from the outer end, clamped to rising order
+        var pos: [CGFloat] = [0, outer - 1, outer, outer + line, outer + line + 1, outer + inner * 0.35, thick]
+        for i in 1..<pos.count { pos[i] = min(max(pos[i], pos[i - 1]), thick) }
+        let alphas: [CGFloat] = [0, 0.22, 0.9, 0.9, 0.34, 0.10, 0].map { min(1, $0 * k) }
+
+        enum Side { case top, right, bottom, left }
+        for edge in [Side.top, .right, .bottom, .left] {
+            let horizontal = edge == .top || edge == .bottom
+            let frame: CGRect
+            switch edge {
+            case .top:    frame = CGRect(x: margin, y: side - inner, width: len, height: thick)
+            case .right:  frame = CGRect(x: side - inner, y: margin, width: thick, height: len)
+            case .bottom: frame = CGRect(x: margin, y: -outer, width: len, height: thick)
+            case .left:   frame = CGRect(x: -outer, y: margin, width: thick, height: len)
+            }
+            let w = frame.width, h = frame.height
+            // Gradient across the edge, from the outer end to the inner end (layer coordinates, y up)
+            let ends: (CGPoint, CGPoint)
+            switch edge {
+            case .top:    ends = (CGPoint(x: 0, y: h), CGPoint(x: 0, y: 0))
+            case .right:  ends = (CGPoint(x: w, y: 0), CGPoint(x: 0, y: 0))
+            case .bottom: ends = (CGPoint(x: 0, y: 0), CGPoint(x: 0, y: h))
+            case .left:   ends = (CGPoint(x: 0, y: 0), CGPoint(x: w, y: 0))
+            }
+            let l = CALayer()
+            l.frame = frame
+            l.contentsScale = scale
+            l.contents = edgeImage(size: frame.size, scale: scale, color: lit, alphas: alphas,
+                                   locations: pos.map { $0 / thick }, from: ends.0, to: ends.1,
+                                   alongHorizontal: horizontal)
+            l.opacity = 0
+            plate.addSublayer(l)
+            edgeLayers.append(l)
+        }
+    }
+
+    private func edgeImage(size: CGSize, scale: CGFloat, color: NSColor, alphas: [CGFloat], locations: [CGFloat],
+                           from: CGPoint, to: CGPoint, alongHorizontal: Bool) -> CGImage? {
+        let pw = max(1, Int((size.width * scale).rounded(.up))), ph = max(1, Int((size.height * scale).rounded(.up)))
+        guard let space = CGColorSpace(name: CGColorSpace.sRGB),
+              let ctx = CGContext(data: nil, width: pw, height: ph, bitsPerComponent: 8, bytesPerRow: 0,
+                                  space: space, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+        else { return nil }
+        ctx.scaleBy(x: scale, y: scale)
+        let colors = alphas.map { color.withAlphaComponent($0).cgColor } as CFArray
+        if let g = CGGradient(colorsSpace: space, colors: colors, locations: locations) {
+            ctx.drawLinearGradient(g, start: from, end: to, options: [])
+        }
+        // Taper along the edge: keep the middle, fade out towards both ends
+        ctx.setBlendMode(.destinationIn)
+        let taper = [NSColor(white: 0, alpha: 0), NSColor(white: 0, alpha: 1),
+                     NSColor(white: 0, alpha: 1), NSColor(white: 0, alpha: 0)].map { $0.cgColor } as CFArray
+        if let g = CGGradient(colorsSpace: space, colors: taper, locations: [0, 0.22, 0.78, 1]) {
+            let end = alongHorizontal ? CGPoint(x: size.width, y: 0) : CGPoint(x: 0, y: size.height)
+            ctx.drawLinearGradient(g, start: .zero, end: end, options: [])
+        }
+        return ctx.makeImage()
     }
 
     private func glyphPath(_ letter: String, font: CTFont) -> CGPath {
@@ -320,7 +400,7 @@ final class WortuhrView: ScreenSaverView {
     // MARK: - Time
 
     private func updateTime(animated: Bool) {
-        guard !cellLayers.isEmpty else { return }
+        guard !cells.isEmpty else { return }
         let now = Calendar.current.dateComponents([.hour, .minute], from: Date())
         let h = fixedTime?.0 ?? now.hour ?? 0, m = fixedTime?.1 ?? now.minute ?? 0
         let key = "\(h):\(m)"
@@ -332,7 +412,7 @@ final class WortuhrView: ScreenSaverView {
         let on = s.language.face.litCells(for: p.words)
         let litColor = s.lit.cgColor
         let offColor = s.offColor.cgColor
-        let glowOpacity: Float = s.glow > 0 ? 0.9 : 0
+        let glow = Float(s.glow)
 
         CATransaction.begin()
         if animated && s.fade > 0 {
@@ -341,20 +421,18 @@ final class WortuhrView: ScreenSaverView {
         } else {
             CATransaction.setDisableActions(true)
         }
-        for (i, l) in cellLayers.enumerated() {
-            let lit = on.contains(i)
-            l.fillColor = lit ? litColor : offColor
-            l.shadowOpacity = lit ? glowOpacity : 0
+        for (i, c) in cells.enumerated() {
+            c.set(lit: on.contains(i), litColor: litColor, offColor: offColor, glow: glow)
         }
-        for (l, word) in markLayers {
-            let lit = p.words.contains(word)
-            l.fillColor = lit ? litColor : offColor
-            l.shadowOpacity = lit ? glowOpacity : 0
+        for (c, word) in marks {
+            c.set(lit: p.words.contains(word), litColor: litColor, offColor: offColor, glow: glow)
         }
-        for (i, l) in dotLayers.enumerated() {
-            let lit = i < p.dots
-            l.fillColor = lit ? litColor : offColor
-            l.shadowOpacity = lit ? glowOpacity : 0
+        // Minute edges go dark together with the old words and light up one by one.
+        // The latest edge is brightest; each earlier one is dimmed by the trail factor
+        // (trail 100 % = all equally bright, 0 % = only the latest edge).
+        let trail = Float(s.edgeTrail / 100)
+        for (i, l) in edgeLayers.enumerated() {
+            l.opacity = s.minuteEdges && i < p.edges ? powf(trail, Float(p.edges - 1 - i)) : 0
         }
         CATransaction.commit()
     }
@@ -403,7 +481,6 @@ final class WortuhrView: ScreenSaverView {
         CATransaction.begin()
         CATransaction.setAnimationDuration(visible ? 1.0 : 0.3)
         plate.opacity = visible ? 1 : 0
-        root.backgroundColor = (visible && settings.flat ? settings.front : NSColor.black).cgColor
         CATransaction.commit()
     }
 
