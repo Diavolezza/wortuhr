@@ -5,7 +5,6 @@
 [![CI](https://github.com/Diavolezza/wortuhr/actions/workflows/ci.yml/badge.svg)](https://github.com/Diavolezza/wortuhr/actions/workflows/ci.yml)
 · **[Im Browser ausprobieren](https://diavolezza.github.io/wortuhr/)**
 · **[Download](https://github.com/Diavolezza/wortuhr/releases/latest)**
-· **[Auf Ko-fi unterstützen](https://ko-fi.com/diavolezza)**
 
 Wortuhr im 11×10-Raster. Die Minuten zwischen den Fünf-Minuten-Schritten lassen nacheinander die Kanten der
 Platte glimmen – oben, rechts, unten, links – und erlöschen mit den nächsten Wörtern. Die jüngste Kante leuchtet am
@@ -24,8 +23,7 @@ Zeitansage in acht Varianten:
 | Spanisch | las tres y cuarto · las cuatro menos cuarto (1 Uhr: es la una) |
 
 Farben, Schrift, Größe, das Licht der Minutenkanten, Einbrennschutz und „Nur auf dem Hauptbildschirm“ im
-Optionen-Dialog einstellbar; der Dialog
-spricht die gewählte Sprache. Beim ersten Start richtet sich die Uhr nach der Sprache des Macs.
+Optionen-Dialog einstellbar; der Dialog erscheint in der gewählten Sprache. Beim ersten Start richtet sich die Uhr nach der Sprache des Macs.
 
 ![Wortuhr im Zeitraffer von 3:00 bis 3:15](docs/wortuhr.gif)
 
@@ -114,11 +112,6 @@ vergleicht Prototyp und Swift Zeile für Zeile.
 - `Tools/Docs/main.swift` – erzeugt die Bilder der README (`./build.sh --docs`)
 - `Tools/Phrases/main.swift` – gibt alle Zeitansagen aus Swift aus (für `prototype/check.mjs`)
 - `.github/workflows/` – CI (Bauen + Prüfen), Live-Demo auf GitHub Pages, Release bei Versions-Tags (`v1.2` …)
-
-## Unterstützen
-
-Die Wortuhr ist kostenlos. Wenn sie dir gefällt, kannst du mir auf [Ko-fi](https://ko-fi.com/diavolezza) einen Kaffee spendieren ☕
-oder sie über [GitHub Sponsors](https://github.com/sponsors/Diavolezza) unterstützen.
 
 ## Lizenz
 

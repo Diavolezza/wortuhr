@@ -33,9 +33,6 @@ final class ConfigController: NSObject {
     private let reset = NSButton(title: "", target: nil, action: nil)
     private let cancel = NSButton(title: "", target: nil, action: nil)
     private let ok = NSButton(title: "", target: nil, action: nil)
-    /// Link to the support page (Ko-fi), shown like a hyperlink
-    private let support = NSButton(title: "", target: nil, action: nil)
-    static let supportURL = URL(string: "https://ko-fi.com/diavolezza")!
     /// Labels whose text depends on the language: field -> key path in Texts
     private var labels: [(NSTextField, KeyPath<Texts, String>, Bool)] = []
     private var ui: UILanguage = .de
@@ -141,10 +138,7 @@ final class ConfigController: NSObject {
         cancel.keyEquivalent = "\u{1b}"
         ok.target = self; ok.action = #selector(okSheet)
         ok.keyEquivalent = "\r"
-        support.target = self; support.action = #selector(openSupport)
-        support.isBordered = false
-        support.toolTip = Self.supportURL.absoluteString
-        let buttons = NSStackView(views: [reset, support, NSView(), cancel, ok])
+        let buttons = NSStackView(views: [reset, NSView(), cancel, ok])
         buttons.orientation = .horizontal
         buttons.translatesAutoresizingMaskIntoConstraints = false
 
@@ -177,10 +171,6 @@ final class ConfigController: NSObject {
         reset.title = t.reset
         cancel.title = t.cancel
         ok.title = t.ok
-        support.attributedTitle = NSAttributedString(string: t.support, attributes: [
-            .foregroundColor: NSColor.linkColor,
-            .font: NSFont.systemFont(ofSize: NSFont.smallSystemFontSize + 1),
-        ])
 
         let fontIndex = max(font.indexOfSelectedItem, 0)
         font.removeAllItems()
@@ -311,11 +301,6 @@ final class ConfigController: NSObject {
         close()
     }
 
-    /// Opens the support page in the browser.
-    @objc private func openSupport() {
-        NSWorkspace.shared.open(Self.supportURL)
-    }
-
     @objc private func okSheet() {
         read()
         s.save()
@@ -354,7 +339,7 @@ struct Texts {
     let sectionColors, front, lit, dim, glow, edge, custom: String
     let sectionFont, font, weight, letterScale, systemFont: String
     let sectionLook, size, fade, minuteEdges, edgeStrength, edgeSpread, edgeTrail, drift, mainScreenOnly: String
-    let reset, cancel, ok, support: String
+    let reset, cancel, ok: String
     /// Colour names in the order of Settings.frontPresets / Settings.litPresets
     let frontNames, litNames: [String]
     let decimalComma: Bool
@@ -381,7 +366,7 @@ struct Texts {
         size: "Größe:", fade: "Überblendung:", minuteEdges: "Minuten an den Kanten anzeigen",
         edgeStrength: "Kantenlicht:", edgeSpread: "Ausbreitung:", edgeTrail: "Nachglühen:",
         drift: "Langsam wandern (Einbrennschutz)", mainScreenOnly: "Nur auf dem Hauptbildschirm",
-        reset: "Standard", cancel: "Abbrechen", ok: "OK", support: "Wortuhr unterstützen …",
+        reset: "Standard", cancel: "Abbrechen", ok: "OK",
         frontNames: ["Tiefschwarz", "Graphit", "Nachtblau", "Tannengrün", "Ziegelrot", "Kalkweiß"],
         litNames: ["Warmweiß", "Kaltweiß", "Bernstein", "Eisblau", "Mint", "Anthrazit"],
         decimalComma: true)
@@ -397,7 +382,7 @@ struct Texts {
         size: "Grösse:", fade: "Überblendung:", minuteEdges: "Minuten an den Kanten anzeigen",
         edgeStrength: "Kantenlicht:", edgeSpread: "Ausbreitung:", edgeTrail: "Nachglühen:",
         drift: "Langsam wandern (Einbrennschutz)", mainScreenOnly: "Nur auf dem Hauptbildschirm",
-        reset: "Standard", cancel: "Abbrechen", ok: "OK", support: "Wortuhr unterstützen …",
+        reset: "Standard", cancel: "Abbrechen", ok: "OK",
         frontNames: ["Tiefschwarz", "Graphit", "Nachtblau", "Tannengrün", "Ziegelrot", "Kalkweiss"],
         litNames: ["Warmweiss", "Kaltweiss", "Bernstein", "Eisblau", "Mint", "Anthrazit"],
         decimalComma: false)
@@ -412,7 +397,7 @@ struct Texts {
         size: "Size:", fade: "Cross-fade:", minuteEdges: "Show minutes at the edges",
         edgeStrength: "Edge light:", edgeSpread: "Spread:", edgeTrail: "Afterglow:",
         drift: "Drift slowly (burn-in protection)", mainScreenOnly: "Main display only",
-        reset: "Defaults", cancel: "Cancel", ok: "OK", support: "Support Wortuhr…",
+        reset: "Defaults", cancel: "Cancel", ok: "OK",
         frontNames: ["Deep black", "Graphite", "Midnight blue", "Forest green", "Brick red", "Chalk white"],
         litNames: ["Warm white", "Cool white", "Amber", "Ice blue", "Mint", "Charcoal"],
         decimalComma: false)
@@ -427,7 +412,7 @@ struct Texts {
         size: "Size:", fade: "Cross-fade:", minuteEdges: "Show minutes at the edges",
         edgeStrength: "Edge light:", edgeSpread: "Spread:", edgeTrail: "Afterglow:",
         drift: "Drift slowly (burn-in protection)", mainScreenOnly: "Main display only",
-        reset: "Defaults", cancel: "Cancel", ok: "OK", support: "Support Wortuhr…",
+        reset: "Defaults", cancel: "Cancel", ok: "OK",
         frontNames: ["Deep black", "Graphite", "Midnight blue", "Forest green", "Brick red", "Chalk white"],
         litNames: ["Warm white", "Cool white", "Amber", "Ice blue", "Mint", "Charcoal"],
         decimalComma: false)
@@ -443,7 +428,7 @@ struct Texts {
         size: "Taille\u{202F}:", fade: "Fondu\u{202F}:", minuteEdges: "Afficher les minutes sur les bords",
         edgeStrength: "Lumière des bords\u{202F}:", edgeSpread: "Diffusion\u{202F}:", edgeTrail: "Rémanence\u{202F}:",
         drift: "Déplacement lent (anti-marquage)", mainScreenOnly: "Écran principal uniquement",
-        reset: "Par défaut", cancel: "Annuler", ok: "OK", support: "Soutenir Wortuhr…",
+        reset: "Par défaut", cancel: "Annuler", ok: "OK",
         frontNames: ["Noir profond", "Graphite", "Bleu nuit", "Vert sapin", "Rouge brique", "Blanc craie"],
         litNames: ["Blanc chaud", "Blanc froid", "Ambre", "Bleu glacier", "Menthe", "Anthracite"],
         decimalComma: true)
@@ -458,7 +443,7 @@ struct Texts {
         size: "Dimensione:", fade: "Dissolvenza:", minuteEdges: "Mostra i minuti sui bordi",
         edgeStrength: "Luce dei bordi:", edgeSpread: "Diffusione:", edgeTrail: "Persistenza:",
         drift: "Spostamento lento (anti burn-in)", mainScreenOnly: "Solo sullo schermo principale",
-        reset: "Predefiniti", cancel: "Annulla", ok: "OK", support: "Sostieni Wortuhr…",
+        reset: "Predefiniti", cancel: "Annulla", ok: "OK",
         frontNames: ["Nero profondo", "Grafite", "Blu notte", "Verde abete", "Rosso mattone", "Bianco gesso"],
         litNames: ["Bianco caldo", "Bianco freddo", "Ambra", "Blu ghiaccio", "Menta", "Antracite"],
         decimalComma: true)
@@ -473,7 +458,7 @@ struct Texts {
         size: "Tamaño:", fade: "Fundido:", minuteEdges: "Mostrar los minutos en los bordes",
         edgeStrength: "Luz de los bordes:", edgeSpread: "Difusión:", edgeTrail: "Estela:",
         drift: "Desplazamiento lento (antiquemado)", mainScreenOnly: "Solo en la pantalla principal",
-        reset: "Restablecer", cancel: "Cancelar", ok: "Aceptar", support: "Apoyar Wortuhr…",
+        reset: "Restablecer", cancel: "Cancelar", ok: "Aceptar",
         frontNames: ["Negro profundo", "Grafito", "Azul noche", "Verde abeto", "Rojo ladrillo", "Blanco tiza"],
         litNames: ["Blanco cálido", "Blanco frío", "Ámbar", "Azul hielo", "Menta", "Antracita"],
         decimalComma: true)

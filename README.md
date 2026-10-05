@@ -5,7 +5,6 @@
 [![CI](https://github.com/Diavolezza/wortuhr/actions/workflows/ci.yml/badge.svg)](https://github.com/Diavolezza/wortuhr/actions/workflows/ci.yml)
 · **[Try it in the browser](https://diavolezza.github.io/wortuhr/)**
 · **[Download](https://github.com/Diavolezza/wortuhr/releases/latest)**
-· **[Support on Ko-fi](https://ko-fi.com/diavolezza)**
 
 A word clock on an 11×10 letter grid. The minutes between the five-minute steps light up the edges of the
 plate one after the other – top, right, bottom, left – and go dark again with the next words. The latest edge
@@ -25,8 +24,8 @@ The time is spelled out in eight variants:
 | Spanish | las tres y cuarto · las cuatro menos cuarto (1:00 es la una) |
 
 Colours, typeface, size, the glow of the minute edges, burn-in protection and “main display only” can be set
-in the options dialog; the
-dialog speaks the selected language. On first start the clock uses the Mac's language.
+in the options dialog; the dialog appears in the selected language. On first start the clock uses the Mac’s
+language.
 
 ![Wortuhr running from 3:00 to 3:15 in German](docs/wortuhr.gif)
 
@@ -70,7 +69,7 @@ writes the system log (last 20 minutes) and crash reports to `diag.log`.
 - The login window disappears again after 30 s without input → then fade the clock back in.
 - The preview in System Settings reports `isPreview = false` → input detection only for the real
   screen saver: after `didstart` or when the screen is locked (`CGSSessionScreenIsLocked`).
-  The size is no indicator – the preview is screen-sized internally as well.
+  The size is not an indicator either – the preview is screen-sized internally as well.
 - `didstart` is unreliable: sometimes it never arrives, sometimes it arrives before macOS creates
   a second view → the state is process-wide, plus a check for a locked screen.
 - Behind the login window `animateOneFrame` (or the animation) stops → own timer
@@ -114,11 +113,6 @@ at the same time don’t touch) and compares prototype and Swift line by line.
 - `Tools/Docs/main.swift` – renders the README images (`./build.sh --docs`)
 - `Tools/Phrases/main.swift` – prints all time phrases from Swift (for `prototype/check.mjs`)
 - `.github/workflows/` – CI (build + check), live demo on GitHub Pages, release on version tags (`v1.2` …)
-
-## Support
-
-Wortuhr is free. If you like it, you can buy me a coffee on [Ko-fi](https://ko-fi.com/diavolezza) ☕
-or support it via [GitHub Sponsors](https://github.com/sponsors/Diavolezza).
 
 ## Licence
 
