@@ -85,6 +85,11 @@ body{background:var(--page);color:var(--ink);font:14px/1.45 system-ui,-apple-sys
 .stagebar{position:absolute;top:12px;right:12px;display:flex;gap:8px;opacity:.35;transition:opacity .2s}
 .stage:hover .stagebar,.stagebar:focus-within{opacity:1}
 .stage:fullscreen .stagebar{display:none}
+.legal{position:absolute;bottom:10px;right:12px;font-size:11px;opacity:.45;transition:opacity .2s}
+.legal a{color:var(--muted);text-decoration:none}
+.legal a:hover,.legal a:focus{color:var(--ink);text-decoration:underline}
+.stage:hover .legal,.legal:focus-within{opacity:1}
+.stage:fullscreen .legal{display:none}
 
 /* ---------- Panel ---------- */
 .panel{background:var(--panel);border-left:1px solid var(--line);overflow-y:auto;min-height:0;
@@ -132,6 +137,7 @@ kbd{font:11px ui-monospace,Menlo,monospace;border:1px solid var(--line);border-b
       <span class="medge" data-i="1"></span><span class="medge" data-i="2"></span>
       <span class="medge" data-i="3"></span><span class="medge" data-i="4"></span>
     </div>
+    <div class="legal"><a href="https://diavolezza.github.io/impressum.html">Impressum</a> · <a href="https://diavolezza.github.io/datenschutz.html">Datenschutz</a></div>
     <div class="stagebar">
       <button class="btn" id="bPanel" title="Key H">Settings</button>
       <button class="btn" id="bFull" title="Key F">Full screen</button>
@@ -226,7 +232,7 @@ kbd{font:11px ui-monospace,Menlo,monospace;border:1px solid var(--line);border-b
       </div>
     </section>
     <p class="hint"><kbd>H</kbd> settings on/off · <kbd>F</kbd> full screen</p>
-    <p class="hint"><a href="https://github.com/Diavolezza/wortuhr" target="_blank" rel="noopener" style="color:var(--accent)">Source on GitHub</a> · <a href="https://diavolezza.github.io/impressum.html" style="color:var(--accent)">Impressum</a> · <a href="https://diavolezza.github.io/datenschutz.html" style="color:var(--accent)">Datenschutz</a></p>
+    <p class="hint"><a href="https://github.com/Diavolezza/wortuhr" target="_blank" rel="noopener" style="color:var(--accent)">Source on GitHub</a></p>
   </aside>
 </div>
 
