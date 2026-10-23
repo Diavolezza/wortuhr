@@ -32,12 +32,10 @@ Getestet unter macOS 27 auf Apple Silicon; gebaut wird für Apple Silicon und In
 ## Herunterladen und installieren
 
 `Wortuhr-….zip` aus dem [neuesten Release](https://github.com/Diavolezza/wortuhr/releases/latest)
-laden, entpacken und `Wortuhr.saver` nach `~/Library/Screen Savers` legen. Das Paket ist nur
-ad hoc signiert, nicht notarisiert – deshalb einmal im Terminal die Download-Sperre entfernen:
+laden, entpacken und `Wortuhr.saver` doppelklicken. macOS fragt, ob er nur für dich oder für alle
+Benutzer installiert werden soll. Dann in Systemeinstellungen → Bildschirmschoner „Wortuhr“ wählen.
 
-    xattr -dr com.apple.quarantine ~/Library/Screen\ Savers/Wortuhr.saver
-
-Dann in Systemeinstellungen → Bildschirmschoner „Wortuhr“ wählen.
+Der Bildschirmschoner ist mit einer Developer ID signiert und von Apple notarisiert.
 
 ## Aus dem Quelltext bauen und installieren
 
@@ -55,6 +53,10 @@ Mit `--arm-only` wird nur für Apple Silicon gebaut – schneller, reicht für d
 (z. B. `./build.sh --system --arm-only`). Zum Weitergeben ohne die Option bauen.
 
 `--docs` erzeugt zusätzlich die Bilder der README in `docs/` mit dem Bildschirmschoner selbst.
+
+`--notarize` signiert mit deinem Developer-ID-Zertifikat, lässt den Bildschirmschoner von Apple
+notarisieren und heftet die Freigabe an (Schlüsselbund-Profil `wortuhr-notary`, siehe Kommentar
+oben in `build.sh`). Der Release-Workflow macht das bei Versions-Tags automatisch.
 
 ## Wenn etwas nicht geht
 

@@ -34,12 +34,10 @@ Tested on macOS 27 on Apple Silicon; built for Apple Silicon and Intel (macOS 13
 ## Download and install
 
 Download `Wortuhr-….zip` from the [latest release](https://github.com/Diavolezza/wortuhr/releases/latest),
-unzip it and move `Wortuhr.saver` to `~/Library/Screen Savers`. The bundle is signed ad hoc,
-not notarised, so remove the download quarantine once in Terminal:
-
-    xattr -dr com.apple.quarantine ~/Library/Screen\ Savers/Wortuhr.saver
-
+unzip it and double-click `Wortuhr.saver`. macOS asks whether to install it for you or for all users.
 Then select “Wortuhr” in System Settings → Screen Saver.
+
+The screen saver is signed with a Developer ID and notarised by Apple.
 
 ## Build and install from source
 
@@ -56,6 +54,10 @@ System Settings shows the custom thumbnail only for savers in `/Library/Screen S
 (e.g. `./build.sh --system --arm-only`). Build without it to share the saver.
 
 `--docs` also renders the README images in `docs/` with the screen saver itself.
+
+`--notarize` signs with your Developer ID certificate, has the saver notarised by Apple and staples
+the ticket (keychain profile `wortuhr-notary`, see the comment at the top of `build.sh`).
+The release workflow does this automatically for version tags.
 
 ## When something goes wrong
 

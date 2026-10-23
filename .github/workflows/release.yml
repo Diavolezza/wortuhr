@@ -18,14 +18,31 @@ jobs:
           node-version: 22
       - name: Check grids and time phrases
         run: node prototype/check.mjs
-      - name: Build (Apple Silicon + Intel)
-        run: ./build.sh --no-install
-      - name: Set version from tag and re-sign
+      - name: Import Developer ID certificate
+        env:
+          DEVELOPER_ID_P12: ${{ secrets.DEVELOPER_ID_P12 }}
+          DEVELOPER_ID_P12_PASSWORD: ${{ secrets.DEVELOPER_ID_P12_PASSWORD }}
+          NOTARY_KEY_P8: ${{ secrets.NOTARY_KEY_P8 }}
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
-          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" build/Wortuhr.saver/Contents/Info.plist
-          codesign --force --sign - build/Wortuhr.saver
-          ditto -c -k --keepParent build/Wortuhr.saver "Wortuhr-$VERSION.zip"
+          KC="$RUNNER_TEMP/signing.keychain-db"
+          KC_PW=$(uuidgen)
+          security create-keychain -p "$KC_PW" "$KC"
+          security set-keychain-settings -lut 21600 "$KC"
+          security unlock-keychain -p "$KC_PW" "$KC"
+          echo "$DEVELOPER_ID_P12" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security import "$RUNNER_TEMP/cert.p12" -k "$KC" -P "$DEVELOPER_ID_P12_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KC_PW" "$KC" >/dev/null
+          security list-keychains -d user -s "$KC" $(security list-keychains -d user | tr -d '"')
+          rm "$RUNNER_TEMP/cert.p12"
+          printf '%s\n' "$NOTARY_KEY_P8" > "$RUNNER_TEMP/AuthKey.p8"
+      - name: Build, sign and notarise (Apple Silicon + Intel)
+        env:
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+          NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
+          NOTARY_ISSUER_ID: ${{ secrets.NOTARY_ISSUER_ID }}
+        run: |
+          NOTARY_KEY_PATH="$RUNNER_TEMP/AuthKey.p8" ./build.sh --no-install --notarize --version "${GITHUB_REF_NAME#v}"
+          ditto -c -k --keepParent build/Wortuhr.saver "Wortuhr-${GITHUB_REF_NAME#v}.zip"
       - name: Create release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -34,13 +51,16 @@ jobs:
           cat > notes.md <<'EOF'
           ## Install
 
-          1. Unzip and move `Wortuhr.saver` to `~/Library/Screen Savers` (or `/Library/Screen Savers` for all users).
-          2. The bundle is signed ad hoc, not notarised. Remove the download quarantine once in Terminal:
+          1. Unzip and double-click `Wortuhr.saver`. macOS asks whether to install it for you or for all users.
+          2. System Settings → Screen Saver → select “Wortuhr”.
 
-                 xattr -dr com.apple.quarantine ~/Library/Screen\ Savers/Wortuhr.saver
-
-          3. System Settings → Screen Saver → select “Wortuhr”.
+          The screen saver is signed with a Developer ID and notarised by Apple.
 
           Runs on Apple Silicon and Intel, macOS 13 or later.
           EOF
           gh release create "$GITHUB_REF_NAME" "Wortuhr-$VERSION.zip" --title "Wortuhr $VERSION" --notes-file notes.md
+      - name: Clean up signing keychain
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/signing.keychain-db" 2>/dev/null || true
+          rm -f "$RUNNER_TEMP/AuthKey.p8"

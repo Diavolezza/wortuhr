@@ -1,10 +1,17 @@
 #!/bin/bash
-# Builds Wortuhr.saver (arm64 + x86_64), signs it ad hoc and installs it to ~/Library/Screen Savers.
-# Usage:  ./build.sh                build and install
+# Builds Wortuhr.saver (arm64 + x86_64), signs it and installs it to ~/Library/Screen Savers.
+# Usage:  ./build.sh                build and install (signed ad hoc)
 #         ./build.sh --no-install   build only
 #         ./build.sh --system       install for all users to /Library/Screen Savers (admin password)
 #         --arm-only                Apple Silicon only (faster; combinable, e.g. ./build.sh --system --arm-only)
 #         --docs                    also render the README images in docs/ (combinable)
+#         --notarize                sign with the Developer ID, notarise with Apple and staple the ticket
+#         --version X.Y             set the version (CFBundleShortVersionString) before signing
+# Notarisation credentials: locally the keychain profile "wortuhr-notary"
+#   (xcrun notarytool store-credentials wortuhr-notary --key … --key-id … --issuer …);
+#   in CI the variables NOTARY_KEY_PATH, NOTARY_KEY_ID and NOTARY_ISSUER_ID.
+# SIGN_ID selects the signing identity; by default the Developer ID Application certificate
+#   in the keychain (with TEAM_ID set: the one of that team) is used for --notarize.
 set -euo pipefail
 cd "$(dirname "$0")"
 # Also write the output to build.log (so Claude can read errors)
@@ -15,14 +22,27 @@ MIN_OS=13.0
 ARCHS=(arm64 x86_64)
 MODE=""
 DOCS=0
-for arg in "$@"; do
-  case "$arg" in
+NOTARIZE=0
+VERSION=""
+while [ $# -gt 0 ]; do
+  case "$1" in
     --arm-only) ARCHS=(arm64) ;;
     --docs) DOCS=1 ;;
-    --no-install|--system) MODE="$arg" ;;
-    *) echo "Unknown option: $arg" >&2; exit 1 ;;
+    --notarize) NOTARIZE=1 ;;
+    --version) VERSION="${2:?--version needs a value}"; shift ;;
+    --no-install|--system) MODE="$1" ;;
+    *) echo "Unknown option: $1" >&2; exit 1 ;;
   esac
+  shift
 done
+if [ "$NOTARIZE" = 1 ] && [ -z "${SIGN_ID:-}" ]; then
+  SIGN_ID=$(security find-identity -v -p codesigning | grep "Developer ID Application" \
+    | grep -- "${TEAM_ID:-}" | head -1 | awk '{print $2}' || true)
+  if [ -z "$SIGN_ID" ]; then
+    echo "No 'Developer ID Application' certificate found in the keychain." >&2; exit 1
+  fi
+fi
+SIGN_ID="${SIGN_ID:--}"
 BUILD=build
 BUNDLE="$BUILD/$NAME.saver"
 SDK=$(xcrun --sdk macosx --show-sdk-path)
@@ -51,6 +71,9 @@ lipo -create "${BINS[@]}" -output "$BUNDLE/Contents/MacOS/$NAME"
 cp Info.plist "$BUNDLE/Contents/Info.plist"
 # New build number on every build so macOS discards cached thumbnails.
 /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $(date +%Y%m%d%H%M%S)" "$BUNDLE/Contents/Info.plist"
+if [ -n "$VERSION" ]; then
+  /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" "$BUNDLE/Contents/Info.plist"
+fi
 echo "▸ Thumbnail (11:55)"
 xcrun swiftc -O -module-name WortuhrThumb -sdk "$SDK" \
   Sources/*.swift Tools/main.swift -o "$BUILD/makethumb" -framework ScreenSaver
@@ -66,8 +89,36 @@ if [ "$DOCS" = 1 ]; then
 fi
 # Make everything world-readable – otherwise macOS cannot load the bundle from /Library.
 chmod -R u+rwX,go+rX-w "$BUNDLE"
-codesign --force --sign - "$BUNDLE"
+if [ "$SIGN_ID" = "-" ]; then
+  codesign --force --sign - "$BUNDLE"
+else
+  echo "▸ Signing with Developer ID"
+  codesign --force --options runtime --timestamp --sign "$SIGN_ID" "$BUNDLE"
+  codesign --verify --strict --verbose=1 "$BUNDLE"
+fi
 echo "✓ Built: $BUNDLE"
+
+if [ "$NOTARIZE" = 1 ]; then
+  echo "▸ Notarising (takes a few minutes)"
+  ZIP="$BUILD/$NAME-notarize.zip"
+  ditto -c -k --keepParent "$BUNDLE" "$ZIP"
+  if [ -n "${NOTARY_KEY_PATH:-}" ]; then
+    AUTH=(--key "$NOTARY_KEY_PATH" --key-id "$NOTARY_KEY_ID" --issuer "$NOTARY_ISSUER_ID")
+  else
+    AUTH=(--keychain-profile wortuhr-notary)
+  fi
+  xcrun notarytool submit "$ZIP" "${AUTH[@]}" --wait --timeout 30m --output-format json \
+    | tee "$BUILD/notarize.json" || true
+  if ! grep -q '"status" *: *"Accepted"' "$BUILD/notarize.json"; then
+    ID=$(sed -n 's/.*"id" *: *"\([^"]*\)".*/\1/p' "$BUILD/notarize.json" | head -1)
+    [ -n "$ID" ] && xcrun notarytool log "$ID" "${AUTH[@]}" || true
+    echo "Notarisation failed." >&2; exit 1
+  fi
+  rm -f "$ZIP"
+  xcrun stapler staple "$BUNDLE"
+  xcrun stapler validate "$BUNDLE"
+  echo "✓ Notarised and stapled"
+fi
 
 if [ "$MODE" != "--no-install" ]; then
   if [ "$MODE" = "--system" ]; then
