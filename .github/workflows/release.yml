@@ -34,7 +34,20 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple: -s -k "$KC_PW" "$KC" >/dev/null
           security list-keychains -d user -s "$KC" $(security list-keychains -d user | tr -d '"')
           rm "$RUNNER_TEMP/cert.p12"
-          printf '%s\n' "$NOTARY_KEY_P8" > "$RUNNER_TEMP/AuthKey.p8"
+          # Rebuild a clean PEM file from the secret: accepts the .p8 text (even pasted as one line)
+          # or the .p8 file in base64.
+          python3 - <<'PY'
+          import base64, os, re
+          v = os.environ["NOTARY_KEY_P8"].strip()
+          if "BEGIN" not in v:
+              v = base64.b64decode(re.sub(r"\s", "", v)).decode()
+          body = re.sub(r"-----(BEGIN|END) PRIVATE KEY-----", "", v)
+          body = re.sub(r"[^A-Za-z0-9+/=]", "", body)
+          lines = [body[i:i + 64] for i in range(0, len(body), 64)]
+          pem = "-----BEGIN PRIVATE KEY-----\n" + "\n".join(lines) + "\n-----END PRIVATE KEY-----\n"
+          open(os.path.join(os.environ["RUNNER_TEMP"], "AuthKey.p8"), "w").write(pem)
+          print(f"API key: {len(body)} base64 characters (an App Store Connect key has about 200)")
+          PY
       - name: Build, sign and notarise (Apple Silicon + Intel)
         env:
           TEAM_ID: ${{ secrets.TEAM_ID }}
