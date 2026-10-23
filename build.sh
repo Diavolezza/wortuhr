@@ -37,7 +37,7 @@ while [ $# -gt 0 ]; do
 done
 if [ "$NOTARIZE" = 1 ] && [ -z "${SIGN_ID:-}" ]; then
   SIGN_ID=$(security find-identity -v -p codesigning | grep "Developer ID Application" \
-    | grep -- "${TEAM_ID:-}" | head -1 | awk '{print $2}' || true)
+    | grep -- "$(printf %s "${TEAM_ID:-}" | tr -d '[:space:]')" | head -1 | awk '{print $2}' || true)
   if [ -z "$SIGN_ID" ]; then
     echo "No 'Developer ID Application' certificate found in the keychain." >&2; exit 1
   fi
@@ -103,7 +103,10 @@ if [ "$NOTARIZE" = 1 ]; then
   ZIP="$BUILD/$NAME-notarize.zip"
   ditto -c -k --keepParent "$BUNDLE" "$ZIP"
   if [ -n "${NOTARY_KEY_PATH:-}" ]; then
-    AUTH=(--key "$NOTARY_KEY_PATH" --key-id "$NOTARY_KEY_ID" --issuer "$NOTARY_ISSUER_ID")
+    # Strip stray whitespace/line breaks that easily slip into pasted secrets.
+    KEY_ID=$(printf %s "${NOTARY_KEY_ID:-}" | tr -d '[:space:]')
+    ISSUER=$(printf %s "${NOTARY_ISSUER_ID:-}" | tr -d '[:space:]')
+    AUTH=(--key "$NOTARY_KEY_PATH" --key-id "$KEY_ID" --issuer "$ISSUER")
   else
     AUTH=(--keychain-profile wortuhr-notary)
   fi
