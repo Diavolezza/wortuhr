@@ -72,6 +72,20 @@ jobs:
           Runs on Apple Silicon and Intel, macOS 13 or later.
           EOF
           gh release create "$GITHUB_REF_NAME" "Wortuhr-$VERSION.zip" --title "Wortuhr $VERSION" --notes-file notes.md
+      - name: Update Homebrew cask (Diavolezza/homebrew-tap)
+        env:
+          TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          if [ -z "$TAP_TOKEN" ]; then echo "No HOMEBREW_TAP_TOKEN secret – skipping."; exit 0; fi
+          VERSION="${GITHUB_REF_NAME#v}"
+          SHA=$(shasum -a 256 "Wortuhr-$VERSION.zip" | awk '{print $1}')
+          git clone --depth 1 "https://x-access-token:${TAP_TOKEN}@github.com/Diavolezza/homebrew-tap.git" "$RUNNER_TEMP/tap"
+          cd "$RUNNER_TEMP/tap"
+          sed -i '' -E "s/^  version \".*\"/  version \"$VERSION\"/; s/^  sha256 \".*\"/  sha256 \"$SHA\"/" Casks/wortuhr.rb
+          if git diff --quiet; then echo "Cask already up to date."; exit 0; fi
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -am "wortuhr $VERSION"
+          git push
       - name: Clean up signing keychain
         if: always()
         run: |
