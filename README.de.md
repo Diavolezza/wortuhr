@@ -24,6 +24,7 @@ Zeitansage in acht Varianten:
 
 Farben, Schrift, Größe, das Licht der Minutenkanten, Einbrennschutz und „Nur auf dem Hauptbildschirm“ im
 Optionen-Dialog einstellbar; der Dialog erscheint in der gewählten Sprache. Beim ersten Start richtet sich die Uhr nach der Sprache des Macs.
+„Kopieren“ und „Einfügen“ im Dialog übertragen alle Einstellungen als eine Textzeile.
 
 ![Wortuhr im Zeitraffer von 3:00 bis 3:15](docs/wortuhr.gif)
 
@@ -113,7 +114,10 @@ vergleicht Prototyp und Swift Zeile für Zeile.
 - `Shared/ClockFace.swift` – Buchstabenraster und Zeitlogik je Sprache
 - `Sources/Settings.swift` – Einstellungen, Voreinstellungen, Speichern (ScreenSaverDefaults)
 - `Sources/WortuhrView.swift` – Darstellung mit Core Animation (ein Glyphen-Layer pro Buchstabe)
-- `Sources/ConfigController.swift` – Optionen-Dialog in allen Sprachen
+- `Sources/ConfigController.swift` – Optionen-Dialog
+- `Shared/Texts.swift` – Texte des Optionen-Dialogs in allen Sprachen
+- `Shared/SettingsExchange.swift` – Einstellungen als eine Textzeile (Kopieren / Einfügen)
+- `App/` – App und Widget für iPhone, iPad und Mac (SwiftUI, in Arbeit; `App/build.sh`)
 - `Sources/Log.swift` – Diagnose-Ausgaben (`./diag.sh` sammelt sie)
 - `Tools/main.swift` – erzeugt das Vorschaubild für die Systemeinstellungen (11:55)
 - `Tools/Docs/main.swift` – erzeugt die Bilder der README (`./build.sh --docs`)

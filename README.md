@@ -25,7 +25,7 @@ The time is spelled out in eight variants:
 
 Colours, typeface, size, the glow of the minute edges, burn-in protection and “main display only” can be set
 in the options dialog; the dialog appears in the selected language. On first start the clock uses the Mac’s
-language.
+language. “Copy” and “Paste” in the dialog transfer all settings as one line of text.
 
 ![Wortuhr running from 3:00 to 3:15 in German](docs/wortuhr.gif)
 
@@ -114,7 +114,10 @@ at the same time don’t touch) and compares prototype and Swift line by line.
 - `Shared/ClockFace.swift` – letter grids and time logic per language
 - `Sources/Settings.swift` – settings, defaults, persistence (ScreenSaverDefaults)
 - `Sources/WortuhrView.swift` – rendering with Core Animation (one glyph layer per letter)
-- `Sources/ConfigController.swift` – options dialog in all languages
+- `Sources/ConfigController.swift` – options dialog
+- `Shared/Texts.swift` – texts of the options dialog in all languages
+- `Shared/SettingsExchange.swift` – settings as one line of text (Copy / Paste)
+- `App/` – app and widget for iPhone, iPad and Mac (SwiftUI, in development; `App/build.sh`)
 - `Sources/Log.swift` – diagnostic messages (collected by `./diag.sh`)
 - `Tools/main.swift` – creates the thumbnail for System Settings (11:55)
 - `Tools/Docs/main.swift` – renders the README images (`./build.sh --docs`)
