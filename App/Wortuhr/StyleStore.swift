@@ -1,4 +1,5 @@
 import SwiftUI
+import WidgetKit
 #if os(macOS)
 import AppKit
 #else
@@ -10,7 +11,24 @@ import UIKit
 @Observable
 final class StyleStore {
     var style: ClockStyle {
-        didSet { if style != oldValue { style.save() } }
+        didSet {
+            guard style != oldValue else { return }
+            style.save()
+            reloadWidgets()
+        }
+    }
+
+    @ObservationIgnored private var widgetReload: Task<Void, Never>?
+
+    /// The widgets show the app's settings: redraw them shortly after the last change
+    /// (not on every step of a slider).
+    private func reloadWidgets() {
+        widgetReload?.cancel()
+        widgetReload = Task {
+            try? await Task.sleep(for: .seconds(1))
+            guard !Task.isCancelled else { return }
+            WidgetCenter.shared.reloadAllTimelines()
+        }
     }
 
     var keepAwake: Bool {

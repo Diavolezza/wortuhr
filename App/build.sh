@@ -9,13 +9,6 @@ SNAPSHOTS=0
 LOG=build.log
 : > "$LOG"
 
-# Team ID from the Developer ID certificate in the keychain (for signing in Xcode)
-if [ -z "${TEAM_ID:-}" ]; then
-  TEAM_ID=$(security find-identity -v -p codesigning 2>/dev/null | grep -m1 -oE '\([A-Z0-9]{10}\)"' | tr -d '()"' || true)
-fi
-export TEAM_ID
-echo "Team: ${TEAM_ID:-none}" | tee -a "$LOG"
-
 xcodegen generate 2>&1 | tee -a "$LOG"
 [ "${PIPESTATUS[0]}" -eq 0 ] || exit 1
 

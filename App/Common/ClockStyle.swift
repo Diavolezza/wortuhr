@@ -70,13 +70,13 @@ struct ClockStyle: Equatable {
     /// Stored as the same text that "Copy" puts on the clipboard (see Shared/SettingsExchange.swift).
     private static let key = "settings"
 
-    static func load(from defaults: UserDefaults = .standard) -> ClockStyle {
+    static func load(from defaults: UserDefaults = .shared) -> ClockStyle {
         var style = ClockStyle()
         if let text = defaults.string(forKey: key), let x = SettingsExchange(text: text) { style.apply(x) }
         return style
     }
 
-    func save(to defaults: UserDefaults = .standard) {
+    func save(to defaults: UserDefaults = .shared) {
         defaults.set(exchange.text, forKey: Self.key)
     }
 
@@ -121,6 +121,30 @@ struct ClockStyle: Equatable {
         if let v = x.edgeSpread { edgeSpread = v }
         if let v = x.edgeTrail { edgeTrail = v }
         if let v = x.drift { drift = v }
+    }
+}
+
+extension UserDefaults {
+    /// Shared by the app and the widget (App Group).
+    static let shared = UserDefaults(suiteName: "group.de.wanner-it.wordclock") ?? .standard
+}
+
+extension ClockStyle {
+    /// Look of a widget: the app's settings, the whole tile, no drift.
+    /// mono: tinted / vibrant rendering (StandBy at night, tinted Home Screen, Mac desktop in the
+    /// background) – the system colours the widget itself, so plain white letters without glow.
+    func forWidget(mono: Bool) -> ClockStyle {
+        var s = self
+        s.size = 100
+        s.drift = false
+        if mono {
+            s.front = "#000000"
+            s.lit = "#ffffff"
+            s.dim = 22
+            s.glow = 0
+            s.edge = 0
+        }
+        return s
     }
 }
 
