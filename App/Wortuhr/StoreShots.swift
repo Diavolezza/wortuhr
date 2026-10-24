@@ -3,7 +3,7 @@ import AppKit
 import SwiftUI
 
 /// Screenshots for the App Store in the sizes Apple asks for (rendered by `./build.sh --snapshots`
-/// into build/snapshots/store): iPhone 6.9" 1320 × 2868, iPad 13" 2064 × 2752, Mac 2880 × 1800.
+/// into build/snapshots/store): iPhone 1206 × 2622, iPad 13" 2064 × 2752, Mac 2880 × 1800.
 extension Snapshots {
     @MainActor
     static func storeShots(_ dir: URL) {
@@ -40,18 +40,19 @@ extension Snapshots {
                                                 Color(red: 0.86, green: 0.56, blue: 0.42)],
                                        startPoint: .top, endPoint: .bottom)
 
-        // iPhone 6.9": 440 × 956 points at 3×
-        write(app(classic, at(10, 23), 440, 956), "iphone-1.png", out, scale: 3)
-        write(app(amber, at(19, 32), 440, 956), "iphone-2.png", out, scale: 3)
-        write(app(chalk, at(8, 16), 440, 956), "iphone-3.png", out, scale: 3)
+        // iPhone with Dynamic Island, medium display (the size class App Store Connect requires):
+        // 402 × 874 points at 3× = 1206 × 2622
+        write(app(classic, at(10, 23), 402, 874), "iphone-1.png", out, scale: 3)
+        write(app(amber, at(19, 32), 402, 874), "iphone-2.png", out, scale: 3)
+        write(app(chalk, at(8, 16), 402, 874), "iphone-3.png", out, scale: 3)
         write(VStack(spacing: 26) {
-            widget(classic, at(10, 23), 364, 382)
-            HStack(spacing: 24) {
-                widget(amber, at(10, 23), 170, 170)
-                widget(mint, at(10, 23), 170, 170)
+            widget(classic, at(10, 23), 338, 354)
+            HStack(spacing: 22) {
+                widget(amber, at(10, 23), 158, 158)
+                widget(mint, at(10, 23), 158, 158)
             }
         }
-        .frame(width: 440, height: 956).background(wallpaper), "iphone-4.png", out, scale: 3)
+        .frame(width: 402, height: 874).background(wallpaper), "iphone-4.png", out, scale: 3)
 
         // iPad 13": 1032 × 1376 points at 2×
         write(app(classic, at(10, 23), 1032, 1376), "ipad-1.png", out, scale: 2)
