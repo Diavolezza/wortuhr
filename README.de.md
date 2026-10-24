@@ -99,7 +99,7 @@ aus zu erzwingen, haben nicht funktioniert oder es verschlimmert.
 dieselbe Uhr zum Ausprobieren von Zeitansage, Farben, Schrift und Größe, mit Zeitraffer.
 Die Einstellungen lassen sich als JSON kopieren.
 
-Raster und Zeitlogik stehen in `prototype/faces.js` und identisch in `Sources/ClockFace.swift`.
+Raster und Zeitlogik stehen in `prototype/faces.js` und identisch in `Shared/ClockFace.swift`.
 Nach jeder Änderung daran:
 
     node prototype/check.mjs
@@ -110,7 +110,7 @@ vergleicht Prototyp und Swift Zeile für Zeile.
 
 ## Aufbau
 
-- `Sources/ClockFace.swift` – Buchstabenraster und Zeitlogik je Sprache
+- `Shared/ClockFace.swift` – Buchstabenraster und Zeitlogik je Sprache
 - `Sources/Settings.swift` – Einstellungen, Voreinstellungen, Speichern (ScreenSaverDefaults)
 - `Sources/WortuhrView.swift` – Darstellung mit Core Animation (ein Glyphen-Layer pro Buchstabe)
 - `Sources/ConfigController.swift` – Optionen-Dialog in allen Sprachen

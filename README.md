@@ -101,7 +101,7 @@ Open `prototype/index.html` in a browser – or the [live demo](https://diavolez
 the same clock for trying out languages, colours, typeface and size, with a fast-forward mode.
 The settings can be copied as JSON.
 
-Grids and time logic live in `prototype/faces.js` and, identically, in `Sources/ClockFace.swift`.
+Grids and time logic live in `prototype/faces.js` and, identically, in `Shared/ClockFace.swift`.
 After every change to them run
 
     node prototype/check.mjs
@@ -111,7 +111,7 @@ at the same time don’t touch) and compares prototype and Swift line by line.
 
 ## Structure
 
-- `Sources/ClockFace.swift` – letter grids and time logic per language
+- `Shared/ClockFace.swift` – letter grids and time logic per language
 - `Sources/Settings.swift` – settings, defaults, persistence (ScreenSaverDefaults)
 - `Sources/WortuhrView.swift` – rendering with Core Animation (one glyph layer per letter)
 - `Sources/ConfigController.swift` – options dialog in all languages

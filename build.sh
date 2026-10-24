@@ -57,7 +57,7 @@ for ARCH in "${ARCHS[@]}"; do
   xcrun swiftc -parse-as-library -wmo -O \
     -module-name "$NAME" \
     -target "$ARCH-apple-macos$MIN_OS" -sdk "$SDK" \
-    -c Sources/*.swift -o "$BUILD/$NAME-$ARCH.o"
+    -c Sources/*.swift Shared/*.swift -o "$BUILD/$NAME-$ARCH.o"
   echo "▸ Linking $ARCH"
   xcrun clang -bundle -target "$ARCH-apple-macos$MIN_OS" -isysroot "$SDK" \
     "$BUILD/$NAME-$ARCH.o" -o "$BUILD/$NAME-$ARCH" \
@@ -77,7 +77,7 @@ if [ -n "$VERSION" ]; then
 fi
 echo "▸ Thumbnail (11:55)"
 xcrun swiftc -O -module-name WortuhrThumb -sdk "$SDK" \
-  Sources/*.swift Tools/main.swift -o "$BUILD/makethumb" -framework ScreenSaver
+  Sources/*.swift Shared/*.swift Tools/main.swift -o "$BUILD/makethumb" -framework ScreenSaver
 "$BUILD/makethumb" "$BUNDLE/Contents/Resources"
 tiffutil -cathidpicheck "$BUNDLE/Contents/Resources/thumbnail.png" "$BUNDLE/Contents/Resources/thumbnail@2x.png" -out "$BUNDLE/Contents/Resources/thumbnail.tiff" >/dev/null
 # Like Xcode projects, ship only the combined TIFF file, no PNGs.
@@ -85,7 +85,7 @@ rm -f "$BUNDLE/Contents/Resources/thumbnail.png" "$BUNDLE/Contents/Resources/thu
 if [ "$DOCS" = 1 ]; then
   echo "▸ README images (docs/)"
   xcrun swiftc -O -module-name WortuhrDocs -sdk "$SDK" \
-    Sources/*.swift Tools/Docs/main.swift -o "$BUILD/makedocs" -framework ScreenSaver
+    Sources/*.swift Shared/*.swift Tools/Docs/main.swift -o "$BUILD/makedocs" -framework ScreenSaver
   "$BUILD/makedocs" docs
 fi
 # Make everything world-readable – otherwise macOS cannot load the bundle from /Library.

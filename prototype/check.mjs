@@ -56,7 +56,7 @@ for (const lang of Object.keys(LANGS)) {
   console.log(`  1:25 ${say(13, 25)} · 11:45 ${say(11, 45)} · 12:30 ${say(12, 30)} · 23:55 ${say(23, 55)}`);
 }
 
-// 4. Comparison with Swift (Sources/ClockFace.swift)
+// 4. Comparison with Swift (Shared/ClockFace.swift)
 if (!process.argv.includes("--no-swift")) {
   const js = [];
   for (const [name, f] of Object.entries(FACES)) {
@@ -69,7 +69,7 @@ if (!process.argv.includes("--no-swift")) {
   mkdirSync(path.join(root, "build"), { recursive: true });
   const bin = path.join(root, "build", "phrases");
   execFileSync("xcrun", ["swiftc", "-O", "-module-name", "Phrases",
-    path.join(root, "Sources/ClockFace.swift"), path.join(root, "Tools/Phrases/main.swift"), "-o", bin]);
+    path.join(root, "Shared/ClockFace.swift"), path.join(root, "Tools/Phrases/main.swift"), "-o", bin]);
   const swift = execFileSync(bin, { encoding: "utf8", maxBuffer: 64 << 20 }).trim().split("\n");
   const n = Math.max(js.length, swift.length);
   let diffs = 0;

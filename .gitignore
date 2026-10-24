@@ -4,3 +4,6 @@ diag.log
 crash-latest.ips
 publish.sh
 .DS_Store
+App/Wortuhr.xcodeproj/
+App/Wortuhr/Info.plist
+App/WortuhrWidget/Info.plist
