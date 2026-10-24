@@ -104,11 +104,13 @@ struct Provider: AppIntentTimelineProvider {
         ClockEntry(date: .now, style: style(configuration))
     }
 
-    /// One entry per minute for the next two hours, then WidgetKit asks again.
+    /// One entry per minute for the next hour, then WidgetKit asks again (24 reloads a day,
+    /// within WidgetKit's budget). WidgetKit keeps all entries of a timeline in memory at once,
+    /// so they must not get too many.
     func timeline(for configuration: ClockWidgetIntent, in context: Context) async -> Timeline<ClockEntry> {
         let s = style(configuration)
         let start = Calendar.current.dateInterval(of: .minute, for: .now)?.start ?? .now
-        let entries = (0..<120).map { ClockEntry(date: start.addingTimeInterval(Double($0) * 60), style: s) }
+        let entries = (0..<60).map { ClockEntry(date: start.addingTimeInterval(Double($0) * 60), style: s) }
         return Timeline(entries: entries, policy: .atEnd)
     }
 }

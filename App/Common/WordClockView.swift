@@ -129,13 +129,18 @@ private struct ClockPlate: View {
         let cap = style.capHeight(size: pt)
         let color = lit ? style.litColor : style.offColor
         let cell = CGSize(width: cw, height: ch)
+        // Widgets (plate == false) do not fade: the lit layers hold only the lit letters, so each
+        // timeline entry stays small. The app keeps all letters so that they can fade in and out.
+        let lean = lit && !plate
+        let cells = lean ? on.sorted() : Array(0..<(ClockFace.rows * cols))
+        let marks = face.marks.filter { !lean || words.contains($0.word) }
         return ZStack(alignment: .topLeading) {
-            ForEach(0..<(ClockFace.rows * cols), id: \.self) { i in
+            ForEach(cells, id: \.self) { i in
                 Glyph(text: face.letter(row: i / cols, col: i % cols), font: font, cap: cap, color: color, cell: cell)
                     .opacity(lit && !on.contains(i) ? 0 : 1)
                     .position(x: gx0 + cw * (CGFloat(i % cols) + 0.5), y: gy0 + ch * (CGFloat(i / cols) + 0.5))
             }
-            ForEach(Array(face.marks.enumerated()), id: \.offset) { _, mark in
+            ForEach(Array(marks.enumerated()), id: \.offset) { _, mark in
                 Glyph(text: mark.glyph, font: font, cap: cap, color: color, cell: cell)
                     .opacity(lit && !words.contains(mark.word) ? 0 : 1)
                     .position(x: gx0 + cw * CGFloat(mark.afterCol + 1), y: gy0 + ch * (CGFloat(mark.row) + 0.5))
