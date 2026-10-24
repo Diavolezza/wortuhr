@@ -124,6 +124,8 @@ struct WortuhrWidgetView: View {
     var body: some View {
         let style = entry.style.forWidget(mono: renderingMode != .fullColor)
         WordClockView(style: style, date: entry.date, plate: false)
+            // The placeholder shows the real letters right away instead of grey blocks
+            .unredacted()
             .containerBackground(for: .widget) { style.frontColor }
     }
 }

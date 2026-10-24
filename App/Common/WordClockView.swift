@@ -25,6 +25,9 @@ struct WordClockView: View {
                 // (the large widget is not quite square)
                 let w = floor(geo.size.width * scale), h = floor(geo.size.height * scale)
                 ZStack {
+                    // The whole tile in the plate colour: iOS 26 draws the widget background
+                    // (containerBackground) lighter, which showed as grey bands above and below the plate.
+                    Rectangle().fill(style.frontColor)
                     ClockPlate(style: style, side: side, date: date, plate: false)
                         .frame(width: side, height: side)
                     if style.minuteEdges {
