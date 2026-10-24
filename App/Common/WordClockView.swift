@@ -41,9 +41,7 @@ private struct ClockPlate: View {
             if plate {
                 // Sheen: subtle gradient from top left to bottom right
                 RoundedRectangle(cornerRadius: radius)
-                    .fill(LinearGradient(stops: [.init(color: .white.opacity(0.055), location: 0),
-                                                 .init(color: .white.opacity(0), location: 0.45),
-                                                 .init(color: .black.opacity(0.12), location: 1)],
+                    .fill(LinearGradient(stops: Self.sheen,
                                          startPoint: UnitPoint(x: 0.33, y: 0), endPoint: UnitPoint(x: 0.67, y: 1)))
                 // Edge: fine light border, highlight at the top, shadow at the bottom
                 Rectangle().fill(.white.opacity(e * 0.20))
@@ -55,13 +53,15 @@ private struct ClockPlate: View {
             }
             letters(face, on: on, words: words, pt: pt, lit: false)
             if g > 0 {
-                // Same look as the two shadow layers per glyph in the screen saver
+                // Same look as the two shadow layers per glyph in the screen saver (halo and main glow).
+                // SwiftUI blurs about twice as wide as Core Animation for the same radius and a bit
+                // brighter: radius × 0.53 and opacity × 0.85 match docs/wortuhr.png (measured).
                 letters(face, on: on, words: words, pt: pt, lit: true)
                     .compositingGroup()
-                    .shadow(color: style.litColor.opacity(0.6), radius: pt * 1.1 * g)
+                    .shadow(color: style.litColor.opacity(0.6 * 0.85), radius: pt * 1.1 * g * 0.53)
                 letters(face, on: on, words: words, pt: pt, lit: true)
                     .compositingGroup()
-                    .shadow(color: style.litColor.opacity(0.95), radius: pt * 0.3 * g)
+                    .shadow(color: style.litColor.opacity(0.95 * 0.85), radius: pt * 0.3 * g * 0.53)
             } else {
                 letters(face, on: on, words: words, pt: pt, lit: true)
             }
@@ -72,6 +72,15 @@ private struct ClockPlate: View {
         .frame(width: side, height: side, alignment: .topLeading)
         .animation(style.fade > 0 ? .easeInOut(duration: style.fade) : nil, value: h * 60 + m)
     }
+
+    /// Sheen of the plate: white 5.5 % → clear (45 %) → black 12 %. Core Animation interpolates
+    /// colour and alpha separately (the colour turns grey while the alpha rises), SwiftUI
+    /// premultiplied – the extra stops reproduce the screen saver's gradient.
+    static let sheen: [Gradient.Stop] = [.init(color: .white.opacity(0.055), location: 0)]
+        + (0...8).map { i in
+            let t = Double(i) / 8
+            return .init(color: Color(white: 1 - t).opacity(0.12 * t), location: 0.45 + 0.55 * t)
+        }
 
     /// All letters of the grid. lit = false: every letter in the unlit colour.
     /// lit = true: only the lit letters, in the lit colour (the others transparent, so they fade).

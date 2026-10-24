@@ -2,6 +2,12 @@ import SwiftUI
 
 @main
 struct WortuhrApp: App {
+    init() {
+        #if os(macOS)
+        MainActor.assumeIsolated { Snapshots.runIfRequested() }
+        #endif
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()
