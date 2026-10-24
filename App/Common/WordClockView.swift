@@ -10,10 +10,26 @@ struct WordClockView: View {
 
     var body: some View {
         GeometryReader { geo in
-            let side = floor(min(geo.size.width, geo.size.height) * CGFloat(style.size / 100))
-            ClockPlate(style: style, side: side, date: date, plate: plate)
-                .frame(width: side, height: side)
+            let scale = CGFloat(style.size / 100)
+            let side = floor(min(geo.size.width, geo.size.height) * scale)
+            if plate {
+                ClockPlate(style: style, side: side, date: date, plate: true)
+                    .frame(width: side, height: side)
+                    .position(x: geo.size.width / 2, y: geo.size.height / 2)
+            } else {
+                // Widget: square letter grid in the middle, minute edges along the whole tile
+                // (the large widget is not quite square)
+                let w = floor(geo.size.width * scale), h = floor(geo.size.height * scale)
+                ZStack {
+                    ClockPlate(style: style, side: side, date: date, plate: false)
+                        .frame(width: side, height: side)
+                    if style.minuteEdges {
+                        MinuteEdges(style: style, width: w, height: h, edges: ClockPlate.edges(at: date, style))
+                    }
+                }
+                .frame(width: w, height: h)
                 .position(x: geo.size.width / 2, y: geo.size.height / 2)
+            }
         }
     }
 }
@@ -65,12 +81,17 @@ private struct ClockPlate: View {
             } else {
                 letters(face, on: on, words: words, pt: pt, lit: true)
             }
-            if style.minuteEdges {
-                MinuteEdges(style: style, side: side, edges: p.edges)
+            if plate && style.minuteEdges {
+                MinuteEdges(style: style, width: side, height: side, edges: p.edges)
             }
         }
         .frame(width: side, height: side, alignment: .topLeading)
         .animation(style.fade > 0 ? .easeInOut(duration: style.fade) : nil, value: h * 60 + m)
+    }
+
+    /// Number of lit minute edges (minutes past the five-minute step).
+    static func edges(at date: Date, _ style: ClockStyle) -> Int {
+        Calendar.current.component(.minute, from: date) % 5
     }
 
     /// Sheen of the plate: white 5.5 % → clear (45 %) → black 12 %. Core Animation interpolates
@@ -132,11 +153,14 @@ private struct Glyph: View {
 /// glow fading into the plate; the ends taper off so the corners stay dark.
 private struct MinuteEdges: View {
     let style: ClockStyle
-    let side: CGFloat
+    let width: CGFloat
+    let height: CGFloat
     let edges: Int
 
+    private var side: CGFloat { min(width, height) }
+
     private struct Geometry {
-        var inner: CGFloat, outer: CGFloat, thick: CGFloat, margin: CGFloat, len: CGFloat
+        var inner: CGFloat, outer: CGFloat, thick: CGFloat, margin: CGFloat
         var stops: [Gradient.Stop]
     }
 
@@ -153,7 +177,7 @@ private struct MinuteEdges: View {
         let alphas: [CGFloat] = [0, 0.22, 0.9, 0.9, 0.34, 0.10, 0].map { min(1, $0 * k) }
         let stops = zip(alphas, pos).map { Gradient.Stop(color: style.litColor.opacity($0), location: $1 / thick) }
         let margin = side * 0.06
-        return Geometry(inner: inner, outer: outer, thick: thick, margin: margin, len: side - 2 * margin, stops: stops)
+        return Geometry(inner: inner, outer: outer, thick: thick, margin: margin, stops: stops)
     }
 
     var body: some View {
@@ -165,18 +189,19 @@ private struct MinuteEdges: View {
                     .opacity(i >= edges ? 0 : (i == edges - 1 ? 1 : trail))
             }
         }
-        .frame(width: side, height: side, alignment: .topLeading)
+        .frame(width: width, height: height, alignment: .topLeading)
     }
 
     private func edge(_ i: Int, _ g: Geometry) -> some View {
         let horizontal = i % 2 == 0
-        let size = horizontal ? CGSize(width: g.len, height: g.thick) : CGSize(width: g.thick, height: g.len)
+        let size = horizontal ? CGSize(width: width - 2 * g.margin, height: g.thick)
+                              : CGSize(width: g.thick, height: height - 2 * g.margin)
         let origin: CGPoint
         let from: UnitPoint, to: UnitPoint   // across the edge, from the outer end to the inner end
         switch i {
         case 0:  origin = CGPoint(x: g.margin, y: -g.outer);         from = .top;      to = .bottom
-        case 1:  origin = CGPoint(x: side - g.inner, y: g.margin);   from = .trailing; to = .leading
-        case 2:  origin = CGPoint(x: g.margin, y: side - g.inner);   from = .bottom;   to = .top
+        case 1:  origin = CGPoint(x: width - g.inner, y: g.margin);   from = .trailing; to = .leading
+        case 2:  origin = CGPoint(x: g.margin, y: height - g.inner);   from = .bottom;   to = .top
         default: origin = CGPoint(x: -g.outer, y: g.margin);         from = .leading;  to = .trailing
         }
         let taper = Gradient(stops: [.init(color: .clear, location: 0), .init(color: .black, location: 0.22),
