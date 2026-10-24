@@ -35,6 +35,10 @@ Getestet unter macOS 27 auf Apple Silicon; gebaut wird für Apple Silicon und In
 laden, entpacken und `Wortuhr.saver` doppelklicken. macOS fragt, ob er nur für dich oder für alle
 Benutzer installiert werden soll. Dann in Systemeinstellungen → Bildschirmschoner „Wortuhr“ wählen.
 
+Oder mit [Homebrew](https://brew.sh):
+
+    brew install --cask diavolezza/tap/wortuhr
+
 Der Bildschirmschoner ist mit einer Developer ID signiert und von Apple notarisiert.
 
 ## Aus dem Quelltext bauen und installieren

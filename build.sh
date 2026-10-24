@@ -70,7 +70,8 @@ done
 lipo -create "${BINS[@]}" -output "$BUNDLE/Contents/MacOS/$NAME"
 cp Info.plist "$BUNDLE/Contents/Info.plist"
 # New build number on every build so macOS discards cached thumbnails.
-/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $(date +%Y%m%d%H%M%S)" "$BUNDLE/Contents/Info.plist"
+# Seconds since 1970: always increasing and small enough for macOS's version comparison.
+/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $(date +%s)" "$BUNDLE/Contents/Info.plist"
 if [ -n "$VERSION" ]; then
   /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" "$BUNDLE/Contents/Info.plist"
 fi

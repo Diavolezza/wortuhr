@@ -37,6 +37,10 @@ Download `Wortuhr-….zip` from the [latest release](https://github.com/Diavolez
 unzip it and double-click `Wortuhr.saver`. macOS asks whether to install it for you or for all users.
 Then select “Wortuhr” in System Settings → Screen Saver.
 
+Or with [Homebrew](https://brew.sh):
+
+    brew install --cask diavolezza/tap/wortuhr
+
 The screen saver is signed with a Developer ID and notarised by Apple.
 
 ## Build and install from source
