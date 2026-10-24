@@ -39,7 +39,8 @@ Then select “Wortuhr” in System Settings → Screen Saver.
 
 Or with [Homebrew](https://brew.sh):
 
-    brew install --cask diavolezza/tap/wortuhr
+    brew tap diavolezza/tap
+    brew install --cask wortuhr
 
 The screen saver is signed with a Developer ID and notarised by Apple.
 

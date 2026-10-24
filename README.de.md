@@ -37,7 +37,8 @@ Benutzer installiert werden soll. Dann in Systemeinstellungen → Bildschirmscho
 
 Oder mit [Homebrew](https://brew.sh):
 
-    brew install --cask diavolezza/tap/wortuhr
+    brew tap diavolezza/tap
+    brew install --cask wortuhr
 
 Der Bildschirmschoner ist mit einer Developer ID signiert und von Apple notarisiert.
 
