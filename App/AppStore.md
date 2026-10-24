@@ -84,3 +84,13 @@ ALSO AS A SCREEN SAVER
 Wortuhr is also available as a free screen saver for the Mac. With "Copy" and "Paste" you transfer the look between the app and the screen saver.
 
 Free, no ads, no account, no data collection.
+
+## Notes for App Review (English)
+
+Wortuhr shows the time as words on a grid of letters. Tap the clock (iPhone/iPad) or press Command-comma (Mac) to open the settings. The app offers widgets in three sizes, also for StandBy; each widget can be configured with "Edit Widget". The app has no accounts, no network access and collects no data. The link "Wortuhr as a screen saver for the Mac" in the settings opens the project page of the free, open-source screen saver on GitHub; there is nothing to buy.
+
+## Checklist for a new version
+
+1. Raise `MARKETING_VERSION` (new version) and `CURRENT_PROJECT_VERSION` (every upload) in `App/project.yml`, run `App/build.sh`.
+2. Xcode: Any iOS Device → Product → Archive → Distribute App → App Store Connect → Upload; the same with Any Mac.
+3. App Store Connect: new version for iOS and macOS, "What's New" (de, en), select the build, add for review, submit.
