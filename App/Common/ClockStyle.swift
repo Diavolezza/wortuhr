@@ -3,7 +3,7 @@ import CoreText
 
 /// Look and behaviour of the word clock in the app and the widget.
 /// Same settings and defaults as the screen saver (Sources/Settings.swift).
-struct ClockStyle: Codable, Equatable {
+struct ClockStyle: Equatable {
     var language: Language = .systemDefault
     var intro = true              // always show "ES IST" / "IT IS"
     var front = "#0e0f11"         // plate colour
@@ -20,10 +20,12 @@ struct ClockStyle: Codable, Equatable {
     var edgeStrength: Double = 100 // brightness of the minute edges in % (10 … 200)
     var edgeSpread: Double = 50   // light outside the plate: 0 = none … 100 = wide halo
     var edgeTrail: Double = 40    // brightness of the earlier edges
+    var drift = false             // the plate drifts slowly (burn-in protection)
 
     static let fonts = ["Helvetica Neue", "System", "Avenir Next", "Futura", "DIN Alternate", "Gill Sans", "SF Mono"]
     static let frontPresets = ["#0e0f11", "#2a2c30", "#101b2c", "#14261e", "#5e231d", "#e9e7e1"]
     static let litPresets = ["#fff1d6", "#f3f7ff", "#ffb24a", "#9ad7ff", "#9ff0c8", "#1d1f22"]
+    static let weights: [(String, Int)] = [("Light", 300), ("Regular", 400), ("Medium", 500), ("Bold", 700)]
 
     var frontColor: Color { Color(hex: front) }
     var litColor: Color { Color(hex: lit) }
@@ -63,22 +65,64 @@ struct ClockStyle: Codable, Equatable {
         (0.005, 0.02 * pow(CGFloat(edgeSpread) / 100, 1.5))
     }
 
-    // MARK: - Persistence
+    // MARK: - Persistence and exchange
 
-    private static let key = "clockStyle"
+    /// Stored as the same text that "Copy" puts on the clipboard (see Shared/SettingsExchange.swift).
+    private static let key = "settings"
 
     static func load(from defaults: UserDefaults = .standard) -> ClockStyle {
-        guard let data = defaults.data(forKey: key),
-              let style = try? JSONDecoder().decode(ClockStyle.self, from: data) else { return ClockStyle() }
+        var style = ClockStyle()
+        if let text = defaults.string(forKey: key), let x = SettingsExchange(text: text) { style.apply(x) }
         return style
     }
 
     func save(to defaults: UserDefaults = .standard) {
-        if let data = try? JSONEncoder().encode(self) { defaults.set(data, forKey: Self.key) }
+        defaults.set(exchange.text, forKey: Self.key)
+    }
+
+    var exchange: SettingsExchange {
+        var x = SettingsExchange()
+        x.language = language.rawValue
+        x.intro = intro
+        x.front = front
+        x.lit = lit
+        x.dim = dim
+        x.glow = glow
+        x.edge = edge
+        x.font = font
+        x.weight = weight
+        x.letterScale = letterScale
+        x.size = size
+        x.fade = fade
+        x.minuteEdges = minuteEdges
+        x.edgeStrength = edgeStrength
+        x.edgeSpread = edgeSpread
+        x.edgeTrail = edgeTrail
+        x.drift = drift
+        return x
+    }
+
+    /// Takes over pasted settings; values that are missing stay as they are.
+    mutating func apply(_ x: SettingsExchange) {
+        if let v = x.language.flatMap(Language.init(rawValue:)) { language = v }
+        if let v = x.intro { intro = v }
+        if let v = x.front { front = v }
+        if let v = x.lit { lit = v }
+        if let v = x.dim { dim = v }
+        if let v = x.glow { glow = v }
+        if let v = x.edge { edge = v }
+        if let v = x.font, Self.fonts.contains(v) { font = v }
+        if let v = x.weight { weight = v }
+        if let v = x.letterScale { letterScale = v }
+        if let v = x.size { size = v }
+        if let v = x.fade { fade = v }
+        if let v = x.minuteEdges { minuteEdges = v }
+        if let v = x.edgeStrength { edgeStrength = v }
+        if let v = x.edgeSpread { edgeSpread = v }
+        if let v = x.edgeTrail { edgeTrail = v }
+        if let v = x.drift { drift = v }
     }
 }
-
-extension Language: Codable {}
 
 extension Color {
     /// Colour from "#rrggbb" (sRGB).
@@ -92,6 +136,19 @@ extension Color {
         let x = components(a), y = components(b)
         return Color(.sRGB, red: x.r * t + y.r * (1 - t), green: x.g * t + y.g * (1 - t),
                      blue: x.b * t + y.b * (1 - t), opacity: 1)
+    }
+
+    /// "#rrggbb" of a colour (sRGB), e.g. from the colour picker.
+    var hexString: String {
+        #if os(macOS)
+        let c = NSColor(self).usingColorSpace(.sRGB) ?? .black
+        let r = c.redComponent, g = c.greenComponent, b = c.blueComponent
+        #else
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        UIColor(self).getRed(&r, green: &g, blue: &b, alpha: &a)
+        #endif
+        func byte(_ x: CGFloat) -> Int { Int((min(max(x, 0), 1) * 255).rounded()) }
+        return String(format: "#%02x%02x%02x", byte(r), byte(g), byte(b))
     }
 
     static func components(_ hex: String) -> (r: Double, g: Double, b: Double) {

@@ -34,6 +34,10 @@ targets:
         CFBundleDisplayName: Wortuhr
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        # System texts (menus, buttons) in the user's language; the app's own texts follow the clock language
+        CFBundleDevelopmentRegion: en
+        CFBundleLocalizations: [en, de, fr, it, es]
+        CFBundleAllowMixedLocalizations: true
         LSApplicationCategoryType: public.app-category.utilities
         ITSAppUsesNonExemptEncryption: false
         UILaunchScreen:
@@ -42,6 +46,7 @@ targets:
         UIViewControllerBasedStatusBarAppearance: true
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
         UISupportedInterfaceOrientations~ipad:

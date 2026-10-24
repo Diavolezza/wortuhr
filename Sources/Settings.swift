@@ -89,6 +89,50 @@ struct Settings {
         d.synchronize()
     }
 
+    /// Settings for copying to the app (see Shared/SettingsExchange.swift).
+    var exchange: SettingsExchange {
+        var x = SettingsExchange()
+        x.language = language.rawValue
+        x.intro = intro
+        x.front = front.hexString
+        x.lit = lit.hexString
+        x.dim = dim
+        x.glow = glow
+        x.edge = edge
+        x.font = font
+        x.weight = weight
+        x.letterScale = letterScale
+        x.size = size
+        x.fade = fade
+        x.minuteEdges = minuteEdges
+        x.edgeStrength = edgeStrength
+        x.edgeSpread = edgeSpread
+        x.edgeTrail = edgeTrail
+        x.drift = drift
+        return x
+    }
+
+    /// Takes over pasted settings; values that are missing stay as they are.
+    mutating func apply(_ x: SettingsExchange) {
+        if let v = x.language.flatMap(Language.init(rawValue:)) { language = v }
+        if let v = x.intro { intro = v }
+        if let v = x.front { front = NSColor(hex: v) }
+        if let v = x.lit { lit = NSColor(hex: v) }
+        if let v = x.dim { dim = v }
+        if let v = x.glow { glow = v }
+        if let v = x.edge { edge = v }
+        if let v = x.font, Settings.fonts.contains(v) { font = v }
+        if let v = x.weight { weight = v }
+        if let v = x.letterScale { letterScale = v }
+        if let v = x.size { size = v }
+        if let v = x.fade { fade = v }
+        if let v = x.minuteEdges { minuteEdges = v }
+        if let v = x.edgeStrength { edgeStrength = v }
+        if let v = x.edgeSpread { edgeSpread = v }
+        if let v = x.edgeTrail { edgeTrail = v }
+        if let v = x.drift { drift = v }
+    }
+
     /// Glow of the minute edges as fractions of the plate width, same as edgeSpread() in the prototype:
     /// depth = how far the glow reaches into the plate (fixed: a hint), halo = light outside the plate,
     /// set by the spread (0 % none, 50 % 0.7 %, 100 % 2 % of the plate width).

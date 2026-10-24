@@ -7,15 +7,19 @@ struct WordClockView: View {
     var date: Date
     /// Rim and sheen of the plate (off in widgets, which bring their own background).
     var plate = true
+    /// Seconds since start for the slow drift (burn-in protection), nil = no drift.
+    var driftTime: TimeInterval? = nil
 
     var body: some View {
         GeometryReader { geo in
             let scale = CGFloat(style.size / 100)
             let side = floor(min(geo.size.width, geo.size.height) * scale)
             if plate {
+                let d = drift(in: geo.size, side: side)
                 ClockPlate(style: style, side: side, date: date, plate: true)
                     .frame(width: side, height: side)
-                    .position(x: geo.size.width / 2, y: geo.size.height / 2)
+                    .position(x: geo.size.width / 2 + d.width, y: geo.size.height / 2 + d.height)
+                    .animation(.linear(duration: 2), value: driftTime)
             } else {
                 // Widget: square letter grid in the middle, minute edges along the whole tile
                 // (the large widget is not quite square)
@@ -31,6 +35,17 @@ struct WordClockView: View {
                 .position(x: geo.size.width / 2, y: geo.size.height / 2)
             }
         }
+    }
+}
+
+extension WordClockView {
+    /// Drift as in the screen saver: only within the free area around the plate,
+    /// at most 6 % of the width and 3 % of the height, periods of 180 and 137 seconds.
+    func drift(in size: CGSize, side: CGFloat) -> CGSize {
+        guard let t = driftTime else { return .zero }
+        let ax = min(max((size.width - side) / 2 - 12, 0), size.width * 0.06)
+        let ay = min(max((size.height - side) / 2 - 12, 0), size.height * 0.03)
+        return CGSize(width: ax * CGFloat(sin(2 * .pi * t / 180)), height: ay * CGFloat(sin(2 * .pi * t / 137)))
     }
 }
 
