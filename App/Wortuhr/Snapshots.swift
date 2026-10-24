@@ -49,6 +49,7 @@ enum Snapshots {
         write(widgetView(mono, at(22, 44), 158, 158, wallpaper: Color(red: 0.12, green: 0.18, blue: 0.3)),
               "widget-small-mono.png", dir)
         iconDrafts(dir)
+        storeShots(dir)
         exit(0)
     }
 
