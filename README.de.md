@@ -1,4 +1,4 @@
-# Wortuhr – Bildschirmschoner für macOS
+# Wortuhr – Wortuhr für Mac, iPhone und iPad
 
 [English](README.md) · **Deutsch**
 
@@ -30,6 +30,15 @@ Optionen-Dialog einstellbar; der Dialog erscheint in der gewählten Sprache. Bei
 
 Getestet unter macOS 27 auf Apple Silicon; gebaut wird für Apple Silicon und Intel (ab macOS 13).
 
+## App und Widgets für iPhone, iPad und Mac
+
+Dieselbe Uhr als App, **„Wortuhr – Word Clock“**: im Vollbild mit allen Optionen des Bildschirmschoners,
+„Bildschirm nicht abschalten“ und langsamem Wandern gegen Einbrennen, aufrecht auch, wenn das iPhone auf dem
+Kopf steht. Widgets in drei Größen für den Home-Bildschirm, StandBy und den Mac-Schreibtisch; jedes Widget kann
+eine eigene Sprache und eigene Farben haben. „Kopieren“ und „Einfügen“ übertragen das Aussehen zwischen App und
+Bildschirmschoner. Kostenlos, ohne Werbung, ohne Datenerfassung. Die App ist beim App Store eingereicht; der Link
+folgt, sobald sie erhältlich ist. Ab iOS 17 / macOS 14.
+
 ## Herunterladen und installieren
 
 `Wortuhr-….zip` aus dem [neuesten Release](https://github.com/Diavolezza/wortuhr/releases/latest)
@@ -52,8 +61,9 @@ erzeugt das Vorschaubild, signiert ad hoc und installiert nach `/Library/Screen 
 (fragt nach dem Administrator-Passwort). Danach in den Systemeinstellungen die Kachel
 „Wortuhr“ einmal anklicken.
 
-Nur aus `/Library/Screen Savers` zeigen die Systemeinstellungen das eigene Vorschaubild;
-`./build.sh` ohne Option installiert nach `~/Library/Screen Savers` (dann mit Standard-Strudel).
+`./build.sh` ohne Option installiert nach `~/Library/Screen Savers`.
+Seit macOS 26 zeigen die Systemeinstellungen für neu installierte Bildschirmschoner den Standard-Strudel statt des
+Vorschaubilds (ein Fehler in macOS, FB21094920).
 
 Mit `--arm-only` wird nur für Apple Silicon gebaut – schneller, reicht für den eigenen Mac
 (z. B. `./build.sh --system --arm-only`). Zum Weitergeben ohne die Option bauen.
@@ -117,7 +127,7 @@ vergleicht Prototyp und Swift Zeile für Zeile.
 - `Sources/ConfigController.swift` – Optionen-Dialog
 - `Shared/Texts.swift` – Texte des Optionen-Dialogs in allen Sprachen
 - `Shared/SettingsExchange.swift` – Einstellungen als eine Textzeile (Kopieren / Einfügen)
-- `App/` – App und Widget für iPhone, iPad und Mac (SwiftUI, in Arbeit; `App/build.sh`)
+- `App/` – App und Widgets für iPhone, iPad und Mac (SwiftUI, XcodeGen; `App/build.sh`, Store-Texte in `App/AppStore.md`)
 - `Sources/Log.swift` – Diagnose-Ausgaben (`./diag.sh` sammelt sie)
 - `Tools/main.swift` – erzeugt das Vorschaubild für die Systemeinstellungen (11:55)
 - `Tools/Docs/main.swift` – erzeugt die Bilder der README (`./build.sh --docs`)

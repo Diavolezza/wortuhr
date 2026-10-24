@@ -1,4 +1,4 @@
-# Wortuhr – word clock screen saver for macOS
+# Wortuhr – word clock for Mac, iPhone and iPad
 
 **English** · [Deutsch](README.de.md)
 
@@ -31,6 +31,15 @@ language. “Copy” and “Paste” in the dialog transfer all settings as one 
 
 Tested on macOS 27 on Apple Silicon; built for Apple Silicon and Intel (macOS 13 or later).
 
+## App and widgets for iPhone, iPad and Mac
+
+The same clock as an app, **“Wortuhr – Word Clock”**: full screen with all the options of the screen saver,
+“keep the screen on” and slow drift against burn-in, upright also when the iPhone stands upside down.
+Widgets in three sizes for the Home Screen, StandBy and the Mac desktop; each widget can have its own
+language and colours. “Copy” and “Paste” transfer the look between the app and the screen saver.
+Free, no ads, no data collection. The app has been submitted to the App Store; the link follows once it
+is available. iOS 17 / macOS 14 or later.
+
 ## Download and install
 
 Download `Wortuhr-….zip` from the [latest release](https://github.com/Diavolezza/wortuhr/releases/latest),
@@ -52,8 +61,9 @@ Requires Xcode (or the Command Line Tools). The script builds for Apple Silicon 
 creates the thumbnail, signs ad hoc and installs to `/Library/Screen Savers`
 (asks for the administrator password). Then click the “Wortuhr” tile once in System Settings.
 
-System Settings shows the custom thumbnail only for savers in `/Library/Screen Savers`;
-`./build.sh` without options installs to `~/Library/Screen Savers` (with the default swirl).
+`./build.sh` without options installs to `~/Library/Screen Savers`.
+Since macOS 26, System Settings shows the default swirl instead of the thumbnail for newly installed
+screen savers (a bug in macOS, FB21094920).
 
 `--arm-only` builds for Apple Silicon only – faster, and enough for your own Mac
 (e.g. `./build.sh --system --arm-only`). Build without it to share the saver.
@@ -117,7 +127,7 @@ at the same time don’t touch) and compares prototype and Swift line by line.
 - `Sources/ConfigController.swift` – options dialog
 - `Shared/Texts.swift` – texts of the options dialog in all languages
 - `Shared/SettingsExchange.swift` – settings as one line of text (Copy / Paste)
-- `App/` – app and widget for iPhone, iPad and Mac (SwiftUI, in development; `App/build.sh`)
+- `App/` – app and widgets for iPhone, iPad and Mac (SwiftUI, XcodeGen; `App/build.sh`, store texts in `App/AppStore.md`)
 - `Sources/Log.swift` – diagnostic messages (collected by `./diag.sh`)
 - `Tools/main.swift` – creates the thumbnail for System Settings (11:55)
 - `Tools/Docs/main.swift` – renders the README images (`./build.sh --docs`)
