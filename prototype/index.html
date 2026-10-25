@@ -258,6 +258,7 @@ function buildGrid(){
     '<rect class="rail" x="6" y="2" width="8" height="16" rx="1.6"/>'+
     '<g clip-path="url(#mclip)"><rect class="fill" x="6" y="2" width="8" height="16"/></g></svg>';
   bar=mc.querySelector(".mbar");
+  sizeBar();
   f.marks.forEach(mk=>{const s=document.createElement("span");s.className="mark";s.textContent=mk.glyph;
     s.style.left=((mk.afterCol+1)/11*100)+"%";s.style.top=(mk.row*10)+"%";gridEl.appendChild(s);marks.push({el:s,word:mk.word});});
 }
@@ -277,6 +278,17 @@ document.querySelectorAll(".seg").forEach(seg=>seg.querySelectorAll("button").fo
 $("font").onchange=e=>{S.font=e.target.value;apply()};
 $("language").onchange=e=>{S.language=e.target.value;apply()};
 
+/* The bar is as wide as an "E" of the letter font. Cell square = 0.0788 of the plate,
+   letters 0.0466 × letter size → width in bar units (20 per cell) = E width / font size × letter size × 11.83 */
+const measureCtx=document.createElement("canvas").getContext("2d");
+function sizeBar(){
+  if(!bar)return;
+  measureCtx.font=S.weight+" 100px "+S.font;
+  const m=measureCtx.measureText("E");
+  const ratio=(m.actualBoundingBoxLeft+m.actualBoundingBoxRight)/100||0.5;
+  const w=Math.min(18,ratio*(S.lscale/100)*0.0466*20/(0.8667/11));
+  bar.querySelectorAll("rect").forEach(r=>{r.setAttribute("x",10-w/2);r.setAttribute("width",w)});
+}
 const fmt=min=>String(Math.floor(min/60)).padStart(2,"0")+":"+String(min%60).padStart(2,"0");
 function apply(){
   root.style.setProperty("--front",S.front);root.style.setProperty("--lit",S.lit);
@@ -308,6 +320,7 @@ function apply(){
     it:"3:15 le tre e un quarto · 3:45 le quattro meno un quarto · 1:00 è l’una",
     es:"3:15 las tres y cuarto · 3:45 las cuatro menos cuarto · 1:00 es la una"}[S.language];
   buildGrid();
+  sizeBar();
   const {tmode,man,...out}=S;
   $("json").value=JSON.stringify(out,null,1);
   save();render(true);

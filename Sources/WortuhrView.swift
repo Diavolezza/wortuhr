@@ -306,7 +306,7 @@ final class WortuhrView: ScreenSaverView {
             marks.append((glyph(mark.glyph, x: x, row: mark.row), mark.word))
         }
 
-        buildBar(face: face, gx0: gx0, gy0: gy0, cw: cw, ch: ch, side: side, pointSize: font.pointSize)
+        buildBar(face: face, gx0: gx0, gy0: gy0, cw: cw, ch: ch, side: side, font: ctFont)
 
         CATransaction.commit()
         lastKey = ""
@@ -314,9 +314,11 @@ final class WortuhrView: ScreenSaverView {
     }
 
     /// Minute bar in the minute cell (a square the size of a letter cell, 20 × 20 units):
-    /// rail x 6, y 2, 8 × 16, corner radius 1.6. The minute cell's letter is hidden.
+    /// as wide as an "E" of the letter font, 16 units high (y 2 … 18), corner radius 1.6.
+    /// The minute cell's letter is hidden.
     private func buildBar(face: ClockFace, gx0: CGFloat, gy0: CGFloat, cw: CGFloat, ch: CGFloat,
-                          side: CGFloat, pointSize: CGFloat) {
+                          side: CGFloat, font: CTFont) {
+        let pointSize = CTFontGetSize(font)
         barRail.removeFromSuperlayer()
         barFill.removeFromSuperlayer()
         let s = settings
@@ -325,7 +327,8 @@ final class WortuhrView: ScreenSaverView {
         let cx = gx0 + cw * (CGFloat(face.minute.col) + 0.5)
         let cy = side - (gy0 + ch * (CGFloat(face.minute.row) + 0.5))   // layer coordinates: y points up
         let k = min(cw, ch) / 20
-        barRect = CGRect(x: cx - 4 * k, y: cy - 8 * k, width: 8 * k, height: 16 * k)
+        let width = glyphPath("E", font: font).boundingBoxOfPath.width
+        barRect = CGRect(x: cx - width / 2, y: cy - 8 * k, width: width, height: 16 * k)
         barRadius = 1.6 * k
         let scale = backingScale
         barRail.contentsScale = scale

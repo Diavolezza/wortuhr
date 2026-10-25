@@ -47,17 +47,43 @@ struct ClockStyle: Equatable {
         }
     }
 
+    /// The letter font as Core Text font (typeface and weight), for measuring.
+    func ctFont(size pt: CGFloat) -> CTFont {
+        #if os(macOS)
+        typealias PlatformFont = NSFont
+        #else
+        typealias PlatformFont = UIFont
+        #endif
+        let w: PlatformFont.Weight
+        switch weight {
+        case ..<350: w = .light
+        case ..<450: w = .regular
+        case ..<600: w = .medium
+        default:     w = .bold
+        }
+        switch font {
+        case "System":  return PlatformFont.systemFont(ofSize: pt, weight: w) as CTFont
+        case "SF Mono": return PlatformFont.monospacedSystemFont(ofSize: pt, weight: w) as CTFont
+        default:
+            let traits = [kCTFontWeightTrait as String: w.rawValue] as CFDictionary
+            let d = CTFontDescriptorCreateWithAttributes([kCTFontFamilyNameAttribute as String: font,
+                                                         kCTFontTraitsAttribute as String: traits] as CFDictionary)
+            return CTFontCreateWithFontDescriptor(d, pt, nil)
+        }
+    }
+
     /// Cap height of the letter font, used to centre the capitals vertically in their cells.
     func capHeight(size pt: CGFloat) -> CGFloat {
-        let f: CTFont
-        switch font {
-        case "System", "SF Mono":
-            f = CTFontCreateUIFontForLanguage(.system, pt, nil) ?? CTFontCreateWithName("Helvetica" as CFString, pt, nil)
-        default:
-            let d = CTFontDescriptorCreateWithAttributes([kCTFontFamilyNameAttribute as String: font] as CFDictionary)
-            f = CTFontCreateWithFontDescriptor(d, pt, nil)
-        }
-        return CTFontGetCapHeight(f)
+        CTFontGetCapHeight(ctFont(size: pt))
+    }
+
+    /// Ink width of a letter in the letter font (the minute bar is as wide as an "E").
+    func glyphWidth(_ letter: String, size pt: CGFloat) -> CGFloat {
+        let f = ctFont(size: pt)
+        var chars = Array(letter.utf16)
+        var glyphs = [CGGlyph](repeating: 0, count: chars.count)
+        guard !chars.isEmpty, CTFontGetGlyphsForCharacters(f, &chars, &glyphs, chars.count) else { return pt * 0.5 }
+        return CTFontGetBoundingRectsForGlyphs(f, .horizontal, glyphs, nil, 1).width
     }
 
     // MARK: - Persistence and exchange

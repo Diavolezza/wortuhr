@@ -108,7 +108,7 @@ private struct ClockPlate: View {
     }
 
     /// Minutes past the five-minute step: a bar in the minute cell (a square the size of a letter
-    /// cell, 20 × 20 units: rail x 6, y 2, 8 × 16, corner radius 1.6). Rail in the colour of the
+    /// cell, 20 × 20 units: as wide as an "E" of the letter font, 16 units high, corner radius 1.6). Rail in the colour of the
     /// unlit letters, the part filled from below in the lit colour, one quarter per minute
     /// (full at four minutes).
     private func minuteBar(_ face: ClockFace, level: CGFloat, pt: CGFloat, g: CGFloat) -> some View {
@@ -127,7 +127,7 @@ private struct ClockPlate: View {
             .shadow(color: style.litColor.opacity(g > 0 ? 0.95 * 0.85 : 0), radius: pt * 0.3 * g * 0.53)
             .widgetAccentable(style.mono)
         }
-        .frame(width: 8 * k, height: 16 * k)
+        .frame(width: style.glyphWidth("E", size: pt), height: 16 * k)
         .position(x: gx0 + cw * (CGFloat(face.minute.col) + 0.5), y: gy0 + ch * (CGFloat(face.minute.row) + 0.5))
     }
 
