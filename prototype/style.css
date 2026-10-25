@@ -1,0 +1,14 @@
+/* Shared look of the Wortuhr web pages: dark plate, warm-white letters, no external fonts or scripts. */
+:root { --bg: #0e0f11; --text: #e6e3dc; --dim: #8f9196; --lit: #fff1d6; --accent: #ffb24a; --line: #2a2c30; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.55 -apple-system, BlinkMacSystemFont, "Avenir Next", "Segoe UI", Roboto, sans-serif; }
+main { max-width: 760px; margin: 0 auto; padding: 32px 16px 64px; }
+header { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+h1 { font-weight: 500; font-size: 28px; letter-spacing: 0.35em; color: var(--lit); margin: 0; text-shadow: 0 0 10px rgba(255, 241, 214, 0.45); }
+h2 { font-weight: 500; font-size: 19px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--lit); margin: 32px 0 8px; }
+h3 { font-size: 17px; margin: 22px 0 4px; }
+nav a { color: var(--accent); margin-left: 12px; text-decoration: none; }
+a { color: var(--accent); }
+section.lang { border-top: 1px solid var(--line); margin-top: 28px; }
+.dim { color: var(--dim); font-size: 15px; }
+ul { padding-left: 22px; }
