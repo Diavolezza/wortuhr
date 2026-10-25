@@ -6,6 +6,8 @@ struct AppTexts {
     let settings, done, fullScreen: String
     let sectionApp, keepAwake, screenSaver: String
     let sectionShare, shareFooter, copied, pasteFailed: String
+    /// Help menu (Mac): opens the support page
+    let help: String
 
     static func `for`(_ ui: UILanguage) -> AppTexts {
         switch ui {
@@ -25,7 +27,8 @@ struct AppTexts {
         sectionShare: "Einstellungen übertragen",
         shareFooter: "Kopiert die Einstellungen als Text oder übernimmt sie aus der Zwischenablage – auch zwischen App und Bildschirmschoner (Optionen …).",
         copied: "Die Einstellungen sind in der Zwischenablage.",
-        pasteFailed: "Die Zwischenablage enthält keine Wortuhr-Einstellungen.")
+        pasteFailed: "Die Zwischenablage enthält keine Wortuhr-Einstellungen.",
+        help: "Wortuhr-Hilfe")
 
     static let enGB = AppTexts(
         settings: "Settings", done: "Done", fullScreen: "Full screen",
@@ -34,7 +37,8 @@ struct AppTexts {
         sectionShare: "Transfer settings",
         shareFooter: "Copies the settings as text or takes them from the clipboard – also between the app and the screen saver (Options …).",
         copied: "The settings are on the clipboard.",
-        pasteFailed: "The clipboard contains no Wortuhr settings.")
+        pasteFailed: "The clipboard contains no Wortuhr settings.",
+        help: "Wortuhr Help")
 
     static let enUS = AppTexts(
         settings: "Settings", done: "Done", fullScreen: "Full Screen",
@@ -43,7 +47,8 @@ struct AppTexts {
         sectionShare: "Transfer settings",
         shareFooter: "Copies the settings as text or takes them from the clipboard – also between the app and the screen saver (Options …).",
         copied: "The settings are on the clipboard.",
-        pasteFailed: "The clipboard contains no Wortuhr settings.")
+        pasteFailed: "The clipboard contains no Wortuhr settings.",
+        help: "Wortuhr Help")
 
     static let fr = AppTexts(
         settings: "Réglages", done: "OK", fullScreen: "Plein écran",
@@ -52,7 +57,8 @@ struct AppTexts {
         sectionShare: "Transférer les réglages",
         shareFooter: "Copie les réglages sous forme de texte ou les reprend du presse-papiers – aussi entre l’app et l’économiseur d’écran (Options…).",
         copied: "Les réglages sont dans le presse-papiers.",
-        pasteFailed: "Le presse-papiers ne contient aucun réglage Wortuhr.")
+        pasteFailed: "Le presse-papiers ne contient aucun réglage Wortuhr.",
+        help: "Aide de Wortuhr")
 
     static let it = AppTexts(
         settings: "Impostazioni", done: "Fine", fullScreen: "Schermo intero",
@@ -61,7 +67,8 @@ struct AppTexts {
         sectionShare: "Trasferisci le impostazioni",
         shareFooter: "Copia le impostazioni come testo o le riprende dagli appunti – anche tra l’app e il salvaschermo (Opzioni…).",
         copied: "Le impostazioni sono negli appunti.",
-        pasteFailed: "Gli appunti non contengono impostazioni di Wortuhr.")
+        pasteFailed: "Gli appunti non contengono impostazioni di Wortuhr.",
+        help: "Guida di Wortuhr")
 
     static let es = AppTexts(
         settings: "Ajustes", done: "OK", fullScreen: "Pantalla completa",
@@ -70,7 +77,8 @@ struct AppTexts {
         sectionShare: "Transferir los ajustes",
         shareFooter: "Copia los ajustes como texto o los toma del portapapeles – también entre la app y el salvapantallas (Opciones…).",
         copied: "Los ajustes están en el portapapeles.",
-        pasteFailed: "El portapapeles no contiene ajustes de Wortuhr.")
+        pasteFailed: "El portapapeles no contiene ajustes de Wortuhr.",
+        help: "Ayuda de Wortuhr")
 }
 
 extension String {

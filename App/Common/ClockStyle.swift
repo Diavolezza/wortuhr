@@ -21,6 +21,9 @@ struct ClockStyle: Equatable {
     var edgeSpread: Double = 50   // light outside the plate: 0 = none … 100 = wide halo
     var edgeTrail: Double = 40    // brightness of the earlier edges
     var drift = false             // the plate drifts slowly (burn-in protection)
+    /// Widget in tinted / vibrant rendering (not saved): the system colours the widget itself and keeps
+    /// only the opacity – so no filled areas, and unlit letters by opacity instead of by colour.
+    var mono = false
 
     static let fonts = ["Helvetica Neue", "System", "Avenir Next", "Futura", "DIN Alternate", "Gill Sans", "SF Mono"]
     static let frontPresets = ["#0e0f11", "#2a2c30", "#101b2c", "#14261e", "#5e231d", "#e9e7e1"]
@@ -30,7 +33,7 @@ struct ClockStyle: Equatable {
     var frontColor: Color { Color(hex: front) }
     var litColor: Color { Color(hex: lit) }
     /// Unlit letters: dim % lit colour, the rest plate colour (like CSS color-mix).
-    var offColor: Color { Color.mix(lit, front, dim / 100) }
+    var offColor: Color { mono ? Color(hex: lit).opacity(dim / 100) : Color.mix(lit, front, dim / 100) }
 
     func font(size pt: CGFloat) -> Font {
         let w: Font.Weight
@@ -138,6 +141,7 @@ extension ClockStyle {
         s.size = 100
         s.drift = false
         if mono {
+            s.mono = true
             s.front = "#000000"
             s.lit = "#ffffff"
             s.dim = 22

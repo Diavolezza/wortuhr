@@ -1,4 +1,5 @@
 import SwiftUI
+import WidgetKit
 
 /// The word clock: plate, letter grid with glow and minute edges, centred in the available space.
 /// SwiftUI port of the screen saver's Core Animation view (Sources/WortuhrView.swift).
@@ -27,7 +28,7 @@ struct WordClockView: View {
                 ZStack {
                     // The whole tile in the plate colour: iOS 26 draws the widget background
                     // (containerBackground) lighter, which showed as grey bands above and below the plate.
-                    Rectangle().fill(style.frontColor)
+                    if !style.mono { Rectangle().fill(style.frontColor) }
                     ClockPlate(style: style, side: side, date: date, plate: false)
                         .frame(width: side, height: side)
                     if style.minuteEdges {
@@ -71,7 +72,7 @@ private struct ClockPlate: View {
         let g = CGFloat(style.glow / 100)
 
         ZStack(alignment: .topLeading) {
-            RoundedRectangle(cornerRadius: radius).fill(style.frontColor)
+            if !style.mono { RoundedRectangle(cornerRadius: radius).fill(style.frontColor) }
             if plate {
                 // Sheen: subtle gradient from top left to bottom right
                 RoundedRectangle(cornerRadius: radius)
@@ -97,7 +98,9 @@ private struct ClockPlate: View {
                     .compositingGroup()
                     .shadow(color: style.litColor.opacity(0.95 * 0.85), radius: pt * 0.3 * g * 0.53)
             } else {
+                // Tinted widgets: the lit letters take the accent colour
                 letters(face, on: on, words: words, pt: pt, lit: true)
+                    .widgetAccentable(style.mono)
             }
             if plate && style.minuteEdges {
                 MinuteEdges(style: style, width: side, height: side, edges: p.edges)
