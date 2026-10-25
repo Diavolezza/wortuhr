@@ -2,7 +2,7 @@
 import SwiftUI
 
 /// Drafts for the app icon (rendered by `./build.sh --snapshots`): a corner of the real
-/// German letter grid, enlarged, with a few lit letters and glowing minute edges.
+/// German letter grid, enlarged, with a few lit letters (no minute display).
 struct IconDraft: View {
     enum Side { case top, right, bottom, left }
 
@@ -109,14 +109,14 @@ extension Snapshots {
         medium.weight = 500
         var bold = medium
         bold.weight = 700
-        // A real time: "ES IST FÜNF VOR ZWÖLF" with two minute edges = 11:57
+        // A real time: "ES IST FÜNF VOR ZWÖLF" (11:55)
         let full = ClockFace.german
         let fullOn = full.litCells(for: ["ES", "IST", "M5", "VOR", "H0"])
         // D: the whole clock, medium weight, more margin
-        writeIcon(view(IconDraft(rows: full.grid, lit: fullOn, edges: [.top, .right], style: medium,
+        writeIcon(view(IconDraft(rows: full.grid, lit: fullOn, edges: [], style: medium,
                                  letterSize: 0.6, margin: 0.11)), "icon-d.png", dir)
         // D2: the same in bold
-        writeIcon(view(IconDraft(rows: full.grid, lit: fullOn, edges: [.top, .right], style: bold,
+        writeIcon(view(IconDraft(rows: full.grid, lit: fullOn, edges: [], style: bold,
                                  letterSize: 0.6, margin: 0.11)), "icon-d2.png", dir)
         // E: reduced grid 6 × 6 with the same time
         let e = ["ESRIST", "FÜNFZW", "QTVORM", "HALBXS", "ZWÖLFK", "SECHSR"]
@@ -126,11 +126,11 @@ extension Snapshots {
             return on
         }
         writeIcon(view(IconDraft(rows: e, lit: cells([(0, 0, 2), (0, 3, 3), (1, 0, 4), (2, 2, 3), (4, 0, 5)], cols: 6),
-                                 edges: [.top, .right], style: medium, letterSize: 0.55, margin: 0.12)), "icon-e.png", dir)
-        // F: reduced grid 5 × 5, "ES IST HALB ZWÖLF" (11:31: one edge)
+                                 edges: [], style: medium, letterSize: 0.55, margin: 0.12)), "icon-e.png", dir)
+        // F: reduced grid 5 × 5, "ES IST HALB ZWÖLF" (11:30)
         let f = ["ESIST", "HALBX", "ZWÖLF", "VIERN", "ACHTE"]
         writeIcon(view(IconDraft(rows: f, lit: cells([(0, 0, 2), (0, 2, 3), (1, 0, 4), (2, 0, 5)], cols: 5),
-                                 edges: [.top], style: medium, letterSize: 0.55, margin: 0.12)), "icon-f.png", dir)
+                                 edges: [], style: medium, letterSize: 0.55, margin: 0.12)), "icon-f.png", dir)
     }
 
     @MainActor

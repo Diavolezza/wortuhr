@@ -3,7 +3,8 @@ import Foundation
 /// The settings as one line of text, to copy them between the screen saver's options and the app:
 ///   Wortuhr {"dim":10,"font":"Avenir Next","front":"#0e0f11",…}
 /// Keys as in the screen saver's defaults. Missing or invalid values are left out, so they keep
-/// their current value. "Main display only" is a Mac screen saver option and is not exchanged.
+/// their current value; unknown keys (e.g. of removed options) are ignored. "Main display only"
+/// is a Mac screen saver option and is not exchanged.
 struct SettingsExchange: Codable, Equatable {
     var language: String?
     var intro: Bool?
@@ -18,9 +19,6 @@ struct SettingsExchange: Codable, Equatable {
     var size: Double?
     var fade: Double?
     var minuteEdges: Bool?
-    var edgeStrength: Double?
-    var edgeSpread: Double?
-    var edgeTrail: Double?
     var drift: Bool?
 
     static let prefix = "Wortuhr "
@@ -65,9 +63,6 @@ struct SettingsExchange: Codable, Equatable {
         x.letterScale = range(letterScale, 70...140)
         x.size = range(size, 40...100)
         x.fade = range(fade, 0...3)
-        x.edgeStrength = range(edgeStrength, 10...200)
-        x.edgeSpread = range(edgeSpread, 0...100)
-        x.edgeTrail = range(edgeTrail, 0...100)
         return x
     }
 }

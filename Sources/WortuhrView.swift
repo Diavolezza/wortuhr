@@ -18,6 +18,7 @@ final class WortuhrView: ScreenSaverView {
         let main: CAShapeLayer
         let halo: CAShapeLayer
         func remove() { main.removeFromSuperlayer(); halo.removeFromSuperlayer() }
+        func hide() { main.isHidden = true; halo.isHidden = true }
         func set(lit: Bool, litColor: CGColor, offColor: CGColor, glow: Float) {
             main.fillColor = lit ? litColor : offColor
             halo.fillColor = main.fillColor
@@ -28,8 +29,12 @@ final class WortuhrView: ScreenSaverView {
     private var cells: [Glyph] = []
     /// Extra glyphs between cells (apostrophe in O'CLOCK) with the word they light up with.
     private var marks: [(glyph: Glyph, word: String)] = []
-    /// Minute edges: top, right, bottom, left
-    private var edgeLayers: [CALayer] = []
+    /// Minutes past the five-minute step: a bar in the minute cell, a rail in the colour of the
+    /// unlit letters and the part filled from below in the lit colour (one quarter per minute, full at four minutes).
+    private let barRail = CAShapeLayer()
+    private let barFill = CAShapeLayer()
+    private var barRect = CGRect.zero
+    private var barRadius: CGFloat = 0
     private var lastKey = ""
     private var startDate = Date()
     private var plateCenter = CGPoint.zero
@@ -301,90 +306,58 @@ final class WortuhrView: ScreenSaverView {
             marks.append((glyph(mark.glyph, x: x, row: mark.row), mark.word))
         }
 
-        buildEdges(side: side)
+        buildBar(face: face, gx0: gx0, gy0: gy0, cw: cw, ch: ch, side: side, pointSize: font.pointSize)
 
         CATransaction.commit()
         lastKey = ""
         updateTime(animated: false)
     }
 
-    /// Minute edges: one layer per edge, centred on the plate's edge line.
-    /// From outside to inside: halo (optional) – fine bright line – glow fading into the plate.
-    /// The ends taper off so the corners stay dark. Same geometry as .medge in the prototype.
-    /// Drawn into a bitmap instead of CAGradientLayer + mask: CALayer.render(in:) – used for
-    /// the thumbnail and the README images – skips layers with a mask.
-    private func buildEdges(side: CGFloat) {
-        edgeLayers.forEach { $0.removeFromSuperlayer() }
-        edgeLayers.removeAll()
+    /// Minute bar in the minute cell (a square the size of a letter cell, 20 × 20 units):
+    /// rail x 6, y 2, 8 × 16, corner radius 1.6. The minute cell's letter is hidden.
+    private func buildBar(face: ClockFace, gx0: CGFloat, gy0: CGFloat, cw: CGFloat, ch: CGFloat,
+                          side: CGFloat, pointSize: CGFloat) {
+        barRail.removeFromSuperlayer()
+        barFill.removeFromSuperlayer()
         let s = settings
+        guard s.minuteEdges else { return }
+        cells[face.minuteIndex].hide()
+        let cx = gx0 + cw * (CGFloat(face.minute.col) + 0.5)
+        let cy = side - (gy0 + ch * (CGFloat(face.minute.row) + 0.5))   // layer coordinates: y points up
+        let k = min(cw, ch) / 20
+        barRect = CGRect(x: cx - 4 * k, y: cy - 8 * k, width: 8 * k, height: 16 * k)
+        barRadius = 1.6 * k
         let scale = backingScale
-        let (depth, halo) = s.edgeGeometry
-        let inner = max(3 * max(1, CGFloat(s.edgeStrength / 100)), side * depth)   // points inside the plate
-        let outer = side * halo                   // points outside the plate
-        let thick = inner + outer
-        let margin = side * 0.06
-        let len = side - 2 * margin
-        let lit = s.lit.srgb
-        // Edge light 10 … 200 %: above 100 % the line gets wider and the glow denser
-        let k = CGFloat(s.edgeStrength / 100)
-        let line = 1.5 * max(1, k)
-        // Stop positions in points from the outer end, clamped to rising order
-        var pos: [CGFloat] = [0, outer - 1, outer, outer + line, outer + line + 1, outer + inner * 0.35, thick]
-        for i in 1..<pos.count { pos[i] = min(max(pos[i], pos[i - 1]), thick) }
-        let alphas: [CGFloat] = [0, 0.22, 0.9, 0.9, 0.34, 0.10, 0].map { min(1, $0 * k) }
-
-        enum Side { case top, right, bottom, left }
-        for edge in [Side.top, .right, .bottom, .left] {
-            let horizontal = edge == .top || edge == .bottom
-            let frame: CGRect
-            switch edge {
-            case .top:    frame = CGRect(x: margin, y: side - inner, width: len, height: thick)
-            case .right:  frame = CGRect(x: side - inner, y: margin, width: thick, height: len)
-            case .bottom: frame = CGRect(x: margin, y: -outer, width: len, height: thick)
-            case .left:   frame = CGRect(x: -outer, y: margin, width: thick, height: len)
-            }
-            let w = frame.width, h = frame.height
-            // Gradient across the edge, from the outer end to the inner end (layer coordinates, y up)
-            let ends: (CGPoint, CGPoint)
-            switch edge {
-            case .top:    ends = (CGPoint(x: 0, y: h), CGPoint(x: 0, y: 0))
-            case .right:  ends = (CGPoint(x: w, y: 0), CGPoint(x: 0, y: 0))
-            case .bottom: ends = (CGPoint(x: 0, y: 0), CGPoint(x: 0, y: h))
-            case .left:   ends = (CGPoint(x: 0, y: 0), CGPoint(x: w, y: 0))
-            }
-            let l = CALayer()
-            l.frame = frame
-            l.contentsScale = scale
-            l.contents = edgeImage(size: frame.size, scale: scale, color: lit, alphas: alphas,
-                                   locations: pos.map { $0 / thick }, from: ends.0, to: ends.1,
-                                   alongHorizontal: horizontal)
-            l.opacity = 0
-            plate.addSublayer(l)
-            edgeLayers.append(l)
-        }
+        barRail.contentsScale = scale
+        barRail.path = CGPath(roundedRect: barRect, cornerWidth: barRadius, cornerHeight: barRadius, transform: nil)
+        barRail.fillColor = s.offColor.cgColor
+        barFill.contentsScale = scale
+        barFill.fillColor = s.lit.cgColor
+        barFill.shadowColor = s.lit.cgColor
+        barFill.shadowOffset = .zero
+        barFill.shadowRadius = pointSize * 0.3 * CGFloat(s.glow / 100)
+        barFill.shadowOpacity = s.glow > 0 ? 0.95 : 0
+        barFill.path = barPath(level: 0)
+        barFill.opacity = 0
+        plate.addSublayer(barRail)
+        plate.addSublayer(barFill)
     }
 
-    private func edgeImage(size: CGSize, scale: CGFloat, color: NSColor, alphas: [CGFloat], locations: [CGFloat],
-                           from: CGPoint, to: CGPoint, alongHorizontal: Bool) -> CGImage? {
-        let pw = max(1, Int((size.width * scale).rounded(.up))), ph = max(1, Int((size.height * scale).rounded(.up)))
-        guard let space = CGColorSpace(name: CGColorSpace.sRGB),
-              let ctx = CGContext(data: nil, width: pw, height: ph, bitsPerComponent: 8, bytesPerRow: 0,
-                                  space: space, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
-        else { return nil }
-        ctx.scaleBy(x: scale, y: scale)
-        let colors = alphas.map { color.withAlphaComponent($0).cgColor } as CFArray
-        if let g = CGGradient(colorsSpace: space, colors: colors, locations: locations) {
-            ctx.drawLinearGradient(g, start: from, end: to, options: [])
-        }
-        // Taper along the edge: keep the middle, fade out towards both ends
-        ctx.setBlendMode(.destinationIn)
-        let taper = [NSColor(white: 0, alpha: 0), NSColor(white: 0, alpha: 1),
-                     NSColor(white: 0, alpha: 1), NSColor(white: 0, alpha: 0)].map { $0.cgColor } as CFArray
-        if let g = CGGradient(colorsSpace: space, colors: taper, locations: [0, 0.22, 0.78, 1]) {
-            let end = alongHorizontal ? CGPoint(x: size.width, y: 0) : CGPoint(x: 0, y: size.height)
-            ctx.drawLinearGradient(g, start: .zero, end: end, options: [])
-        }
-        return ctx.makeImage()
+    /// Filled part of the bar up to `level` (0…1): rounded at the bottom, flat on top – and
+    /// rounded on top like the rail when full. Always the same path elements (four arcs; the top
+    /// ones with a tiny radius when not full), so that Core Animation can animate between levels.
+    private func barPath(level: CGFloat) -> CGPath {
+        let r = barRadius, b = barRect
+        let top = b.minY + max(b.height * min(level, 1), r)
+        let rt = level >= 1 ? r : 0.001
+        let p = CGMutablePath()
+        p.move(to: CGPoint(x: b.minX, y: (b.minY + top) / 2))
+        p.addArc(tangent1End: CGPoint(x: b.minX, y: b.minY), tangent2End: CGPoint(x: b.maxX, y: b.minY), radius: r)
+        p.addArc(tangent1End: CGPoint(x: b.maxX, y: b.minY), tangent2End: CGPoint(x: b.maxX, y: top), radius: r)
+        p.addArc(tangent1End: CGPoint(x: b.maxX, y: top), tangent2End: CGPoint(x: b.minX, y: top), radius: rt)
+        p.addArc(tangent1End: CGPoint(x: b.minX, y: top), tangent2End: CGPoint(x: b.minX, y: b.minY), radius: rt)
+        p.closeSubpath()
+        return p
     }
 
     private func glyphPath(_ letter: String, font: CTFont) -> CGPath {
@@ -427,12 +400,10 @@ final class WortuhrView: ScreenSaverView {
         for (c, word) in marks {
             c.set(lit: p.words.contains(word), litColor: litColor, offColor: offColor, glow: glow)
         }
-        // Minute edges go dark together with the old words and light up one by one.
-        // The latest edge at full strength, all earlier ones at the trail value
-        // (trail 100 % = all equally bright, 0 % = only the latest edge).
-        let trail = Float(s.edgeTrail / 100)
-        for (i, l) in edgeLayers.enumerated() {
-            l.opacity = !s.minuteEdges || i >= p.edges ? 0 : (i == p.edges - 1 ? 1 : trail)
+        // Minute bar: fills up by one quarter per minute, empties with the next words
+        if s.minuteEdges {
+            barFill.path = barPath(level: CGFloat(p.edges) / 4)
+            barFill.opacity = p.edges > 0 ? 1 : 0
         }
         CATransaction.commit()
     }

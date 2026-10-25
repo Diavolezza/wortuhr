@@ -25,9 +25,6 @@ final class ConfigController: NSObject {
     private let size = NSSlider(value: 92, minValue: 40, maxValue: 100, target: nil, action: nil)
     private let fade = NSSlider(value: 0.8, minValue: 0, maxValue: 3, target: nil, action: nil)
     private let minuteEdges = NSButton(checkboxWithTitle: "", target: nil, action: nil)
-    private let edgeStrength = NSSlider(value: 100, minValue: 10, maxValue: 200, target: nil, action: nil)
-    private let edgeSpread = NSSlider(value: 50, minValue: 0, maxValue: 100, target: nil, action: nil)
-    private let edgeTrail = NSSlider(value: 40, minValue: 0, maxValue: 100, target: nil, action: nil)
     private let drift = NSButton(checkboxWithTitle: "", target: nil, action: nil)
     private let mainScreenOnly = NSButton(checkboxWithTitle: "", target: nil, action: nil)
     private let reset = NSButton(title: "", target: nil, action: nil)
@@ -46,9 +43,6 @@ final class ConfigController: NSObject {
     private let letterScaleValue = NSTextField(labelWithString: "")
     private let sizeValue = NSTextField(labelWithString: "")
     private let fadeValue = NSTextField(labelWithString: "")
-    private let edgeStrengthValue = NSTextField(labelWithString: "")
-    private let edgeSpreadValue = NSTextField(labelWithString: "")
-    private let edgeTrailValue = NSTextField(labelWithString: "")
 
     init(settings: Settings, onChange: @escaping (Settings) -> Void) {
         self.original = settings
@@ -71,19 +65,17 @@ final class ConfigController: NSObject {
         weight.addItems(withTitles: Settings.weights.map { $0.0 })
 
         let controls: [NSControl] = [language, intro, front, lit, dim, glow, edge, font, weight,
-                                     letterScale, size, fade, minuteEdges, edgeStrength, edgeSpread,
-                                     edgeTrail, drift, mainScreenOnly]
+                                     letterScale, size, fade, minuteEdges, drift, mainScreenOnly]
         for c in controls {
             c.target = self
             c.action = #selector(changed(_:))
         }
-        for sl in [dim, glow, edge, letterScale, size, fade, edgeStrength, edgeSpread, edgeTrail] {
+        for sl in [dim, glow, edge, letterScale, size, fade] {
             sl.isContinuous = true
             sl.translatesAutoresizingMaskIntoConstraints = false
             sl.widthAnchor.constraint(equalToConstant: 220).isActive = true
         }
-        for v in [dimValue, glowValue, edgeValue, letterScaleValue, sizeValue, fadeValue,
-                  edgeStrengthValue, edgeSpreadValue, edgeTrailValue] {
+        for v in [dimValue, glowValue, edgeValue, letterScaleValue, sizeValue, fadeValue] {
             v.textColor = .secondaryLabelColor
             v.font = .monospacedDigitSystemFont(ofSize: NSFont.smallSystemFontSize + 1, weight: .regular)
         }
@@ -121,9 +113,6 @@ final class ConfigController: NSObject {
             [label(\.size), size, sizeValue],
             [label(\.fade), fade, fadeValue],
             [e(), minuteEdges, e()],
-            [label(\.edgeStrength), edgeStrength, edgeStrengthValue],
-            [label(\.edgeSpread), edgeSpread, edgeSpreadValue],
-            [label(\.edgeTrail), edgeTrail, edgeTrailValue],
             [e(), drift, e()],
             [e(), mainScreenOnly, e()],
         ])
@@ -236,9 +225,6 @@ final class ConfigController: NSObject {
         size.doubleValue = s.size
         fade.doubleValue = s.fade
         minuteEdges.state = s.minuteEdges ? .on : .off
-        edgeStrength.doubleValue = s.edgeStrength
-        edgeSpread.doubleValue = s.edgeSpread
-        edgeTrail.doubleValue = s.edgeTrail
         drift.state = s.drift ? .on : .off
         mainScreenOnly.state = s.mainScreenOnly ? .on : .off
         updateLabels()
@@ -258,9 +244,6 @@ final class ConfigController: NSObject {
         s.size = (size.doubleValue / 2).rounded() * 2
         s.fade = (fade.doubleValue * 10).rounded() / 10
         s.minuteEdges = minuteEdges.state == .on
-        s.edgeStrength = (edgeStrength.doubleValue / 5).rounded() * 5
-        s.edgeSpread = (edgeSpread.doubleValue / 5).rounded() * 5
-        s.edgeTrail = (edgeTrail.doubleValue / 5).rounded() * 5
         s.drift = drift.state == .on
         s.mainScreenOnly = mainScreenOnly.state == .on
     }
@@ -271,12 +254,6 @@ final class ConfigController: NSObject {
         edgeValue.stringValue = "\(Int(s.edge)) %"
         letterScaleValue.stringValue = "\(Int(s.letterScale)) %"
         sizeValue.stringValue = "\(Int(s.size)) %"
-        edgeStrengthValue.stringValue = "\(Int(s.edgeStrength)) %"
-        edgeSpreadValue.stringValue = "\(Int(s.edgeSpread)) %"
-        edgeTrailValue.stringValue = "\(Int(s.edgeTrail)) %"
-        edgeStrength.isEnabled = s.minuteEdges
-        edgeSpread.isEnabled = s.minuteEdges
-        edgeTrail.isEnabled = s.minuteEdges
         let f = String(format: "%.1f s", s.fade)
         fadeValue.stringValue = t.decimalComma ? f.replacingOccurrences(of: ".", with: ",") : f
     }

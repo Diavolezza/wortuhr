@@ -1,7 +1,7 @@
 import SwiftUI
 import WidgetKit
 
-/// The word clock: plate, letter grid with glow and minute edges, centred in the available space.
+/// The word clock: plate, letter grid with glow and minute bar, centred in the available space.
 /// SwiftUI port of the screen saver's Core Animation view (Sources/WortuhrView.swift).
 struct WordClockView: View {
     var style: ClockStyle
@@ -22,7 +22,7 @@ struct WordClockView: View {
                     .position(x: geo.size.width / 2 + d.width, y: geo.size.height / 2 + d.height)
                     .animation(.linear(duration: 2), value: driftTime)
             } else {
-                // Widget: square letter grid in the middle, minute edges along the whole tile
+                // Widget: square letter grid in the middle of the tile
                 // (the large widget is not quite square)
                 let w = floor(geo.size.width * scale), h = floor(geo.size.height * scale)
                 ZStack {
@@ -31,9 +31,6 @@ struct WordClockView: View {
                     if !style.mono { Rectangle().fill(style.frontColor) }
                     ClockPlate(style: style, side: side, date: date, plate: false)
                         .frame(width: side, height: side)
-                    if style.minuteEdges {
-                        MinuteEdges(style: style, width: w, height: h, edges: ClockPlate.edges(at: date, style))
-                    }
                 }
                 .frame(width: w, height: h)
                 .position(x: geo.size.width / 2, y: geo.size.height / 2)
@@ -102,17 +99,36 @@ private struct ClockPlate: View {
                 letters(face, on: on, words: words, pt: pt, lit: true)
                     .widgetAccentable(style.mono)
             }
-            if plate && style.minuteEdges {
-                MinuteEdges(style: style, width: side, height: side, edges: p.edges)
+            if style.minuteEdges {
+                minuteBar(face, level: CGFloat(p.edges) / 4, pt: pt, g: g)
             }
         }
         .frame(width: side, height: side, alignment: .topLeading)
         .animation(style.fade > 0 ? .easeInOut(duration: style.fade) : nil, value: h * 60 + m)
     }
 
-    /// Number of lit minute edges (minutes past the five-minute step).
-    static func edges(at date: Date, _ style: ClockStyle) -> Int {
-        Calendar.current.component(.minute, from: date) % 5
+    /// Minutes past the five-minute step: a bar in the minute cell (a square the size of a letter
+    /// cell, 20 × 20 units: rail x 6, y 2, 8 × 16, corner radius 1.6). Rail in the colour of the
+    /// unlit letters, the part filled from below in the lit colour, one quarter per minute
+    /// (full at four minutes).
+    private func minuteBar(_ face: ClockFace, level: CGFloat, pt: CGFloat, g: CGFloat) -> some View {
+        let gx0 = side * 0.0667, gw = side * 0.8667
+        let gy0 = side * 0.07, gh = side * 0.86
+        let cw = gw / CGFloat(ClockFace.cols), ch = gh / CGFloat(ClockFace.rows)
+        let k = min(cw, ch) / 20
+        let rail = RoundedRectangle(cornerRadius: 1.6 * k)
+        return ZStack(alignment: .bottom) {
+            rail.fill(style.offColor)
+            ZStack(alignment: .bottom) {
+                Color.clear
+                Rectangle().fill(style.litColor).frame(height: 16 * k * level)
+            }
+            .clipShape(rail)   // rounded at the bottom like the rail, flat on top
+            .shadow(color: style.litColor.opacity(g > 0 ? 0.95 * 0.85 : 0), radius: pt * 0.3 * g * 0.53)
+            .widgetAccentable(style.mono)
+        }
+        .frame(width: 8 * k, height: 16 * k)
+        .position(x: gx0 + cw * (CGFloat(face.minute.col) + 0.5), y: gy0 + ch * (CGFloat(face.minute.row) + 0.5))
     }
 
     /// Sheen of the plate: white 5.5 % → clear (45 %) → black 12 %. Core Animation interpolates
@@ -138,7 +154,8 @@ private struct ClockPlate: View {
         // Widgets (plate == false) do not fade: the lit layers hold only the lit letters, so each
         // timeline entry stays small. The app keeps all letters so that they can fade in and out.
         let lean = lit && !plate
-        let cells = lean ? on.sorted() : Array(0..<(ClockFace.rows * cols))
+        let all = Array(0..<(ClockFace.rows * cols)).filter { !style.minuteEdges || $0 != face.minuteIndex }
+        let cells = lean ? on.sorted() : all
         let marks = face.marks.filter { !lean || words.contains($0.word) }
         return ZStack(alignment: .topLeading) {
             ForEach(cells, id: \.self) { i in
@@ -171,72 +188,5 @@ private struct Glyph: View {
             .fixedSize()
             .alignmentGuide(VerticalAlignment.center) { d in d[.firstTextBaseline] - cap / 2 }
             .frame(width: cell.width, height: cell.height)
-    }
-}
-
-/// Minutes past the five-minute step: the edges of the plate light up one by one
-/// (top, right, bottom, left). From outside to inside: halo (optional) – fine bright line –
-/// glow fading into the plate; the ends taper off so the corners stay dark.
-private struct MinuteEdges: View {
-    let style: ClockStyle
-    let width: CGFloat
-    let height: CGFloat
-    let edges: Int
-
-    private var side: CGFloat { min(width, height) }
-
-    private struct Geometry {
-        var inner: CGFloat, outer: CGFloat, thick: CGFloat, margin: CGFloat
-        var stops: [Gradient.Stop]
-    }
-
-    private var geometry: Geometry {
-        let (depth, halo) = style.edgeGeometry
-        let k = CGFloat(style.edgeStrength / 100)
-        let inner = max(3 * max(1, k), side * depth)   // points inside the plate
-        let outer = side * halo                         // points outside the plate
-        let thick = inner + outer
-        let line = 1.5 * max(1, k)
-        // Stop positions in points from the outer end, clamped to rising order
-        var pos: [CGFloat] = [0, outer - 1, outer, outer + line, outer + line + 1, outer + inner * 0.35, thick]
-        for i in 1..<pos.count { pos[i] = min(max(pos[i], pos[i - 1]), thick) }
-        let alphas: [CGFloat] = [0, 0.22, 0.9, 0.9, 0.34, 0.10, 0].map { min(1, $0 * k) }
-        let stops = zip(alphas, pos).map { Gradient.Stop(color: style.litColor.opacity($0), location: $1 / thick) }
-        let margin = side * 0.06
-        return Geometry(inner: inner, outer: outer, thick: thick, margin: margin, stops: stops)
-    }
-
-    var body: some View {
-        let geo = geometry
-        let trail = style.edgeTrail / 100
-        ZStack(alignment: .topLeading) {
-            ForEach(0..<4, id: \.self) { i in
-                edge(i, geo)
-                    .opacity(i >= edges ? 0 : (i == edges - 1 ? 1 : trail))
-            }
-        }
-        .frame(width: width, height: height, alignment: .topLeading)
-    }
-
-    private func edge(_ i: Int, _ g: Geometry) -> some View {
-        let horizontal = i % 2 == 0
-        let size = horizontal ? CGSize(width: width - 2 * g.margin, height: g.thick)
-                              : CGSize(width: g.thick, height: height - 2 * g.margin)
-        let origin: CGPoint
-        let from: UnitPoint, to: UnitPoint   // across the edge, from the outer end to the inner end
-        switch i {
-        case 0:  origin = CGPoint(x: g.margin, y: -g.outer);         from = .top;      to = .bottom
-        case 1:  origin = CGPoint(x: width - g.inner, y: g.margin);   from = .trailing; to = .leading
-        case 2:  origin = CGPoint(x: g.margin, y: height - g.inner);   from = .bottom;   to = .top
-        default: origin = CGPoint(x: -g.outer, y: g.margin);         from = .leading;  to = .trailing
-        }
-        let taper = Gradient(stops: [.init(color: .clear, location: 0), .init(color: .black, location: 0.22),
-                                     .init(color: .black, location: 0.78), .init(color: .clear, location: 1)])
-        return Rectangle()
-            .fill(LinearGradient(stops: g.stops, startPoint: from, endPoint: to))
-            .mask(LinearGradient(gradient: taper, startPoint: horizontal ? .leading : .top,
-                                 endPoint: horizontal ? .trailing : .bottom))
-            .frame(width: size.width, height: size.height)
-            .position(x: origin.x + size.width / 2, y: origin.y + size.height / 2)
     }
 }

@@ -24,6 +24,11 @@ for (const [name, f] of Object.entries(FACES)) {
     if (r < 0 || r > 9 || c < 0 || c + l > 11) fail(`${name}: word ${w} lies outside the grid`);
   for (const mk of f.marks)
     if (!f.words[mk.word] || mk.afterCol < 0 || mk.afterCol > 9) fail(`${name}: mark ${mk.glyph} is invalid`);
+  const [mr, mc] = f.minute || [];
+  if (!(mr >= 0 && mr <= 9 && mc >= 0 && mc <= 10)) fail(`${name}: minute cell missing or outside the grid`);
+  // No mark may sit on the border of the minute cell
+  for (const mk of f.marks)
+    if (mk.row === mr && (mk.afterCol === mc || mk.afterCol === mc - 1)) fail(`${name}: mark ${mk.glyph} touches the minute cell`);
 }
 
 // 2. Every minute: words exist, in reading order, without overlap,
@@ -33,6 +38,12 @@ for (const lang of Object.keys(LANGS)) {
   const f = FACES[LANGS[lang]];
   for (const intro of [true, false]) for (let h = 0; h < 24; h++) for (let m = 0; m < 60; m++) {
     const p = phrase(h, m, lang, intro);
+    // The minute cell is never part of a lit word (intro, hours, UHR, O'CLOCK, HEURES …)
+    for (const w of p.words) {
+      const pos = f.words[w];
+      if (pos && pos[0] === f.minute[0] && f.minute[1] >= pos[1] && f.minute[1] < pos[1] + pos[2])
+        fail(`${lang} ${h}:${m}${intro ? "" : " (no intro)"}: word ${w} covers the minute cell ${f.minute}`);
+    }
     let last = -1, lastRow = -1, lastEnd = -1;
     for (const w of p.words) {
       const pos = f.words[w];
@@ -64,6 +75,7 @@ if (!process.argv.includes("--no-swift")) {
     for (const w of Object.keys(f.words).sort((a, b) => a < b ? -1 : a > b ? 1 : 0))
       js.push(`word ${name} ${w} ${f.words[w].join(" ")}`);
     for (const mk of f.marks) js.push(`mark ${name} ${mk.glyph} ${mk.row} ${mk.afterCol} ${mk.word}`);
+    js.push(`minute ${name} ${f.minute.join(" ")}`);
   }
   js.push(...table);
   mkdirSync(path.join(root, "build"), { recursive: true });

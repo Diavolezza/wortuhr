@@ -6,9 +6,9 @@
 · **[Im Browser ausprobieren](https://diavolezza.github.io/wortuhr/)**
 · **[Download](https://github.com/Diavolezza/wortuhr/releases/latest)**
 
-Wortuhr im 11×10-Raster. Die Minuten zwischen den Fünf-Minuten-Schritten lassen nacheinander die Kanten der
-Platte glimmen – oben, rechts, unten, links – und erlöschen mit den nächsten Wörtern. Die jüngste Kante leuchtet am
-hellsten; wie stark die früheren nachglühen, ist einstellbar – von nur der jüngsten Kante bis zu allen gleich hell.
+Wortuhr im 11×10-Raster. Die Minuten zwischen den Fünf-Minuten-Schritten zeigt ein kleiner Balken in einem Feld
+der letzten Spalte: Er füllt sich von unten um ein Viertel je Minute, ist nach vier Minuten voll und leert sich mit den nächsten Wörtern.
+Ausgeschaltet zeigt das Feld seinen Buchstaben.
 Zeitansage in acht Varianten:
 
 | Sprache | Beispiel (3:15 · 3:45) |
@@ -22,7 +22,7 @@ Zeitansage in acht Varianten:
 | Italienisch | le tre e un quarto · le quattro meno un quarto (1 Uhr: è l’una) |
 | Spanisch | las tres y cuarto · las cuatro menos cuarto (1 Uhr: es la una) |
 
-Farben, Schrift, Größe, das Licht der Minutenkanten, Einbrennschutz und „Nur auf dem Hauptbildschirm“ im
+Farben, Schrift, Größe, der Minutenbalken, Einbrennschutz und „Nur auf dem Hauptbildschirm“ im
 Optionen-Dialog einstellbar; der Dialog erscheint in der gewählten Sprache. Beim ersten Start richtet sich die Uhr nach der Sprache des Macs.
 „Kopieren“ und „Einfügen“ im Dialog übertragen alle Einstellungen als eine Textzeile.
 

@@ -3,7 +3,7 @@ import ImageIO
 import UniformTypeIdentifiers
 
 // Renders the README images with the real screen saver view (default settings, German):
-//   docs/wortuhr.png         1280×800, 11:58 – three minute edges lit
+//   docs/wortuhr.png         1280×800, 11:58 – minute bar three quarters full
 //   docs/wortuhr.gif         400×400, 3:00 to 3:15 minute by minute, with cross-fades
 //   docs/social-preview.png  1280×640, clock and title for the GitHub link preview
 // Usage: makedocs <output folder>   (called by ./build.sh --docs)

@@ -54,12 +54,6 @@ struct SettingsView: View {
                 ValueSlider(t.size.plain, $store.style.size, 40...100, step: 2, text: percent)
                 ValueSlider(t.fade.plain, $store.style.fade, 0...3, step: 0.1, text: seconds)
                 Toggle(t.minuteEdges, isOn: $store.style.minuteEdges)
-                Group {
-                    ValueSlider(t.edgeStrength.plain, $store.style.edgeStrength, 10...200, step: 5, text: percent)
-                    ValueSlider(t.edgeSpread.plain, $store.style.edgeSpread, 0...100, step: 5, text: percent)
-                    ValueSlider(t.edgeTrail.plain, $store.style.edgeTrail, 0...100, step: 5, text: percent)
-                }
-                .disabled(!store.style.minuteEdges)
                 Toggle(t.drift, isOn: $store.style.drift)
             }
 

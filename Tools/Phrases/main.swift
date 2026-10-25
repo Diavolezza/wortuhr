@@ -12,6 +12,7 @@ for (name, face) in faces {
         print("word \(name) \(key) \(r) \(c) \(l)")
     }
     for m in face.marks { print("mark \(name) \(m.glyph) \(m.row) \(m.afterCol) \(m.word)") }
+    print("minute \(name) \(face.minute.row) \(face.minute.col)")
 }
 for lang in Language.allCases {
     for intro in [true, false] {

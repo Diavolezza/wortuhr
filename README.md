@@ -6,10 +6,9 @@
 · **[Try it in the browser](https://diavolezza.github.io/wortuhr/)**
 · **[Download](https://github.com/Diavolezza/wortuhr/releases/latest)**
 
-A word clock on an 11×10 letter grid. The minutes between the five-minute steps light up the edges of the
-plate one after the other – top, right, bottom, left – and go dark again with the next words. The latest edge
-is the brightest; how much the earlier ones still glow (“afterglow”) is adjustable, from only the latest edge to all
-equally bright.
+A word clock on an 11×10 letter grid. The minutes between the five-minute steps are shown by a small bar in
+one cell of the last column: it fills up from below by one quarter per minute, is full at four minutes and empties again with the next
+words. Switched off, the cell shows its letter.
 The time is spelled out in eight variants:
 
 | Language | Example (3:15 · 3:45) |
@@ -23,7 +22,7 @@ The time is spelled out in eight variants:
 | Italian | le tre e un quarto · le quattro meno un quarto (1:00 è l’una) |
 | Spanish | las tres y cuarto · las cuatro menos cuarto (1:00 es la una) |
 
-Colours, typeface, size, the glow of the minute edges, burn-in protection and “main display only” can be set
+Colours, typeface, size, the minute bar, burn-in protection and “main display only” can be set
 in the options dialog; the dialog appears in the selected language. On first start the clock uses the Mac’s
 language. “Copy” and “Paste” in the dialog transfer all settings as one line of text.
 

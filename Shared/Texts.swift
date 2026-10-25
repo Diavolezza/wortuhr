@@ -23,7 +23,7 @@ struct Texts {
     let sectionTime, language, intro: String
     let sectionColors, front, lit, dim, glow, edge, custom: String
     let sectionFont, font, weight, letterScale, systemFont: String
-    let sectionLook, size, fade, minuteEdges, edgeStrength, edgeSpread, edgeTrail, drift, mainScreenOnly: String
+    let sectionLook, size, fade, minuteEdges, drift, mainScreenOnly: String
     let reset, cancel, ok: String
     /// Copy / paste the settings as text (exchange between screen saver and app)
     let copy, paste: String
@@ -50,8 +50,7 @@ struct Texts {
         sectionFont: "Schrift", font: "Schrift:", weight: "Schnitt:", letterScale: "Buchstabengröße:",
         systemFont: "SF Pro (Systemschrift)",
         sectionLook: "Darstellung",
-        size: "Größe:", fade: "Überblendung:", minuteEdges: "Minuten an den Kanten anzeigen",
-        edgeStrength: "Kantenlicht:", edgeSpread: "Ausbreitung:", edgeTrail: "Nachglühen:",
+        size: "Größe:", fade: "Überblendung:", minuteEdges: "Minuten anzeigen",
         drift: "Langsam wandern (Einbrennschutz)", mainScreenOnly: "Nur auf dem Hauptbildschirm",
         reset: "Standard", cancel: "Abbrechen", ok: "OK",
         copy: "Kopieren", paste: "Einfügen",
@@ -67,8 +66,7 @@ struct Texts {
         sectionFont: "Schrift", font: "Schrift:", weight: "Schnitt:", letterScale: "Buchstabengrösse:",
         systemFont: "SF Pro (Systemschrift)",
         sectionLook: "Darstellung",
-        size: "Grösse:", fade: "Überblendung:", minuteEdges: "Minuten an den Kanten anzeigen",
-        edgeStrength: "Kantenlicht:", edgeSpread: "Ausbreitung:", edgeTrail: "Nachglühen:",
+        size: "Grösse:", fade: "Überblendung:", minuteEdges: "Minuten anzeigen",
         drift: "Langsam wandern (Einbrennschutz)", mainScreenOnly: "Nur auf dem Hauptbildschirm",
         reset: "Standard", cancel: "Abbrechen", ok: "OK",
         copy: "Kopieren", paste: "Einfügen",
@@ -83,8 +81,7 @@ struct Texts {
         sectionFont: "Typeface", font: "Typeface:", weight: "Weight:", letterScale: "Letter size:",
         systemFont: "SF Pro (system font)",
         sectionLook: "Appearance",
-        size: "Size:", fade: "Cross-fade:", minuteEdges: "Show minutes at the edges",
-        edgeStrength: "Edge light:", edgeSpread: "Spread:", edgeTrail: "Afterglow:",
+        size: "Size:", fade: "Cross-fade:", minuteEdges: "Show minutes",
         drift: "Drift slowly (burn-in protection)", mainScreenOnly: "Main display only",
         reset: "Defaults", cancel: "Cancel", ok: "OK",
         copy: "Copy", paste: "Paste",
@@ -99,8 +96,7 @@ struct Texts {
         sectionFont: "Typeface", font: "Typeface:", weight: "Weight:", letterScale: "Letter size:",
         systemFont: "SF Pro (system font)",
         sectionLook: "Appearance",
-        size: "Size:", fade: "Cross-fade:", minuteEdges: "Show minutes at the edges",
-        edgeStrength: "Edge light:", edgeSpread: "Spread:", edgeTrail: "Afterglow:",
+        size: "Size:", fade: "Cross-fade:", minuteEdges: "Show minutes",
         drift: "Drift slowly (burn-in protection)", mainScreenOnly: "Main display only",
         reset: "Defaults", cancel: "Cancel", ok: "OK",
         copy: "Copy", paste: "Paste",
@@ -116,8 +112,7 @@ struct Texts {
         sectionFont: "Police", font: "Police\u{202F}:", weight: "Graisse\u{202F}:",
         letterScale: "Taille des lettres\u{202F}:", systemFont: "SF Pro (police système)",
         sectionLook: "Affichage",
-        size: "Taille\u{202F}:", fade: "Fondu\u{202F}:", minuteEdges: "Afficher les minutes sur les bords",
-        edgeStrength: "Lumière des bords\u{202F}:", edgeSpread: "Diffusion\u{202F}:", edgeTrail: "Rémanence\u{202F}:",
+        size: "Taille\u{202F}:", fade: "Fondu\u{202F}:", minuteEdges: "Afficher les minutes",
         drift: "Déplacement lent (anti-marquage)", mainScreenOnly: "Écran principal uniquement",
         reset: "Par défaut", cancel: "Annuler", ok: "OK",
         copy: "Copier", paste: "Coller",
@@ -132,8 +127,7 @@ struct Texts {
         sectionFont: "Carattere", font: "Carattere:", weight: "Peso:", letterScale: "Dimensione delle lettere:",
         systemFont: "SF Pro (font di sistema)",
         sectionLook: "Aspetto",
-        size: "Dimensione:", fade: "Dissolvenza:", minuteEdges: "Mostra i minuti sui bordi",
-        edgeStrength: "Luce dei bordi:", edgeSpread: "Diffusione:", edgeTrail: "Persistenza:",
+        size: "Dimensione:", fade: "Dissolvenza:", minuteEdges: "Mostra i minuti",
         drift: "Spostamento lento (anti burn-in)", mainScreenOnly: "Solo sullo schermo principale",
         reset: "Predefiniti", cancel: "Annulla", ok: "OK",
         copy: "Copia", paste: "Incolla",
@@ -148,8 +142,7 @@ struct Texts {
         sectionFont: "Tipografía", font: "Tipografía:", weight: "Grosor:", letterScale: "Tamaño de letra:",
         systemFont: "SF Pro (fuente del sistema)",
         sectionLook: "Aspecto",
-        size: "Tamaño:", fade: "Fundido:", minuteEdges: "Mostrar los minutos en los bordes",
-        edgeStrength: "Luz de los bordes:", edgeSpread: "Difusión:", edgeTrail: "Estela:",
+        size: "Tamaño:", fade: "Fundido:", minuteEdges: "Mostrar los minutos",
         drift: "Desplazamiento lento (antiquemado)", mainScreenOnly: "Solo en la pantalla principal",
         reset: "Restablecer", cancel: "Cancelar", ok: "Aceptar",
         copy: "Copiar", paste: "Pegar",

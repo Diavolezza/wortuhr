@@ -18,6 +18,7 @@ for (scale, name) in [(1, "thumbnail.png"), (2, "thumbnail@2x.png")] {
     // Fixed defaults in German – independent of the builder's saved settings and system language
     var settings = Settings()
     settings.language = .de
+    settings.minuteEdges = false   // the thumbnail without the minute bar
     view.settings = settings
     view.fixedTime = (11, 55)
     view.prepareSnapshot(scale: CGFloat(scale))

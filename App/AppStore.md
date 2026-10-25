@@ -20,14 +20,14 @@ App Store Connect: app "Wortuhr – Word Clock", bundle ID `de.wanner-it.wordclo
 **Untertitel** (30): Die Uhrzeit in Worten
 
 **Werbetext** (170):
-Die Uhrzeit in Worten statt in Ziffern – in acht Sprachvarianten, mit leuchtenden Minutenkanten. Im Vollbild, als Widget und in StandBy.
+Die Uhrzeit in Worten statt in Ziffern – in acht Sprachvarianten, mit einem Balken für die Minuten. Im Vollbild, als Widget und in StandBy.
 
 **Stichwörter** (100):
 Uhr,Uhrzeit,Widget,StandBy,Nachttisch,Schreibtisch,Tischuhr,Buchstaben,Text,minimal,Design,Zeit
 
 **Beschreibung** (4000):
 
-Die Wortuhr zeigt die Uhrzeit nicht mit Ziffern, sondern in Worten: Auf einem Raster aus 110 Buchstaben leuchten die Wörter auf, die die aktuelle Zeit ergeben – „ES IST VIERTEL NACH DREI“. Die Minuten zwischen den Fünf-Minuten-Schritten zeigen die Kanten der Platte, eine nach der anderen.
+Die Wortuhr zeigt die Uhrzeit nicht mit Ziffern, sondern in Worten: Auf einem Raster aus 110 Buchstaben leuchten die Wörter auf, die die aktuelle Zeit ergeben – „ES IST VIERTEL NACH DREI“. Die Minuten zwischen den Fünf-Minuten-Schritten zeigt ein kleiner Balken im Buchstabenfeld, der sich Minute für Minute füllt.
 
 ACHT SPRACHVARIANTEN
 Hochdeutsch, Süddeutsch („viertel vier“), Schwiizerdütsch, Englisch (britisch und amerikanisch), Französisch, Italienisch und Spanisch – jeweils mit eigenem Buchstabenraster.
@@ -42,7 +42,7 @@ ALS WIDGET
 • Jedes Widget kann eine eigene Sprache und eigene Farben haben
 
 GANZ NACH DEINEM GESCHMACK
-Sechs Frontfarben, sechs Leuchtfarben oder eigene Farben, sieben Schriften in vier Schnitten, Leuchten, Größe, Überblendung und das Licht der Minutenkanten.
+Sechs Frontfarben, sechs Leuchtfarben oder eigene Farben, sieben Schriften in vier Schnitten, Leuchten, Größe und Überblendung; die Minutenanzeige lässt sich abschalten.
 
 AUCH ALS BILDSCHIRMSCHONER
 Die Wortuhr gibt es auch als kostenlosen Bildschirmschoner für den Mac. Mit „Kopieren“ und „Einfügen“ überträgst du das Aussehen zwischen App und Bildschirmschoner.
@@ -56,14 +56,14 @@ Kostenlos, ohne Werbung, ohne Konto, ohne Datenerfassung.
 **Subtitle** (30): The time in words
 
 **Promotional text** (170):
-The time in words instead of digits – in eight language variants, with glowing minute edges. Full screen, as a widget and in StandBy.
+The time in words instead of digits – in eight language variants, with a bar for the minutes. Full screen, as a widget and in StandBy.
 
 **Keywords** (100):
 clock,time,widget,standby,desk clock,bedside,text clock,letters,words,minimal,typography,german
 
 **Description** (4000):
 
-Wortuhr ("word clock" in German) shows the time not in digits but in words: on a grid of 110 letters, the words that make up the current time light up – "IT IS A QUARTER PAST THREE". The minutes between the five-minute steps light up the edges of the plate, one after the other.
+Wortuhr ("word clock" in German) shows the time not in digits but in words: on a grid of 110 letters, the words that make up the current time light up – "IT IS A QUARTER PAST THREE". The minutes between the five-minute steps are shown by a small bar in the letter grid that fills up minute by minute.
 
 EIGHT LANGUAGE VARIANTS
 English (British and American), German (standard and southern), Swiss German, French, Italian and Spanish – each with its own letter grid.
@@ -78,7 +78,7 @@ AS A WIDGET
 • Each widget can have its own language and colours
 
 MADE TO YOUR TASTE
-Six faceplate colours, six lit colours or your own, seven typefaces in four weights, glow, size, cross-fade and the light of the minute edges.
+Six faceplate colours, six lit colours or your own, seven typefaces in four weights, glow, size and cross-fade; the minute display can be switched off.
 
 ALSO AS A SCREEN SAVER
 Wortuhr is also available as a free screen saver for the Mac. With "Copy" and "Paste" you transfer the look between the app and the screen saver.
@@ -89,9 +89,9 @@ Free, no ads, no account, no data collection.
 
 Also the reply to the first review (Guideline 2.1 – Information Needed). A screen recording from an iPhone is attached to the reply in App Store Connect.
 
-Purpose and audience: Wortuhr ("word clock" in German) is a clock that shows the time in words on a grid of 110 letters, for example "IT IS A QUARTER PAST THREE"; the minutes between the five-minute steps light up the edges of the plate. It is meant for anyone who wants a calm, decorative clock on the desk, the bedside table or in StandBy, on the Home Screen or the Mac desktop. It offers eight language variants (German standard and southern, Swiss German, English UK and US, French, Italian, Spanish). The same clock is available as a free, open-source screen saver for the Mac; the app brings it to iPhone and iPad and adds widgets.
+Purpose and audience: Wortuhr ("word clock" in German) is a clock that shows the time in words on a grid of 110 letters, for example "IT IS A QUARTER PAST THREE"; a small bar in the grid shows the minutes between the five-minute steps. It is meant for anyone who wants a calm, decorative clock on the desk, the bedside table or in StandBy, on the Home Screen or the Mac desktop. It offers eight language variants (German standard and southern, Swiss German, English UK and US, French, Italian, Spanish). The same clock is available as a free, open-source screen saver for the Mac; the app brings it to iPhone and iPad and adds widgets.
 
-How to use: Launch the app – the clock appears full screen at once. No account, login or sample files are needed. Tap the clock (iPhone/iPad) or press Command-comma (Mac) to open the settings: language, colours, typeface, size, cross-fade, minute edges, slow drift (burn-in protection) and "Keep the screen on". "Copy" and "Paste" transfer the settings as one line of text, also to and from the screen saver. On the Mac, double-click the clock for full screen. Widgets: long-press the Home Screen, tap "Edit" → "Add Widget", choose "Wortuhr – Word Clock" (small, medium or large); long-press a widget → "Edit Widget" to choose language, faceplate and lit colour per widget. The widgets also work in StandBy.
+How to use: Launch the app – the clock appears full screen at once. No account, login or sample files are needed. Tap the clock (iPhone/iPad) or press Command-comma (Mac) to open the settings: language, colours, typeface, size, cross-fade, minute bar, slow drift (burn-in protection) and "Keep the screen on". "Copy" and "Paste" transfer the settings as one line of text, also to and from the screen saver. On the Mac, double-click the clock for full screen. Widgets: long-press the Home Screen, tap "Edit" → "Add Widget", choose "Wortuhr – Word Clock" (small, medium or large); long-press a widget → "Edit Widget" to choose language, faceplate and lit colour per widget. The widgets also work in StandBy.
 
 External services: none. The app has no server, no accounts, no analytics, no ads and no network access; it stores only its settings on the device. The link "Wortuhr as a screen saver for the Mac" in the settings opens the project page of the free, open-source screen saver on GitHub in the browser; there is nothing to buy.
 

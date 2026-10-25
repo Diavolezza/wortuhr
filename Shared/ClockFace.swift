@@ -66,12 +66,18 @@ struct ClockFace {
     /// Extra glyphs between two cells (apostrophe in O'CLOCK, hyphen in VINGT-CINQ):
     /// glyph, row, column to its left, word it lights up with.
     let marks: [(glyph: String, row: Int, afterCol: Int, word: String)]
+    /// Cell that shows the minutes past the five-minute step (0–4) as a bar filling up from
+    /// below. No word uses it at any time; with the minutes switched off it shows its letter.
+    let minute: (row: Int, col: Int)
 
     /// Letter at row/column (precomposed so that Ü/Ö/È are single characters).
     func letter(row: Int, col: Int) -> String {
         let chars = Array(grid[row].precomposedStringWithCanonicalMapping)
         return String(chars[col])
     }
+
+    /// Index (row * 11 + column) of the minute cell.
+    var minuteIndex: Int { minute.row * Self.cols + minute.col }
 
     /// Indices (row * 11 + column) of the lit letters.
     func litCells(for words: [String]) -> Set<Int> {
@@ -85,7 +91,7 @@ struct ClockFace {
     }
 
     /// Time phrase: intro ("ES IST", "IT IS" …, optional), words and the minutes past the
-    /// five-minute step (0–4), shown by the glowing edges of the plate.
+    /// five-minute step (0–4), shown by the bar in the minute cell.
     static func phrase(hour24: Int, minute: Int, language: Language, intro: Bool) -> (words: [String], edges: Int) {
         let m5 = (minute / 5) * 5
         let h = hour24 % 12
@@ -130,7 +136,8 @@ struct ClockFace {
             "H6": (8, 0, 5), "H8": (8, 6, 4),
             "H10": (9, 0, 4), "H9": (9, 3, 4), "UHR": (9, 8, 3),
         ],
-        marks: []
+        marks: [],
+        minute: (8, 10)
     )
 
     private static func germanWords(m5: Int, h: Int, n: Int, south: Bool) -> ([String], [String]) {
@@ -179,7 +186,8 @@ struct ClockFace {
             "H10": (8, 0, 4), "H11": (8, 5, 4),
             "H0": (9, 0, 6),
         ],
-        marks: []
+        marks: [],
+        minute: (9, 10)
     )
 
     private static func swissWords(m5: Int, h: Int, n: Int) -> ([String], [String]) {
@@ -234,7 +242,8 @@ struct ClockFace {
             "M20": (2, 0, 6), "M5": (2, 7, 4),
             "M10": (3, 0, 3), "PAST": (3, 4, 4), "TO": (3, 9, 2),
         ]) { a, _ in a },
-        marks: [("’", 9, 5, "OCLOCK")]
+        marks: [("’", 9, 5, "OCLOCK")],
+        minute: (8, 10)
     )
 
     static let american = ClockFace(
@@ -250,7 +259,8 @@ struct ClockFace {
             "M20": (2, 0, 6), "M5": (2, 7, 4),
             "M10": (3, 0, 3), "AFTER": (3, 4, 5), "TO": (3, 9, 2),
         ]) { a, _ in a },
-        marks: [("’", 9, 5, "OCLOCK")]
+        marks: [("’", 9, 5, "OCLOCK")],
+        minute: (8, 10)
     )
 
     private static func englishWords(m5: Int, h: Int, n: Int, american: Bool) -> ([String], [String]) {
@@ -300,7 +310,8 @@ struct ClockFace {
             "M20": (8, 0, 5), "M5": (8, 5, 4), "M25": (8, 0, 9),
             "DEMI": (9, 1, 4), "DEMIE": (9, 1, 5),
         ],
-        marks: [("-", 8, 4, "M25")]
+        marks: [("-", 8, 4, "M25")],
+        minute: (9, 10)
     )
 
     private static func frenchWords(m5: Int, h24: Int) -> ([String], [String]) {
@@ -357,7 +368,8 @@ struct ClockFace {
             "M20": (8, 0, 5), "M5": (8, 5, 6), "M25": (8, 0, 11),
             "MEZZA": (9, 0, 5), "M10": (9, 6, 5),
         ],
-        marks: [("’", 1, 2, "H1")]
+        marks: [("’", 1, 2, "H1")],
+        minute: (7, 10)
     )
 
     private static func italianWords(m5: Int, h: Int, n: Int) -> ([String], [String]) {
@@ -410,7 +422,8 @@ struct ClockFace {
             "CUARTO": (8, 0, 6), "MEDIA": (8, 6, 5),
             "M20": (9, 0, 6),
         ],
-        marks: []
+        marks: [],
+        minute: (9, 10)
     )
 
     private static func spanishWords(m5: Int, h: Int, n: Int) -> ([String], [String]) {

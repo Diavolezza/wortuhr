@@ -1,4 +1,6 @@
-/* Letter grids & time logic per language – identical in Sources/ClockFace.swift.
+/* Letter grids & time logic per language – identical in Shared/ClockFace.swift.
+   minute: the cell [row, column] that shows the minutes past the five-minute step as a bar;
+   no word uses it at any time.
    Loaded by the prototype (index.html) and by the check script (check.mjs). */
 
 // Hour words in the English grid (same for British and American)
@@ -18,6 +20,7 @@ const FACES = {
       H11:[6,8,3], H4:[7,0,4], H5:[7,5,4], H6:[8,0,5], H8:[8,6,4], H10:[9,0,4],
       H9:[9,3,4], UHR:[9,8,3] },
     marks: [],
+    minute: [8,10],
   },
   ch: {
     grid: ["ESKISCHAFÜF","VIERTELSZÄH","ZWÄNZGDABLN","VORKHALBIJE","EISRZWÖIDRÜ",
@@ -27,18 +30,21 @@ const FACES = {
       H1:[4,0,3], H2:[4,4,4], H3:[4,8,3], H4:[5,0,5], H5:[5,6,4],
       H6:[6,0,6], H7:[6,6,5], H8:[7,0,5], H9:[7,6,4], H10:[8,0,4], H11:[8,5,4], H0:[9,0,6] },
     marks: [],
+    minute: [9,10],
   },
   en: {
     grid: ["ITLISQHALFP","AZQUARTERCK","TWENTYXFIVE","TENRPASTBTO", ...EN_HOUR_ROWS],
     words: { IT:[0,0,2], IS:[0,3,2], HALF:[0,6,4], A:[1,0,1], QUARTER:[1,2,7],
       M20:[2,0,6], M5:[2,7,4], M10:[3,0,3], PAST:[3,4,4], TO:[3,9,2], ...EN_HOURS },
     marks: [OCLOCK_MARK],
+    minute: [8,10],
   },
   us: {
     grid: ["ITLISZHALFA","QUARTERPAST","TWENTYXFIVE","TENKAFTERTO", ...EN_HOUR_ROWS],
     words: { IT:[0,0,2], IS:[0,3,2], HALF:[0,6,4], A:[0,10,1], QUARTER:[1,0,7], PAST:[1,7,4],
       M20:[2,0,6], M5:[2,7,4], M10:[3,0,3], AFTER:[3,4,5], TO:[3,9,2], ...EN_HOURS },
     marks: [OCLOCK_MARK],
+    minute: [8,10],
   },
   fr: {
     grid: ["ILKESTRDEUX","QUATRETROIS","UNECINQSEPT","HUITNEUFSIX","MIDIXMINUIT",
@@ -50,6 +56,7 @@ const FACES = {
       M20:[8,0,5], M5:[8,5,4], M25:[8,0,9], DEMI:[9,1,4], DEMIE:[9,1,5] },
     // hyphen in VINGT-CINQ
     marks: [{ glyph:"-", row:8, afterCol:4, word:"M25" }],
+    minute: [9,10],
   },
   it: {
     grid: ["SONORLEBSEI","ÈPLUNASETTE","QUATTROOTTO","CINQUEDIECI","UNDICINOVEK",
@@ -61,6 +68,7 @@ const FACES = {
       MEZZA:[9,0,5], M10:[9,6,5] },
     // apostrophe in L'UNA
     marks: [{ glyph:"’", row:1, afterCol:2, word:"H1" }],
+    minute: [7,10],
   },
   es: {
     grid: ["ESONRLASFKT","UNADOSCINCO","CUATROSIETE","NUEVEPTRESG","OCHONCEDIEZ",
@@ -71,6 +79,7 @@ const FACES = {
       Y:[6,0,1], MENOS:[6,1,5], M10:[6,7,4], M25:[7,0,11], M5:[7,6,5],
       CUARTO:[8,0,6], MEDIA:[8,6,5], M20:[9,0,6] },
     marks: [],
+    minute: [9,10],
   },
 };
 

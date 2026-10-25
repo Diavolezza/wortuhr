@@ -16,10 +16,7 @@ struct ClockStyle: Equatable {
     var letterScale: Double = 100 // %
     var size: Double = 92         // % of the shorter side
     var fade: Double = 0.8        // seconds
-    var minuteEdges = true        // minutes past the five-minute step light up the edges
-    var edgeStrength: Double = 100 // brightness of the minute edges in % (10 … 200)
-    var edgeSpread: Double = 50   // light outside the plate: 0 = none … 100 = wide halo
-    var edgeTrail: Double = 40    // brightness of the earlier edges
+    var minuteEdges = true        // minutes past the five-minute step as a bar in the minute cell
     var drift = false             // the plate drifts slowly (burn-in protection)
     /// Widget in tinted / vibrant rendering (not saved): the system colours the widget itself and keeps
     /// only the opacity – so no filled areas, and unlit letters by opacity instead of by colour.
@@ -63,11 +60,6 @@ struct ClockStyle: Equatable {
         return CTFontGetCapHeight(f)
     }
 
-    /// Minute edges: depth inside the plate and halo outside, as fractions of the plate side.
-    var edgeGeometry: (depth: CGFloat, halo: CGFloat) {
-        (0.005, 0.02 * pow(CGFloat(edgeSpread) / 100, 1.5))
-    }
-
     // MARK: - Persistence and exchange
 
     /// Stored as the same text that "Copy" puts on the clipboard (see Shared/SettingsExchange.swift).
@@ -98,9 +90,6 @@ struct ClockStyle: Equatable {
         x.size = size
         x.fade = fade
         x.minuteEdges = minuteEdges
-        x.edgeStrength = edgeStrength
-        x.edgeSpread = edgeSpread
-        x.edgeTrail = edgeTrail
         x.drift = drift
         return x
     }
@@ -120,9 +109,6 @@ struct ClockStyle: Equatable {
         if let v = x.size { size = v }
         if let v = x.fade { fade = v }
         if let v = x.minuteEdges { minuteEdges = v }
-        if let v = x.edgeStrength { edgeStrength = v }
-        if let v = x.edgeSpread { edgeSpread = v }
-        if let v = x.edgeTrail { edgeTrail = v }
         if let v = x.drift { drift = v }
     }
 }
