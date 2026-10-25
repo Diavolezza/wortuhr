@@ -87,7 +87,17 @@ Free, no ads, no account, no data collection.
 
 ## Notes for App Review (English)
 
-Wortuhr shows the time as words on a grid of letters. Tap the clock (iPhone/iPad) or press Command-comma (Mac) to open the settings. The app offers widgets in three sizes, also for StandBy; each widget can be configured with "Edit Widget". The app has no accounts, no network access and collects no data. The link "Wortuhr as a screen saver for the Mac" in the settings opens the project page of the free, open-source screen saver on GitHub; there is nothing to buy.
+Also the reply to the first review (Guideline 2.1 – Information Needed). A screen recording from an iPhone is attached to the reply in App Store Connect.
+
+Purpose and audience: Wortuhr ("word clock" in German) is a clock that shows the time in words on a grid of 110 letters, for example "IT IS A QUARTER PAST THREE"; the minutes between the five-minute steps light up the edges of the plate. It is meant for anyone who wants a calm, decorative clock on the desk, the bedside table or in StandBy, on the Home Screen or the Mac desktop. It offers eight language variants (German standard and southern, Swiss German, English UK and US, French, Italian, Spanish). The same clock is available as a free, open-source screen saver for the Mac; the app brings it to iPhone and iPad and adds widgets.
+
+How to use: Launch the app – the clock appears full screen at once. No account, login or sample files are needed. Tap the clock (iPhone/iPad) or press Command-comma (Mac) to open the settings: language, colours, typeface, size, cross-fade, minute edges, slow drift (burn-in protection) and "Keep the screen on". "Copy" and "Paste" transfer the settings as one line of text, also to and from the screen saver. On the Mac, double-click the clock for full screen. Widgets: long-press the Home Screen, tap "Edit" → "Add Widget", choose "Wortuhr – Word Clock" (small, medium or large); long-press a widget → "Edit Widget" to choose language, faceplate and lit colour per widget. The widgets also work in StandBy.
+
+External services: none. The app has no server, no accounts, no analytics, no ads and no network access; it stores only its settings on the device. The link "Wortuhr as a screen saver for the Mac" in the settings opens the project page of the free, open-source screen saver on GitHub in the browser; there is nothing to buy.
+
+Regions: the app works the same in all regions. The language of the clock is chosen in the settings (on first start it follows the device language).
+
+Regulated industry or third-party material: not applicable. All letter grids, texts and graphics are my own work; the typefaces are the system fonts of iOS and macOS.
 
 ## Checklist for a new version
 
