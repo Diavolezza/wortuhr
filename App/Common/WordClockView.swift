@@ -84,7 +84,14 @@ private struct ClockPlate: View {
                     .strokeBorder(.white.opacity(0.03 + e * 0.22), lineWidth: 1)
             }
             letters(face, on: on, words: words, pt: pt, lit: false)
-            if g > 0 {
+            if g > 0 && !plate {
+                // Widgets: the glow as shadows on the single lit letters, without compositing group.
+                // A composited group is stored as a bitmap in every timeline entry, which made the
+                // timeline of the large Mac widget too large for WidgetKit (11 MB) – it then kept
+                // showing an old entry and ignored changed widget settings.
+                letters(face, on: on, words: words, pt: pt, lit: true,
+                        glow: (main: pt * 0.3 * g * 0.53, halo: pt * 1.1 * g * 0.53))
+            } else if g > 0 {
                 // Same look as the two shadow layers per glyph in the screen saver (halo and main glow).
                 // SwiftUI blurs about twice as wide as Core Animation for the same radius and a bit
                 // brighter: radius × 0.53 and opacity × 0.85 match docs/wortuhr.png (measured).
@@ -124,7 +131,7 @@ private struct ClockPlate: View {
                 Rectangle().fill(style.litColor).frame(height: 16 * k * level)
             }
             .clipShape(rail)   // rounded at the bottom like the rail, flat on top
-            .shadow(color: style.litColor.opacity(g > 0 ? 0.95 * 0.85 : 0), radius: pt * 0.3 * g * 0.53)
+            .shadow(color: style.litColor.opacity(g > 0 && plate ? 0.95 * 0.85 : 0), radius: plate ? pt * 0.3 * g * 0.53 : 0)
             .widgetAccentable(style.mono)
         }
         .frame(width: style.glyphWidth("E", size: pt), height: 16 * k)
@@ -142,7 +149,8 @@ private struct ClockPlate: View {
 
     /// All letters of the grid. lit = false: every letter in the unlit colour.
     /// lit = true: only the lit letters, in the lit colour (the others transparent, so they fade).
-    private func letters(_ face: ClockFace, on: Set<Int>, words: Set<String>, pt: CGFloat, lit: Bool) -> some View {
+    private func letters(_ face: ClockFace, on: Set<Int>, words: Set<String>, pt: CGFloat, lit: Bool,
+                         glow: (main: CGFloat, halo: CGFloat)? = nil) -> some View {
         let gx0 = side * 0.0667, gw = side * 0.8667
         let gy0 = side * 0.07, gh = side * 0.86
         let cols = ClockFace.cols
@@ -159,12 +167,13 @@ private struct ClockPlate: View {
         let marks = face.marks.filter { !lean || words.contains($0.word) }
         return ZStack(alignment: .topLeading) {
             ForEach(cells, id: \.self) { i in
-                Glyph(text: face.letter(row: i / cols, col: i % cols), font: font, cap: cap, color: color, cell: cell)
+                Glyph(text: face.letter(row: i / cols, col: i % cols), font: font, cap: cap, color: color, cell: cell,
+                      glow: glow)
                     .opacity(lit && !on.contains(i) ? 0 : 1)
                     .position(x: gx0 + cw * (CGFloat(i % cols) + 0.5), y: gy0 + ch * (CGFloat(i / cols) + 0.5))
             }
             ForEach(Array(marks.enumerated()), id: \.offset) { _, mark in
-                Glyph(text: mark.glyph, font: font, cap: cap, color: color, cell: cell)
+                Glyph(text: mark.glyph, font: font, cap: cap, color: color, cell: cell, glow: glow)
                     .opacity(lit && !words.contains(mark.word) ? 0 : 1)
                     .position(x: gx0 + cw * CGFloat(mark.afterCol + 1), y: gy0 + ch * (CGFloat(mark.row) + 0.5))
             }
@@ -180,13 +189,23 @@ private struct Glyph: View {
     let cap: CGFloat
     let color: Color
     let cell: CGSize
+    var glow: (main: CGFloat, halo: CGFloat)? = nil
 
     var body: some View {
-        Text(text)
-            .font(font)
-            .foregroundStyle(color)
+        letter
             .fixedSize()
             .alignmentGuide(VerticalAlignment.center) { d in d[.firstTextBaseline] - cap / 2 }
             .frame(width: cell.width, height: cell.height)
+    }
+
+    /// The letter, in widgets with its glow as two shadows (main glow and halo).
+    @ViewBuilder private var letter: some View {
+        if let glow {
+            Text(text).font(font).foregroundStyle(color)
+                .shadow(color: color.opacity(0.95 * 0.85), radius: glow.main)
+                .shadow(color: color.opacity(0.6 * 0.85), radius: glow.halo)
+        } else {
+            Text(text).font(font).foregroundStyle(color)
+        }
     }
 }
