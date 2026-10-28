@@ -11,7 +11,6 @@ final class WortuhrView: ScreenSaverView {
     private let plate = CALayer()
     private let sheen = CAGradientLayer()
     private let rimTop = CALayer()
-    private let rimBottom = CALayer()
     /// One letter: the glyph with a close glow, and beneath it the same glyph again,
     /// which only contributes a wide, faint halo (a layer has only one shadow).
     private struct Glyph {
@@ -100,7 +99,6 @@ final class WortuhrView: ScreenSaverView {
         root.addSublayer(plate)
         plate.addSublayer(sheen)
         plate.addSublayer(rimTop)
-        plate.addSublayer(rimBottom)
 
         let dnc = DistributedNotificationCenter.default()
         dnc.addObserver(self, selector: #selector(screenSaverDidStart(_:)),
@@ -234,15 +232,13 @@ final class WortuhrView: ScreenSaverView {
         plate.cornerRadius = side * 0.012
         plate.backgroundColor = s.front.cgColor
 
-        // Edge: fine light border, highlight at the top, shadow at the bottom
+        // Edge: fine light border and a highlight at the top (no shadow line at the bottom)
         let e = CGFloat(s.edge / 100)
         plate.borderWidth = 1
         plate.borderColor = NSColor(white: 1, alpha: 0.03 + e * 0.22).cgColor
         let inset = plate.cornerRadius
         rimTop.frame = CGRect(x: inset, y: side - 2, width: side - 2 * inset, height: 1)
         rimTop.backgroundColor = NSColor(white: 1, alpha: e * 0.20).cgColor
-        rimBottom.frame = CGRect(x: inset, y: 1, width: side - 2 * inset, height: 1)
-        rimBottom.backgroundColor = NSColor(white: 0, alpha: 0.45).cgColor
 
         // Sheen: subtle gradient from top left to bottom right
         sheen.frame = plate.bounds

@@ -75,11 +75,9 @@ private struct ClockPlate: View {
                 RoundedRectangle(cornerRadius: radius)
                     .fill(LinearGradient(stops: Self.sheen,
                                          startPoint: UnitPoint(x: 0.33, y: 0), endPoint: UnitPoint(x: 0.67, y: 1)))
-                // Edge: fine light border, highlight at the top, shadow at the bottom
+                // Edge: fine light border and a highlight at the top (no shadow line at the bottom)
                 Rectangle().fill(.white.opacity(e * 0.20))
                     .frame(width: side - 2 * radius, height: 1).offset(x: radius, y: 1)
-                Rectangle().fill(.black.opacity(0.45))
-                    .frame(width: side - 2 * radius, height: 1).offset(x: radius, y: side - 2)
                 RoundedRectangle(cornerRadius: radius)
                     .strokeBorder(.white.opacity(0.03 + e * 0.22), lineWidth: 1)
             }
