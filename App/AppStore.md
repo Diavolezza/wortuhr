@@ -87,7 +87,9 @@ Free, no ads, no account, no data collection.
 
 ## Notes for App Review (English)
 
-Also the reply to the first review (Guideline 2.1 – Information Needed). A screen recording from an iPhone is attached to the reply in App Store Connect.
+Goes into "Notes" under App Review Information (iOS and macOS) and is also the reply to the first review (Guideline 2.1 – Information Needed). Screen recordings from iPhone and Mac are attached in App Store Connect.
+
+Screen recordings of the app running on a physical iPhone and on a Mac are attached.
 
 Purpose and audience: Wortuhr ("word clock" in German) is a clock that shows the time in words on a grid of 110 letters, for example "IT IS A QUARTER PAST THREE"; a small bar in the grid shows the minutes between the five-minute steps. It is meant for anyone who wants a calm, decorative clock on the desk, the bedside table or in StandBy, on the Home Screen or the Mac desktop. It offers eight language variants (German standard and southern, Swiss German, English UK and US, French, Italian, Spanish). The same clock is available as a free, open-source screen saver for the Mac; the app brings it to iPhone and iPad and adds widgets.
 
