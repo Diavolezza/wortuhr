@@ -30,12 +30,9 @@ final class WortuhrView: ScreenSaverView {
     private var marks: [(glyph: Glyph, word: String)] = []
     /// Minutes past the five-minute step: a bar in the minute cell, a rail in the colour of the
     /// unlit letters and the part filled from below in the lit colour (one quarter per minute, full at four minutes).
-    /// Small dots in the plate colour divide the filled quarters; a dot appears once the fill covers it.
     private let barRail = CAShapeLayer()
     private let barFill = CAShapeLayer()
-    private let barDots = [CAShapeLayer(), CAShapeLayer(), CAShapeLayer()]
     private var barRect = CGRect.zero
-    private var barRadius: CGFloat = 0
     private var lastKey = ""
     private var startDate = Date()
     private var plateCenter = CGPoint.zero
@@ -312,26 +309,25 @@ final class WortuhrView: ScreenSaverView {
     }
 
     /// Minute bar in the minute cell (a square the size of a letter cell, 20 × 20 units):
-    /// as wide as an "E" of the letter font, 16 units high (y 2 … 18), corner radius 1.6.
+    /// 65 % as wide as an "E" of the letter font, as high as the capitals and centred like them,
+    /// square corners like the letters.
     /// The minute cell's letter is hidden.
     private func buildBar(face: ClockFace, gx0: CGFloat, gy0: CGFloat, cw: CGFloat, ch: CGFloat,
                           side: CGFloat, font: CTFont) {
         let pointSize = CTFontGetSize(font)
         barRail.removeFromSuperlayer()
         barFill.removeFromSuperlayer()
-        barDots.forEach { $0.removeFromSuperlayer() }
         let s = settings
         guard s.minuteEdges else { return }
         cells[face.minuteIndex].hide()
         let cx = gx0 + cw * (CGFloat(face.minute.col) + 0.5)
         let cy = side - (gy0 + ch * (CGFloat(face.minute.row) + 0.5))   // layer coordinates: y points up
-        let k = min(cw, ch) / 20
-        let width = glyphPath("E", font: font).boundingBoxOfPath.width
-        barRect = CGRect(x: cx - width / 2, y: cy - 8 * k, width: width, height: 16 * k)
-        barRadius = 1.6 * k
+        let width = glyphPath("E", font: font).boundingBoxOfPath.width * Self.barWidth
+        let cap = CTFontGetCapHeight(font)
+        barRect = CGRect(x: cx - width / 2, y: cy - cap / 2, width: width, height: cap)
         let scale = backingScale
         barRail.contentsScale = scale
-        barRail.path = CGPath(roundedRect: barRect, cornerWidth: barRadius, cornerHeight: barRadius, transform: nil)
+        barRail.path = CGPath(rect: barRect, transform: nil)
         barRail.fillColor = s.offColor.cgColor
         barFill.contentsScale = scale
         barFill.fillColor = s.lit.cgColor
@@ -343,32 +339,17 @@ final class WortuhrView: ScreenSaverView {
         barFill.opacity = 0
         plate.addSublayer(barRail)
         plate.addSublayer(barFill)
-        // Dividing dots at one, two and three quarters of the height, radius 0.8 units
-        let r = 0.8 * k
-        for (i, dot) in barDots.enumerated() {
-            let y = barRect.minY + barRect.height * CGFloat(i + 1) / 4
-            dot.contentsScale = scale
-            dot.path = CGPath(ellipseIn: CGRect(x: cx - r, y: y - r, width: 2 * r, height: 2 * r), transform: nil)
-            dot.fillColor = s.front.cgColor
-            dot.opacity = 0
-            plate.addSublayer(dot)
-        }
     }
 
-    /// Filled part of the bar up to `level` (0…1): rounded at the bottom and on top like the rail.
-    /// Always the same path elements (four arcs), so that Core Animation can animate between levels.
+    /// Width of the minute bar as a share of the width of an "E" of the letter font.
+    static let barWidth: CGFloat = 0.65
+
+    /// Filled part of the bar up to `level` (0…1), a plain rectangle from the bottom
+    /// (always four points, so that Core Animation can animate between levels).
     private func barPath(level: CGFloat) -> CGPath {
-        let r = barRadius, b = barRect
-        let top = b.minY + max(b.height * min(level, 1), 2 * r)
-        let rt = r
-        let p = CGMutablePath()
-        p.move(to: CGPoint(x: b.minX, y: (b.minY + top) / 2))
-        p.addArc(tangent1End: CGPoint(x: b.minX, y: b.minY), tangent2End: CGPoint(x: b.maxX, y: b.minY), radius: r)
-        p.addArc(tangent1End: CGPoint(x: b.maxX, y: b.minY), tangent2End: CGPoint(x: b.maxX, y: top), radius: r)
-        p.addArc(tangent1End: CGPoint(x: b.maxX, y: top), tangent2End: CGPoint(x: b.minX, y: top), radius: rt)
-        p.addArc(tangent1End: CGPoint(x: b.minX, y: top), tangent2End: CGPoint(x: b.minX, y: b.minY), radius: rt)
-        p.closeSubpath()
-        return p
+        let b = barRect
+        return CGPath(rect: CGRect(x: b.minX, y: b.minY, width: b.width, height: b.height * min(max(level, 0), 1)),
+                      transform: nil)
     }
 
     private func glyphPath(_ letter: String, font: CTFont) -> CGPath {
@@ -415,8 +396,6 @@ final class WortuhrView: ScreenSaverView {
         if s.minuteEdges {
             barFill.path = barPath(level: CGFloat(p.edges) / 4)
             barFill.opacity = p.edges > 0 ? 1 : 0
-            // dot i lies between quarter i and i + 1: shown once both are filled
-            for (i, dot) in barDots.enumerated() { dot.opacity = p.edges >= i + 2 ? 1 : 0 }
         }
         CATransaction.commit()
     }

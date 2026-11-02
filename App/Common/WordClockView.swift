@@ -113,32 +113,22 @@ private struct ClockPlate: View {
     }
 
     /// Minutes past the five-minute step: a bar in the minute cell (a square the size of a letter
-    /// cell, 20 × 20 units: as wide as an "E" of the letter font, 16 units high, corner radius 1.6). Rail in the colour of the
-    /// unlit letters, the part filled from below in the lit colour (rounded on top as well), one quarter per minute
-    /// (full at four minutes). Small dots in the plate colour divide the filled quarters; a dot
-    /// appears once the fill covers it (none at one minute, three at four minutes).
+    /// cell, 20 × 20 units: 65 % as wide as an "E" of the letter font, as high as the capitals and centred like them, square corners).
+    /// Rail in the colour of the unlit letters, the part filled from below in the lit colour, one quarter per minute
+    /// (full at four minutes).
     private func minuteBar(_ face: ClockFace, level: CGFloat, pt: CGFloat, g: CGFloat) -> some View {
         let gx0 = side * 0.0667, gw = side * 0.8667
         let gy0 = side * 0.07, gh = side * 0.86
         let cw = gw / CGFloat(ClockFace.cols), ch = gh / CGFloat(ClockFace.rows)
-        let k = min(cw, ch) / 20
-        let rail = RoundedRectangle(cornerRadius: 1.6 * k)
+        let cap = style.capHeight(size: pt)
         return ZStack(alignment: .bottom) {
-            rail.fill(style.offColor)
-            RoundedRectangle(cornerRadius: 1.6 * k)   // rounded at the bottom and on top like the rail
-                .fill(style.litColor)
-                .frame(height: 16 * k * level)
+            Rectangle().fill(style.offColor)
+            Rectangle().fill(style.litColor)
+                .frame(height: cap * level)
                 .shadow(color: style.litColor.opacity(g > 0 && plate ? 0.95 * 0.85 : 0), radius: plate ? pt * 0.3 * g * 0.53 : 0)
                 .widgetAccentable(style.mono)
-            // Dividing dots at one, two and three quarters of the height, radius 0.8 units
-            ForEach(1..<4) { i in
-                Circle().fill(style.frontColor)
-                    .frame(width: 1.6 * k, height: 1.6 * k)
-                    .offset(y: -16 * k * CGFloat(i) / 4 + 0.8 * k)
-                    .opacity(level * 4 >= CGFloat(i) + 1 - 0.01 ? 1 : 0)
-            }
         }
-        .frame(width: style.glyphWidth("E", size: pt), height: 16 * k)
+        .frame(width: style.glyphWidth("E", size: pt) * 0.65, height: cap)
         .position(x: gx0 + cw * (CGFloat(face.minute.col) + 0.5), y: gy0 + ch * (CGFloat(face.minute.row) + 0.5))
     }
 

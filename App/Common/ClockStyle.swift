@@ -77,7 +77,7 @@ struct ClockStyle: Equatable {
         CTFontGetCapHeight(ctFont(size: pt))
     }
 
-    /// Ink width of a letter in the letter font (the minute bar is as wide as an "E").
+    /// Ink width of a letter in the letter font (the minute bar is 65 % as wide as an "E").
     func glyphWidth(_ letter: String, size pt: CGFloat) -> CGFloat {
         let f = ctFont(size: pt)
         var chars = Array(letter.utf16)
