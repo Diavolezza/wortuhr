@@ -30,8 +30,10 @@ final class WortuhrView: ScreenSaverView {
     private var marks: [(glyph: Glyph, word: String)] = []
     /// Minutes past the five-minute step: a bar in the minute cell, a rail in the colour of the
     /// unlit letters and the part filled from below in the lit colour (one quarter per minute, full at four minutes).
+    /// Small dots in the plate colour divide the filled quarters; a dot appears once the fill covers it.
     private let barRail = CAShapeLayer()
     private let barFill = CAShapeLayer()
+    private let barDots = [CAShapeLayer(), CAShapeLayer(), CAShapeLayer()]
     private var barRect = CGRect.zero
     private var barRadius: CGFloat = 0
     private var lastKey = ""
@@ -317,6 +319,7 @@ final class WortuhrView: ScreenSaverView {
         let pointSize = CTFontGetSize(font)
         barRail.removeFromSuperlayer()
         barFill.removeFromSuperlayer()
+        barDots.forEach { $0.removeFromSuperlayer() }
         let s = settings
         guard s.minuteEdges else { return }
         cells[face.minuteIndex].hide()
@@ -340,15 +343,24 @@ final class WortuhrView: ScreenSaverView {
         barFill.opacity = 0
         plate.addSublayer(barRail)
         plate.addSublayer(barFill)
+        // Dividing dots at one, two and three quarters of the height, radius 0.8 units
+        let r = 0.8 * k
+        for (i, dot) in barDots.enumerated() {
+            let y = barRect.minY + barRect.height * CGFloat(i + 1) / 4
+            dot.contentsScale = scale
+            dot.path = CGPath(ellipseIn: CGRect(x: cx - r, y: y - r, width: 2 * r, height: 2 * r), transform: nil)
+            dot.fillColor = s.front.cgColor
+            dot.opacity = 0
+            plate.addSublayer(dot)
+        }
     }
 
-    /// Filled part of the bar up to `level` (0…1): rounded at the bottom, flat on top – and
-    /// rounded on top like the rail when full. Always the same path elements (four arcs; the top
-    /// ones with a tiny radius when not full), so that Core Animation can animate between levels.
+    /// Filled part of the bar up to `level` (0…1): rounded at the bottom and on top like the rail.
+    /// Always the same path elements (four arcs), so that Core Animation can animate between levels.
     private func barPath(level: CGFloat) -> CGPath {
         let r = barRadius, b = barRect
-        let top = b.minY + max(b.height * min(level, 1), r)
-        let rt = level >= 1 ? r : 0.001
+        let top = b.minY + max(b.height * min(level, 1), 2 * r)
+        let rt = r
         let p = CGMutablePath()
         p.move(to: CGPoint(x: b.minX, y: (b.minY + top) / 2))
         p.addArc(tangent1End: CGPoint(x: b.minX, y: b.minY), tangent2End: CGPoint(x: b.maxX, y: b.minY), radius: r)
@@ -403,6 +415,8 @@ final class WortuhrView: ScreenSaverView {
         if s.minuteEdges {
             barFill.path = barPath(level: CGFloat(p.edges) / 4)
             barFill.opacity = p.edges > 0 ? 1 : 0
+            // dot i lies between quarter i and i + 1: shown once both are filled
+            for (i, dot) in barDots.enumerated() { dot.opacity = p.edges >= i + 2 ? 1 : 0 }
         }
         CATransaction.commit()
     }

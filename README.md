@@ -8,7 +8,7 @@
 
 A word clock on an 11×10 letter grid. The minutes between the five-minute steps are shown by a small bar in
 one cell of the last column: it fills up from below by one quarter per minute, is full at four minutes and empties again with the next
-words. Switched off, the cell shows its letter.
+words. Small dots divide the filled quarters, so the minutes can be counted at a glance. Switched off, the cell shows its letter.
 The time is spelled out in eight variants:
 
 | Language | Example (3:15 · 3:45) |

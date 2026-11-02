@@ -7,7 +7,7 @@
 · **[Download](https://github.com/Diavolezza/wortuhr/releases/latest)**
 
 Wortuhr im 11×10-Raster. Die Minuten zwischen den Fünf-Minuten-Schritten zeigt ein kleiner Balken in einem Feld
-der letzten Spalte: Er füllt sich von unten um ein Viertel je Minute, ist nach vier Minuten voll und leert sich mit den nächsten Wörtern.
+der letzten Spalte: Er füllt sich von unten um ein Viertel je Minute, ist nach vier Minuten voll und leert sich mit den nächsten Wörtern. Kleine Punkte trennen die gefüllten Viertel, so lassen sich die Minuten auf einen Blick zählen.
 Ausgeschaltet zeigt das Feld seinen Buchstaben.
 Zeitansage in acht Varianten:
 

@@ -59,12 +59,14 @@ body{background:var(--page);color:var(--ink);font:14px/1.45 system-ui,-apple-sys
               0 0 calc(.9em * var(--glow)) color-mix(in srgb,var(--lit) 60%,transparent),
               0 0 calc(2.2em * var(--glow)) color-mix(in srgb,var(--lit) 30%,transparent)}
 /* Minutes past the five-minute step: a bar in the minute cell (same size as a letter cell)
-   fills up from below by one quarter per minute (full at four minutes). Rail in the colour of the unlit letters,
-   filled part in the lit colour. Switched off, the cell shows its letter. */
+   fills up from below by one quarter per minute (full at four minutes); small dots in the plate colour divide the
+   filled quarters (a dot appears once the fill covers it). Rail in the colour of the unlit letters,
+   filled part in the lit colour, rounded on top as well. Switched off, the cell shows its letter. */
 .mbar{width:100%;height:100%;display:block;overflow:visible}
 .mbar .rail{fill:color-mix(in srgb,var(--lit) var(--dim),var(--front));transition:fill var(--fade) ease}
-.mbar .fill{fill:var(--lit);transform-box:fill-box;transform-origin:50% 100%;
-  transform:scaleY(var(--m,0));transition:transform var(--fade) ease}
+.mbar .fill{fill:var(--lit);transition:y var(--fade) ease,height var(--fade) ease}
+.mbar .dot{fill:var(--front);opacity:0;transition:opacity var(--fade) ease}
+.mbar .dot.on{opacity:1}
 .mbar g{filter:drop-shadow(0 0 calc(var(--glow) * 1.5px) color-mix(in srgb,var(--lit) 80%,transparent))}
 .cell.minute .ch{display:none}
 .nominutes .mbar{display:none}
@@ -200,7 +202,7 @@ kbd{font:11px ui-monospace,Menlo,monospace;border:1px solid var(--line);border-b
     <section>
       <h2>Minutes</h2>
       <div class="row"><label class="check"><input type="checkbox" id="minutes"> Show minutes</label></div>
-      <p class="hint">The bar in the last column fills up by one quarter for each minute past the five-minute step and is full at four minutes. Switched off, the cell shows its letter.</p>
+      <p class="hint">The bar in the last column fills up by one quarter for each minute past the five-minute step and is full at four minutes; small dots divide the filled quarters. Switched off, the cell shows its letter.</p>
     </section>
 
     <section>
@@ -256,7 +258,8 @@ function buildGrid(){
   mc.innerHTML='<span class="ch">'+mc.textContent+'</span><svg class="mbar" viewBox="0 0 20 20" aria-hidden="true">'+
     '<clipPath id="mclip"><rect x="6" y="2" width="8" height="16" rx="1.6"/></clipPath>'+
     '<rect class="rail" x="6" y="2" width="8" height="16" rx="1.6"/>'+
-    '<g clip-path="url(#mclip)"><rect class="fill" x="6" y="2" width="8" height="16"/></g></svg>';
+    '<g clip-path="url(#mclip)"><rect class="fill" x="6" y="18" width="8" height="0" rx="1.6"/></g>'+
+    [14,10,6].map(y=>'<circle class="dot" cx="10" cy="'+y+'" r="0.8"/>').join("")+'</svg>';
   bar=mc.querySelector(".mbar");
   sizeBar();
   f.marks.forEach(mk=>{const s=document.createElement("span");s.className="mark";s.textContent=mk.glyph;
@@ -343,6 +346,10 @@ function render(force){
   marks.forEach(mk=>mk.el.classList.toggle("on",p.words.includes(mk.word)));
   /* minutes past the five-minute step: the bar fills up by quarters */
   bar.style.setProperty("--m",p.edges/4);
+  /* filled part: rounded on top like the rail (attributes for every browser, CSS properties for the transition) */
+  const fill=bar.querySelector(".fill"),fy=18-16*p.edges/4,fh=16*p.edges/4;
+  fill.setAttribute("y",fy);fill.setAttribute("height",fh);fill.style.y=fy+"px";fill.style.height=fh+"px";
+  bar.querySelectorAll(".dot").forEach((d,i)=>d.classList.toggle("on",p.edges>=i+2));
   const words=spell(S.language,p.words);
   $("rTime").textContent=fmt(t);
   $("rPhrase").textContent=words+(S.minutes&&p.edges?"  + "+p.edges+" min":"");
