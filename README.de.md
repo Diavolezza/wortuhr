@@ -38,8 +38,8 @@ Kopf steht. Widgets in drei Größen für den Home-Bildschirm, StandBy und den M
 eine eigene Sprache und eigene Farben haben. „Kopieren“ und „Einfügen“ übertragen das Aussehen zwischen App und
 Bildschirmschoner. Kostenlos, ohne Werbung, ohne Datenerfassung. Ab iOS 17 / macOS 14.
 
-[Wortuhr – Word Clock im App Store](https://apps.apple.com/de/app/wortuhr-word-clock/id6826591590) (iPhone und iPad,
-erhältlich in Europa; die Mac-App folgt).
+[Wortuhr – Word Clock im App Store](https://apps.apple.com/de/app/wortuhr-word-clock/id6826591590) (iPhone, iPad und Mac,
+erhältlich in Europa).
 
 ## Herunterladen und installieren
 

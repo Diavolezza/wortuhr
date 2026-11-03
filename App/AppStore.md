@@ -101,6 +101,14 @@ Regions: the app works the same in all regions. The language of the clock is cho
 
 Regulated industry or third-party material: not applicable. All letter grids, texts and graphics are my own work; the typefaces are the system fonts of iOS and macOS.
 
+## What's New in 1.1
+
+Deutsch:
+Neuer Minutenbalken: schmaler, so hoch wie die Buchstaben und mit eckigen Kanten wie die Schrift. Er fügt sich dadurch ruhiger in das Buchstabenraster ein.
+
+English:
+New minute bar: narrower, as high as the letters and with square corners like the typeface, so it sits more calmly in the letter grid.
+
 ## Checklist for a new version
 
 1. Raise `MARKETING_VERSION` (new version) and `CURRENT_PROJECT_VERSION` (every upload) in `App/project.yml`, run `App/build.sh`.
