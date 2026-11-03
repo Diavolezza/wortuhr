@@ -36,8 +36,10 @@ The same clock as an app, **“Wortuhr – Word Clock”**: full screen with all
 “keep the screen on” and slow drift against burn-in, upright also when the iPhone stands upside down.
 Widgets in three sizes for the Home Screen, StandBy and the Mac desktop; each widget can have its own
 language and colours. “Copy” and “Paste” transfer the look between the app and the screen saver.
-Free, no ads, no data collection. The app has been submitted to the App Store; the link follows once it
-is available. iOS 17 / macOS 14 or later.
+Free, no ads, no data collection. iOS 17 / macOS 14 or later.
+
+[Wortuhr – Word Clock in the App Store](https://apps.apple.com/app/wortuhr-word-clock/id6826591590) (iPhone and iPad,
+available in Europe; the Mac app follows).
 
 ## Download and install
 

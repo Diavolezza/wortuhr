@@ -36,8 +36,10 @@ Dieselbe Uhr als App, **„Wortuhr – Word Clock“**: im Vollbild mit allen Op
 „Bildschirm nicht abschalten“ und langsamem Wandern gegen Einbrennen, aufrecht auch, wenn das iPhone auf dem
 Kopf steht. Widgets in drei Größen für den Home-Bildschirm, StandBy und den Mac-Schreibtisch; jedes Widget kann
 eine eigene Sprache und eigene Farben haben. „Kopieren“ und „Einfügen“ übertragen das Aussehen zwischen App und
-Bildschirmschoner. Kostenlos, ohne Werbung, ohne Datenerfassung. Die App ist beim App Store eingereicht; der Link
-folgt, sobald sie erhältlich ist. Ab iOS 17 / macOS 14.
+Bildschirmschoner. Kostenlos, ohne Werbung, ohne Datenerfassung. Ab iOS 17 / macOS 14.
+
+[Wortuhr – Word Clock im App Store](https://apps.apple.com/de/app/wortuhr-word-clock/id6826591590) (iPhone und iPad,
+erhältlich in Europa; die Mac-App folgt).
 
 ## Herunterladen und installieren
 
