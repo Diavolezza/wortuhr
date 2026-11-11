@@ -107,9 +107,11 @@ struct ContentView: View {
             .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
                 store.reloadWidgetsNow("app active")
             }
-            // Test builds: wake-up time in the widget log, to compare with the widget's next timeline
+            // After a night's sleep the system did not ask the widget for a new timeline for at least
+            // 55 s (measured) – the widget kept showing the time of the evening. The app asks for it.
             .onReceive(NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.didWakeNotification)) { _ in
                 Diag.log("app: Mac woke up")
+                store.reloadWidgetsNow("Mac woke up")
             }
             #endif
             #if os(iOS)
