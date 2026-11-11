@@ -46,6 +46,10 @@ struct WortuhrApp: App {
                     }
                 }
                 .keyboardShortcut("v")
+                #if DEBUG
+                Button("Copy Widget Log") { Clipboard.string = Diag.text }
+                    .keyboardShortcut("l", modifiers: [.command, .option])
+                #endif
             }
             // Help: the support page instead of "Help isn't available"
             CommandGroup(replacing: .help) {

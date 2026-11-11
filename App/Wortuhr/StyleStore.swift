@@ -27,6 +27,7 @@ final class StyleStore {
         widgetReload = Task {
             try? await Task.sleep(for: .seconds(1))
             guard !Task.isCancelled else { return }
+            Diag.log("app: reloadAllTimelines (settings changed)")
             WidgetCenter.shared.reloadAllTimelines()
         }
     }
@@ -50,6 +51,7 @@ final class StyleStore {
         let byDefault = true      // iPhone/iPad as a clock on the desk or in StandBy
         #endif
         keepAwake = UserDefaults.standard.object(forKey: "keepAwake") as? Bool ?? byDefault
+        Diag.log("app: launched")
     }
 
     /// iOS: no auto-lock while the app is in front. macOS: the display does not go to sleep.

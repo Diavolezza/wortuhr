@@ -198,3 +198,40 @@ extension Color {
         return (Double((v >> 16) & 0xff) / 255, Double((v >> 8) & 0xff) / 255, Double(v & 0xff) / 255)
     }
 }
+
+/// Test builds only: one line per event in widget-diag.log in the App Group container
+/// (timeline requests, rendered entries, reloads), to measure what the widget does and when.
+/// In release builds every call is empty.
+enum Diag {
+    static func log(_ text: @autoclosure () -> String) {
+        #if DEBUG
+        guard let dir = FileManager.default.containerURL(
+            forSecurityApplicationGroupIdentifier: "group.de.wanner-it.wordclock") else { return }
+        let url = dir.appendingPathComponent("widget-diag.log")
+        let line = "\(stamp(Date(), ms: true)) [\(ProcessInfo.processInfo.processName)] \(text())\n"
+        if let h = try? FileHandle(forWritingTo: url) {
+            h.seekToEndOfFile()
+            h.write(Data(line.utf8))
+            try? h.close()
+        } else {
+            try? Data(line.utf8).write(to: url)
+        }
+        #endif
+    }
+
+    /// The whole log (test builds), for "Copy Widget Log" in the app's Edit menu: the App Group
+    /// container is protected by macOS and the app is sandboxed, so the clipboard is the way out.
+    static var text: String {
+        guard let dir = FileManager.default.containerURL(
+            forSecurityApplicationGroupIdentifier: "group.de.wanner-it.wordclock") else { return "no container" }
+        return (try? String(contentsOf: dir.appendingPathComponent("widget-diag.log"), encoding: .utf8)) ?? "no log"
+    }
+
+    /// "HH:mm:ss" (or with milliseconds) in local time.
+    static func stamp(_ date: Date, ms: Bool = false) -> String {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.dateFormat = ms ? "HH:mm:ss.SSS" : "HH:mm:ss"
+        return f.string(from: date)
+    }
+}

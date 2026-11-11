@@ -101,7 +101,8 @@ struct Provider: AppIntentTimelineProvider {
     }
 
     func snapshot(for configuration: ClockWidgetIntent, in context: Context) async -> ClockEntry {
-        ClockEntry(date: .now, style: style(configuration))
+        Diag.log("snapshot family=\(context.family) preview=\(context.isPreview)")
+        return ClockEntry(date: .now, style: style(configuration))
     }
 
     /// One entry per minute for the next hour, then WidgetKit asks again (24 reloads a day,
@@ -111,6 +112,8 @@ struct Provider: AppIntentTimelineProvider {
         let s = style(configuration)
         let start = Calendar.current.dateInterval(of: .minute, for: .now)?.start ?? .now
         let entries = (0..<60).map { ClockEntry(date: start.addingTimeInterval(Double($0) * 60), style: s) }
+        Diag.log("timeline family=\(context.family) preview=\(context.isPreview) lang=\(s.language.rawValue) "
+                 + "front=\(s.front) entries=\(entries.count) \(Diag.stamp(entries[0].date))–\(Diag.stamp(entries[entries.count - 1].date))")
         return Timeline(entries: entries, policy: .atEnd)
     }
 }
@@ -123,6 +126,7 @@ struct WortuhrWidgetView: View {
 
     var body: some View {
         let style = entry.style.forWidget(mono: renderingMode != .fullColor)
+        let _ = Diag.log("render entry=\(Diag.stamp(entry.date)) mode=\(renderingMode)")
         WordClockView(style: style, date: entry.date, plate: false)
             // The placeholder shows the real letters right away instead of grey blocks
             .unredacted()
