@@ -32,6 +32,21 @@ final class StyleStore {
         }
     }
 
+    @ObservationIgnored private var lastActiveReload = Date.distantPast
+
+    /// The widgets show the time from a timeline prepared in advance. When the app comes to the front
+    /// (also after a click on a widget, which opens the app), they get a fresh one right away –
+    /// at most once a minute, as every new timeline draws 60 entries (about 3 s of processor time).
+    func reloadWidgetsNow(_ reason: String) {
+        guard Date().timeIntervalSince(lastActiveReload) >= 60 else {
+            Diag.log("app: \(reason), no reload (last one less than a minute ago)")
+            return
+        }
+        lastActiveReload = Date()
+        Diag.log("app: reloadAllTimelines (\(reason))")
+        WidgetCenter.shared.reloadAllTimelines()
+    }
+
     var keepAwake: Bool {
         didSet {
             UserDefaults.standard.set(keepAwake, forKey: "keepAwake")

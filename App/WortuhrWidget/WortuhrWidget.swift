@@ -126,7 +126,10 @@ struct WortuhrWidgetView: View {
 
     var body: some View {
         let style = entry.style.forWidget(mono: renderingMode != .fullColor)
-        let _ = Diag.log("render entry=\(Diag.stamp(entry.date)) mode=\(renderingMode)")
+        // Diagnostics: only the entry of the current minute and every tenth minute (each entry is
+        // rendered several times – per rendering mode and appearance)
+        let _ = (abs(entry.date.timeIntervalSinceNow) < 60 || Calendar.current.component(.minute, from: entry.date) % 10 == 0)
+            ? Diag.log("render entry=\(Diag.stamp(entry.date)) mode=\(renderingMode)") : ()
         WordClockView(style: style, date: entry.date, plate: false)
             // The placeholder shows the real letters right away instead of grey blocks
             .unredacted()

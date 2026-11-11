@@ -93,8 +93,25 @@ struct ContentView: View {
             .contentShape(Rectangle())
             .onAppear { store.applyKeepAwake() }
             .onChange(of: scenePhase) { _, phase in
-                if phase == .active { store.applyKeepAwake() }
+                Diag.log("app: scenePhase \(phase)")
+                if phase == .active {
+                    store.applyKeepAwake()
+                    #if os(iOS)
+                    store.reloadWidgetsNow("app active")
+                    #endif
+                }
             }
+            #if os(macOS)
+            // On the Mac the scene phase stays "active" while the window is open, also when another
+            // app is in front – so the widgets are reloaded when the app becomes the active app
+            .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+                store.reloadWidgetsNow("app active")
+            }
+            // Test builds: wake-up time in the widget log, to compare with the widget's next timeline
+            .onReceive(NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.didWakeNotification)) { _ in
+                Diag.log("app: Mac woke up")
+            }
+            #endif
             #if os(iOS)
             .onTapGesture { showSettings = true }
             .sheet(isPresented: $showSettings) {
