@@ -101,6 +101,14 @@ Regions: the app works the same in all regions. The language of the clock is cho
 
 Regulated industry or third-party material: not applicable. All letter grids, texts and graphics are my own work; the typefaces are the system fonts of iOS and macOS.
 
+## What's New in 1.2
+
+Deutsch:
+Die Widgets bleiben zuverlässiger auf der richtigen Zeit: Beim Öffnen der App – auch über einen Klick oder ein Tippen auf das Widget – werden sie neu geladen. Auf dem Mac zeigen sie nach dem Aufwachen aus dem Ruhezustand sofort wieder die aktuelle Zeit, wenn die App läuft.
+
+English:
+The widgets keep the right time more reliably: they are refreshed whenever the app is opened – also by clicking or tapping a widget. On the Mac they show the current time again right after waking from sleep while the app is running.
+
 ## What's New in 1.1
 
 Deutsch:
