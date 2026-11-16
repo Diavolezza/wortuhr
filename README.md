@@ -95,6 +95,19 @@ writes the system log (last 20 minutes) and crash reports to `diag.log`.
 - `legacyScreenSaver` does not exit → `exit(0)` after `willstop`.
 - NSColorPanel is unreliable in the screen saver process → colours as pop-up lists.
 
+## Energy use of the widgets
+
+Measured on a Mac with a diagnostic log in debug builds:
+
+- A widget gets a timeline of 60 entries, one per minute. The system draws each entry four times
+  (for the different display modes), 12–19 ms each – about 3.3–3.8 s of processor time per timeline.
+- 60 entries are the compromise: a whole day (1440 entries) is cut off by the system, fewer entries
+  would need more frequent reloads, and every reload draws a full timeline again.
+- The app reloads the widgets only when it is needed – when the app becomes active (also after a click
+  on a widget) and when the Mac wakes up – and at most once a minute. There is no reload every minute.
+- At night the system itself fetches a new timeline about every two hours during short dark wake-ups.
+- Caching font metrics was tried and brought no measurable saving, so it was dropped.
+
 ## Known issue: “Options…” opens only once
 
 In System Settings, “Options…” opens the dialog only once per session. After the tile is

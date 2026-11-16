@@ -95,6 +95,20 @@ schreibt Systemprotokoll (letzte 20 Minuten) und Absturzberichte nach `diag.log`
 - `legacyScreenSaver` beendet sich nicht → `exit(0)` nach `willstop`.
 - NSColorPanel ist im Bildschirmschoner-Prozess unzuverlässig → Farben als Auswahllisten.
 
+## Energiebedarf der Widgets
+
+Gemessen auf dem Mac mit einem Diagnoseprotokoll in Debug-Builds:
+
+- Ein Widget bekommt eine Zeitleiste mit 60 Einträgen, einen pro Minute. Das System zeichnet jeden
+  Eintrag viermal (für die verschiedenen Darstellungsarten), je 12–19 ms – zusammen etwa 3,3–3,8 s
+  Prozessorzeit pro Zeitleiste.
+- 60 Einträge sind der Kompromiss: Einen ganzen Tag (1440 Einträge) bricht das System ab, weniger Einträge
+  bräuchten häufiger ein Neuladen, und jedes Neuladen zeichnet wieder eine ganze Zeitleiste.
+- Die App lädt die Widgets nur neu, wenn es nötig ist – wenn die App aktiv wird (auch nach einem Klick auf
+  ein Widget) und wenn der Mac aufwacht – und höchstens einmal pro Minute. Ein Neuladen jede Minute gibt es nicht.
+- Nachts holt das System selbst bei kurzen dunklen Aufwachphasen etwa alle zwei Stunden eine neue Zeitleiste.
+- Schriftmaße zwischenzuspeichern wurde ausprobiert und brachte keine messbare Ersparnis; deshalb verworfen.
+
 ## Bekanntes Problem: „Optionen …“ öffnet nur einmal
 
 In den Systemeinstellungen öffnet „Optionen …“ den Dialog pro Sitzung nur einmal. Wird die
