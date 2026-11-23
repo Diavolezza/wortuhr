@@ -7,3 +7,4 @@ publish.sh
 App/Wortuhr.xcodeproj/
 App/Wortuhr/Info.plist
 App/WortuhrWidget/Info.plist
+App/widget-check.log

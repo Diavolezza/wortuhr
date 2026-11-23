@@ -81,6 +81,11 @@ The release workflow does this automatically for version tags.
 
 writes the system log (last 20 minutes) and crash reports to `diag.log`.
 
+    App/widget-check.sh
+
+writes for the widgets which app provides them, which timelines macOS accepted or rejected
+(with size and number of entries, last 3 hours) and when the Mac slept to `App/widget-check.log`.
+
 ## macOS 26+ quirks the code works around
 
 - The screen saver keeps running behind the login window → fade out on input.
@@ -103,6 +108,9 @@ Measured on a Mac with a diagnostic log in debug builds:
   (for the different display modes), 12–19 ms each – about 3.3–3.8 s of processor time per timeline.
 - 60 entries are the compromise: a whole day (1440 entries) is cut off by the system, fewer entries
   would need more frequent reloads, and every reload draws a full timeline again.
+- Exception: the large Mac widget gets 28 entries. macOS stores every entry as an image and rejects
+  timelines above about 10 MB ("too large timeline archive"); with 60 entries the large widget reached
+  about 20 MB and then kept showing its last entry for hours.
 - The app reloads the widgets only when it is needed – when the app becomes active (also after a click
   on a widget) and when the Mac wakes up – and at most once a minute. There is no reload every minute.
 - At night the system itself fetches a new timeline about every two hours during short dark wake-ups.

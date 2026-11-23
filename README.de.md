@@ -82,6 +82,12 @@ oben in `build.sh`). Der Release-Workflow macht das bei Versions-Tags automatisc
 
 schreibt Systemprotokoll (letzte 20 Minuten) und Absturzberichte nach `diag.log`.
 
+    App/widget-check.sh
+
+schreibt für die Widgets, aus welcher App sie kommen, welche Zeitleisten macOS angenommen oder abgelehnt
+hat (mit Größe und Zahl der Einträge, letzte 3 Stunden) und wann der Mac geschlafen hat, nach
+`App/widget-check.log`.
+
 ## Eigenheiten von macOS 26+, die der Code abfängt
 
 - Der Bildschirmschoner läuft hinter dem Anmeldefenster weiter → bei Eingabe ausblenden.
@@ -104,6 +110,9 @@ Gemessen auf dem Mac mit einem Diagnoseprotokoll in Debug-Builds:
   Prozessorzeit pro Zeitleiste.
 - 60 Einträge sind der Kompromiss: Einen ganzen Tag (1440 Einträge) bricht das System ab, weniger Einträge
   bräuchten häufiger ein Neuladen, und jedes Neuladen zeichnet wieder eine ganze Zeitleiste.
+- Ausnahme: Das große Mac-Widget bekommt 28 Einträge. macOS speichert jeden Eintrag als Bild und lehnt
+  Zeitleisten über etwa 10 MB ab („too large timeline archive“); mit 60 Einträgen kam das große Widget
+  auf etwa 20 MB und zeigte dann stundenlang seinen letzten Eintrag.
 - Die App lädt die Widgets nur neu, wenn es nötig ist – wenn die App aktiv wird (auch nach einem Klick auf
   ein Widget) und wenn der Mac aufwacht – und höchstens einmal pro Minute. Ein Neuladen jede Minute gibt es nicht.
 - Nachts holt das System selbst bei kurzen dunklen Aufwachphasen etwa alle zwei Stunden eine neue Zeitleiste.
