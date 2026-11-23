@@ -101,6 +101,14 @@ Regions: the app works the same in all regions. The language of the clock is cho
 
 Regulated industry or third-party material: not applicable. All letter grids, texts and graphics are my own work; the typefaces are the system fonts of iOS and macOS.
 
+## What's New in 1.2.1
+
+Deutsch:
+Das große Widget auf dem Mac bleibt nicht mehr auf einer alten Uhrzeit stehen.
+
+English:
+The large widget on the Mac no longer gets stuck on an old time.
+
 ## What's New in 1.2
 
 Deutsch:

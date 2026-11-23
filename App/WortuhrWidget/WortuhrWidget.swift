@@ -105,13 +105,26 @@ struct Provider: AppIntentTimelineProvider {
         return ClockEntry(date: .now, style: style(configuration))
     }
 
-    /// One entry per minute for the next hour, then WidgetKit asks again (24 reloads a day,
-    /// within WidgetKit's budget). WidgetKit keeps all entries of a timeline in memory at once,
-    /// so they must not get too many.
+    /// One entry per minute, then WidgetKit asks again. macOS stores every entry of a timeline as
+    /// an image and rejects timelines above about 10 MB ("too large timeline archive"); the widget
+    /// then keeps showing its last entry. Measured: large Mac widget about 170–340 KB per entry
+    /// depending on the settings, the archive grows with the area of the widget.
+    /// So: 60 entries (an hour, 24 reloads a day) for the small and medium widget, fewer for larger
+    /// ones – 28 for the large Mac widget (at most about 9.6 MB, a reload every 28 minutes).
+    static func entryCount(for size: CGSize) -> Int {
+        #if os(macOS)
+        let side = min(size.width, size.height)
+        guard side > 0 else { return 60 }
+        return max(10, min(60, Int(28 * (344 / side) * (344 / side))))
+        #else
+        return 60
+        #endif
+    }
+
     func timeline(for configuration: ClockWidgetIntent, in context: Context) async -> Timeline<ClockEntry> {
         let s = style(configuration)
         let start = Calendar.current.dateInterval(of: .minute, for: .now)?.start ?? .now
-        let entries = (0..<60).map { ClockEntry(date: start.addingTimeInterval(Double($0) * 60), style: s) }
+        let entries = (0..<Self.entryCount(for: context.displaySize)).map { ClockEntry(date: start.addingTimeInterval(Double($0) * 60), style: s) }
         Diag.log("timeline family=\(context.family) preview=\(context.isPreview) lang=\(s.language.rawValue) "
                  + "front=\(s.front) entries=\(entries.count) \(Diag.stamp(entries[0].date))–\(Diag.stamp(entries[entries.count - 1].date))")
         return Timeline(entries: entries, policy: .atEnd)
