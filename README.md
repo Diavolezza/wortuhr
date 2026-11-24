@@ -81,10 +81,10 @@ The release workflow does this automatically for version tags.
 
 writes the system log (last 20 minutes) and crash reports to `diag.log`.
 
-    App/widget-check.sh
+    bash App/widget-check.sh
 
-writes for the widgets which app provides them, which timelines macOS accepted or rejected
-(with size and number of entries, last 3 hours) and when the Mac slept to `App/widget-check.log`.
+writes for the widgets which app provides them and which timelines macOS accepted or rejected
+(with size and number of entries, last 12 hours) to `App/widget-check.log`.
 
 ## macOS 26+ quirks the code works around
 

@@ -82,11 +82,10 @@ oben in `build.sh`). Der Release-Workflow macht das bei Versions-Tags automatisc
 
 schreibt Systemprotokoll (letzte 20 Minuten) und Absturzberichte nach `diag.log`.
 
-    App/widget-check.sh
+    bash App/widget-check.sh
 
-schreibt für die Widgets, aus welcher App sie kommen, welche Zeitleisten macOS angenommen oder abgelehnt
-hat (mit Größe und Zahl der Einträge, letzte 3 Stunden) und wann der Mac geschlafen hat, nach
-`App/widget-check.log`.
+schreibt für die Widgets, aus welcher App sie kommen und welche Zeitleisten macOS angenommen oder
+abgelehnt hat (mit Größe und Zahl der Einträge, letzte 12 Stunden), nach `App/widget-check.log`.
 
 ## Eigenheiten von macOS 26+, die der Code abfängt
 
